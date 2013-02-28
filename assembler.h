@@ -23,31 +23,34 @@
  *
  **/
 
+#pragma once
+
 #include <string>
-#include <fstream>
 #include <vector>
 #include <memory>
+#include <fstream>
 
-#include <assembler.h>
-#include <frontend.h>
 #include <preprocessor/macro.h>
 
-int main(int argc, char ** argv)
+namespace reaver
 {
-    reaver::assembler::frontend frontend(argc, argv);
+    namespace assembler
+    {
+        enum class format
+        {
+            binary
+        };
 
-/*    std::string input_name{"main.asm"};
-    std::string output_name{"bin"};
-    bool link{true};
-    reaver::assembler::format format{reaver::assembler::format::binary};
-    std::vector<std::unique_ptr<reaver::assembler::macro>> commandline_macros;
+        class assembler
+        {
+        public:
+            assembler();
+            ~assembler();
 
-    std::fstream input_file(input_name, std::ios::in | std::ios::binary);
-    std::fstream output_file(output_name, std::ios::out | std::ios::binary);
-
-    reaver::assembler::assembler assembler;
-    assembler.read_file(input_file);
-    assembler.preprocess(commandline_macros);
-    assembler.parse();
-    assembler.generate(output_file, link, format);*/
+            void read_file(std::fstream &);
+            void preprocess(const std::vector<std::unique_ptr<reaver::assembler::macro>> &);
+            void parse();
+            void generate(std::fstream &, bool, format);
+        };
+    }
 }
