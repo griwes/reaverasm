@@ -27,7 +27,7 @@
 
 namespace
 {
-    const char * version_string = "Reaver Project Assembler v0.0.1\nCopyright (C) 2013 Reaver Project Team\n";
+    const char * version_string = "Reaver Project Assembler v0.0.1 dev\nCopyright (C) 2013 Reaver Project Team\n";
 }
 
 reaver::assembler::frontend::frontend(int argc, char ** argv)
@@ -39,10 +39,12 @@ reaver::assembler::frontend::frontend(int argc, char ** argv)
 
     boost::program_options::options_description config("Configuration");
     config.add_options()
-        ("input", boost::program_options::value<std::string>(), "specify input file")
         ("output,o", boost::program_options::value<std::string>()->default_value("output"), "specify output file");
 
     boost::program_options::options_description hidden("Hidden");
+    hidden.add_options()
+        ("input", boost::program_options::value<std::string>()->required(), "specify input file");
+
     boost::program_options::positional_options_description pod;
     pod.add("input", 1);
 
@@ -52,11 +54,12 @@ reaver::assembler::frontend::frontend(int argc, char ** argv)
     boost::program_options::store(boost::program_options::command_line_parser(argc, argv).options(options).positional(pod)
         .run(), _variables);
 
-    boost::program_options::notify(_variables);
-
     if (_variables.count("help"))
     {
         std::cout << version_string << '\n';
+
+        std::cout << "Usage:\n";
+        std::cout << "  rasm [options] <input file> [options]\n\n";
 
         std::cout << general << std::endl << config;
 
@@ -68,8 +71,39 @@ reaver::assembler::frontend::frontend(int argc, char ** argv)
         std::cout << version_string;
         std::cout << "Distributed under modified zlib license.\n\n";
 
-        std::cout << "RAsm, or Reaver Assembler, is part of Reaver Project - http://reaver-project.org/,\n";
+        std::cout << "RAsm, or Reaver Assembler, is part of Reaver Project - http://reaver-project.org/.\n";
         std::cout << "Development of this part of Reaver Project started as second semester programming\n";
         std::cout << "project of Michal \"Griwes\" Dominiak.\n";
+
+        std::exit(0);
     }
+
+    if (!_variables.count("input"))
+    {
+        std::cout << "Error: you must specify input file.\n";
+
+        std::exit(-1);
+    }
+
+    _input.open(_variables["input"].as<std::string>(), std::ios::in | std::ios::binary);
+    if (!_input)
+    {
+        std::cout << "Error: failed to open input file `" << _variables["input"].as<std::string>() << "`.\n";
+    }
+
+    _output.open(_variables["output"].as<std::string>(), std::ios::out | std::ios::binary);
+    if (!_output)
+    {
+        std::cout << "Error: failed to open output file `" << _variables["output"].as<std::string>() << "`.\n";
+    }
+}
+
+std::istream & reaver::assembler::frontend::input() const
+{
+    return _input;
+}
+
+std::ostream & reaver::assembler::frontend::output() const
+{
+    return _output;
 }

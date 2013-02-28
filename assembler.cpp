@@ -23,29 +23,12 @@
  *
  **/
 
-#pragma once
+#include <assembler.h>
 
-#include <fstream>
-
-#include <boost/program_options.hpp>
-
-namespace reaver
+reaver::assembler::assembler::assembler()
 {
-    namespace assembler
-    {
-        class frontend
-        {
-        public:
-            frontend(int, char **);
+}
 
-            std::istream & input() const;
-            std::ostream & output() const;
-
-        private:
-            boost::program_options::variables_map _variables;
-
-            mutable std::fstream _input;
-            mutable std::fstream _output;
-        };
-    }
+reaver::assembler::assembler::~assembler()
+{
 }

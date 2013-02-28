@@ -1,3 +1,6 @@
 *~
 *.o
 rasm
+*output
+*.bin
+*.bin.ref

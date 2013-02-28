@@ -24,7 +24,6 @@
  **/
 
 #include <string>
-#include <fstream>
 #include <vector>
 #include <memory>
 
@@ -36,18 +35,16 @@ int main(int argc, char ** argv)
 {
     reaver::assembler::frontend frontend(argc, argv);
 
-/*    std::string input_name{"main.asm"};
-    std::string output_name{"bin"};
     bool link{true};
     reaver::assembler::format format{reaver::assembler::format::binary};
-    std::vector<std::unique_ptr<reaver::assembler::macro>> commandline_macros;
+//    std::vector<std::unique_ptr<reaver::assembler::macro>> commandline_macros;
 
-    std::fstream input_file(input_name, std::ios::in | std::ios::binary);
-    std::fstream output_file(output_name, std::ios::out | std::ios::binary);
+    std::istream & input_file = frontend.input();
+    std::ostream & output_file = frontend.output();
 
     reaver::assembler::assembler assembler;
-    assembler.read_file(input_file);
-    assembler.preprocess(commandline_macros);
-    assembler.parse();
-    assembler.generate(output_file, link, format);*/
+//    assembler.read_input(input_file);
+//    assembler.preprocess(commandline_macros);
+//    assembler.parse();
+//    assembler.generate(output_file, link, format);
 }

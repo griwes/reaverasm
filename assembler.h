@@ -28,7 +28,6 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <fstream>
 
 #include <preprocessor/macro.h>
 
@@ -47,10 +46,10 @@ namespace reaver
             assembler();
             ~assembler();
 
-            void read_file(std::fstream &);
+            void read_input(std::istream &);
             void preprocess(const std::vector<std::unique_ptr<reaver::assembler::macro>> &);
             void parse();
-            void generate(std::fstream &, bool, format);
+            void generate(std::ostream &, bool, format);
         };
     }
 }
