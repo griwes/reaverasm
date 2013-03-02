@@ -11,7 +11,9 @@ mov     ah, 1
 
 ; mov     ss, 1   ; fail test
 mov     eax, dword [0]
-mov     ecx, [0xb8000]  ; size unnecessary in RASM; it's defaulted to register size
+mov     ax, 0xb800
+mov     es, ax
+mov     ecx, dword [es:0]
 
 bits    32
 

@@ -23,6 +23,8 @@
  *
  **/
 
+#include <iostream>
+
 #include <assembler.h>
 
 reaver::assembler::assembler::assembler()
@@ -31,4 +33,85 @@ reaver::assembler::assembler::assembler()
 
 reaver::assembler::assembler::~assembler()
 {
+}
+
+namespace
+{
+    template<typename CharT>
+    class _comment_remove_iterator
+    {
+    public:
+        typedef std::forward_iterator_tag iterator_category;
+
+        typedef typename std::istreambuf_iterator<CharT>::value_type value_type;
+        typedef typename std::istreambuf_iterator<CharT>::pointer pointer;
+        typedef typename std::istreambuf_iterator<CharT>::reference reference;
+        typedef typename std::istreambuf_iterator<CharT>::difference_type difference_type;
+
+        _comment_remove_iterator()
+        {
+        }
+
+        _comment_remove_iterator(std::basic_streambuf<CharT> * buf) : _iter(buf)
+        {
+        }
+
+        bool operator==(const _comment_remove_iterator & rhs) const
+        {
+            return _iter == rhs._iter;
+        }
+
+        bool operator!=(const _comment_remove_iterator & rhs) const
+        {
+            return !(*this == rhs);
+        }
+
+        reference operator*()
+        {
+            return *_iter;
+        }
+
+        pointer operator->()
+        {
+            return _iter;
+        }
+
+        _comment_remove_iterator & operator++()
+        {
+            ++_iter;
+
+            if (_iter != std::istreambuf_iterator<CharT>() && *_iter == ';')
+            {
+                while (_iter != std::istreambuf_iterator<CharT>() && *_iter != '\n')
+                {
+                    ++_iter;
+
+                    if (_iter != std::istreambuf_iterator<CharT>() && *_iter == '\\')
+                    {
+                        ++_iter;
+
+                        if (*this == _comment_remove_iterator())
+                        {
+                            std::cout << "Syntax error: \\ at the end of the file" << std::endl;
+                            exit(0);
+                        }
+                    }
+                }
+            }
+
+            return *this;
+        }
+
+    private:
+        std::istreambuf_iterator<CharT> _iter;
+    };
+}
+
+void reaver::assembler::assembler::read_input(std::istream & input)
+{
+//    _buffer = std::string(std::istreambuf_iterator<char>(input.rdbuf()), std::istreambuf_iterator<char>());
+
+    _buffer = std::string(_comment_remove_iterator<char>(input.rdbuf()), _comment_remove_iterator<char>());
+
+    std::cout << _buffer;
 }

@@ -16,12 +16,14 @@ $(EXECUTABLE): $(OBJECTS)
 %.o: %.cpp
 	$(CC) $(CFLAGS) $< -o $@
 
-clean:
+clean: clean-test
 	@rm -rfv *.o
 	@rm -rfv */*.o
-	@rm -rfv tests/*.bin
 
-test: clean $(TESTS) $(TESTRESULTS)
+test: $(EXECUTABLE) clean-test $(TESTS) $(TESTRESULTS)
+
+clean-test:
+	@rm -rfv tests/*.bin
 
 %.bin: %.asm
 	@yasm $< -o $@.ref

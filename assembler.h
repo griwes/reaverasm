@@ -30,6 +30,7 @@
 #include <memory>
 
 #include <preprocessor/macro.h>
+#include <parser/ast.h>
 
 namespace reaver
 {
@@ -50,6 +51,10 @@ namespace reaver
             void preprocess(const std::vector<std::unique_ptr<reaver::assembler::macro>> &);
             void parse();
             void generate(std::ostream &, bool, format);
+
+        private:
+            std::string _buffer;
+            reaver::assembler::ast _ast;
         };
     }
 }
