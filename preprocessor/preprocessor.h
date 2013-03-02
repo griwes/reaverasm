@@ -23,28 +23,23 @@
  *
  **/
 
-#include <string>
+#pragma once
+
 #include <vector>
 #include <memory>
 
-#include <assembler.h>
-#include <frontend.h>
 #include <preprocessor/macro.h>
 
-int main(int argc, char ** argv)
+namespace reaver
 {
-    reaver::assembler::frontend frontend(argc, argv);
+    namespace assembler
+    {
+        class preprocessor
+        {
+        public:
+            preprocessor(const std::vector<std::unique_ptr<macro>> &);
 
-    bool link{true};
-    reaver::assembler::format format{reaver::assembler::format::binary};
-    std::vector<std::unique_ptr<reaver::assembler::macro>> commandline_macros;
-
-    std::istream & input_file = frontend.input();
-    std::ostream & output_file = frontend.output();
-
-    reaver::assembler::assembler assembler;
-    assembler.read_input(input_file);
-    assembler.preprocess(commandline_macros);
-//    assembler.parse();
-//    assembler.generate(output_file, link, format);
+            std::string preprocess(const std::string &);
+        };
+    }
 }

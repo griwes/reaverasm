@@ -26,6 +26,7 @@
 #include <iostream>
 
 #include <assembler.h>
+#include <preprocessor/preprocessor.h>
 
 reaver::assembler::assembler::assembler()
 {
@@ -86,7 +87,6 @@ namespace
 
         reference operator*()
         {
-            std::cout << " - dereference\n";
             return *_iter;
         }
 
@@ -129,6 +129,11 @@ namespace
 void reaver::assembler::assembler::read_input(std::istream & input)
 {
     _buffer = std::string(_comment_remove_iterator<char>(input.rdbuf()), _comment_remove_iterator<char>());
+}
 
-    std::cout << _buffer;
+void reaver::assembler::assembler::preprocess(const std::vector<std::unique_ptr<reaver::assembler::macro>> & macros)
+{
+    reaver::assembler::preprocessor preprocessor(macros);
+
+    _buffer = preprocessor.preprocess(_buffer);
 }

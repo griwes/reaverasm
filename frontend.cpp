@@ -39,7 +39,9 @@ reaver::assembler::frontend::frontend(int argc, char ** argv)
 
     boost::program_options::options_description config("Configuration");
     config.add_options()
-        ("output,o", boost::program_options::value<std::string>()->default_value("output"), "specify output file");
+        ("output,o", boost::program_options::value<std::string>()->default_value("output"), "specify output file")
+        (",E", "preprocess only")
+        (",c", "assemble only, do not link");
 
     boost::program_options::options_description hidden("Hidden");
     hidden.add_options()
@@ -52,7 +54,7 @@ reaver::assembler::frontend::frontend(int argc, char ** argv)
     options.add(general).add(config).add(hidden);
 
     boost::program_options::store(boost::program_options::command_line_parser(argc, argv).options(options).positional(pod)
-        .run(), _variables);
+        .style(boost::program_options::command_line_style::unix_style).run(), _variables);
 
     if (_variables.count("help"))
     {
@@ -89,12 +91,16 @@ reaver::assembler::frontend::frontend(int argc, char ** argv)
     if (!_input)
     {
         std::cout << "Error: failed to open input file `" << _variables["input"].as<std::string>() << "`.\n";
+
+        std::exit(-1);
     }
 
     _output.open(_variables["output"].as<std::string>(), std::ios::out | std::ios::binary);
     if (!_output)
     {
         std::cout << "Error: failed to open output file `" << _variables["output"].as<std::string>() << "`.\n";
+
+        std::exit(-1);
     }
 }
 
