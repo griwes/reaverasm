@@ -41,7 +41,7 @@ namespace
     class _comment_remove_iterator
     {
     public:
-        typedef std::forward_iterator_tag iterator_category;
+        typedef std::input_iterator_tag iterator_category;
 
         typedef typename std::istreambuf_iterator<CharT>::value_type value_type;
         typedef typename std::istreambuf_iterator<CharT>::pointer pointer;
@@ -54,6 +54,24 @@ namespace
 
         _comment_remove_iterator(std::basic_streambuf<CharT> * buf) : _iter(buf)
         {
+            if (_iter != std::istreambuf_iterator<CharT>() && *_iter == ';')
+            {
+                while (_iter != std::istreambuf_iterator<CharT>() && *_iter != '\n')
+                {
+                    ++_iter;
+
+                    if (_iter != std::istreambuf_iterator<CharT>() && *_iter == '\\')
+                    {
+                        ++_iter;
+
+                        if (*this == _comment_remove_iterator())
+                        {
+                            std::cout << "Syntax error: \\ at the end of the file" << std::endl;
+                            exit(0);
+                        }
+                    }
+                }
+            }
         }
 
         bool operator==(const _comment_remove_iterator & rhs) const
@@ -68,6 +86,7 @@ namespace
 
         reference operator*()
         {
+            std::cout << " - dereference\n";
             return *_iter;
         }
 
@@ -109,8 +128,6 @@ namespace
 
 void reaver::assembler::assembler::read_input(std::istream & input)
 {
-//    _buffer = std::string(std::istreambuf_iterator<char>(input.rdbuf()), std::istreambuf_iterator<char>());
-
     _buffer = std::string(_comment_remove_iterator<char>(input.rdbuf()), _comment_remove_iterator<char>());
 
     std::cout << _buffer;
