@@ -55,6 +55,11 @@ namespace
 
         _comment_remove_iterator(std::basic_streambuf<CharT> * buf) : _iter(buf)
         {
+            while (_iter != std::istreambuf_iterator<CharT>() && std::isspace(*_iter))
+            {
+                ++_iter;
+            }
+
             if (_iter != std::istreambuf_iterator<CharT>() && (*_iter == ';' || _skip_next))
             {
                 while (_iter != std::istreambuf_iterator<CharT>() && *_iter != '\n')
@@ -76,6 +81,11 @@ namespace
                         _skip_next = true;
                     }
                 }
+            }
+
+            if (_iter != std::istreambuf_iterator<CharT>() && *_iter == '\n')
+            {
+                _skip_ws = true;
             }
         }
 
@@ -103,6 +113,16 @@ namespace
         {
             ++_iter;
 
+            if (_skip_ws)
+            {
+                _skip_ws = false;
+
+                while (_iter != std::istreambuf_iterator<CharT>() && std::isspace(*_iter) && *_iter != '\n')
+                {
+                    ++_iter;
+                }
+            }
+
             if (_iter != std::istreambuf_iterator<CharT>() && (*_iter == ';' || _skip_next))
             {
                 while (_iter != std::istreambuf_iterator<CharT>() && *_iter != '\n')
@@ -126,13 +146,19 @@ namespace
                 }
             }
 
+            if (_iter != std::istreambuf_iterator<CharT>() && *_iter == '\n')
+            {
+                _skip_ws = true;
+            }
+
             return *this;
         }
 
     private:
         std::istreambuf_iterator<CharT> _iter;
 
-        bool _skip_next;
+        bool _skip_next = false;
+        bool _skip_ws = false;
     };
 }
 
@@ -140,8 +166,6 @@ void reaver::assembler::assembler::read_input(std::istream & input, std::string 
 {
     _buffer = std::string(_comment_remove_iterator<char>(input.rdbuf()), _comment_remove_iterator<char>());
     _name = name;
-
-    std::cout << _buffer << std::endl;
 }
 
 void reaver::assembler::assembler::preprocess(const std::map<std::string, std::shared_ptr<reaver::assembler::macro>> & macros)
