@@ -25,39 +25,46 @@
 
 #pragma once
 
+#include <iostream>
 #include <string>
-#include <map>
-#include <memory>
-
-#include <preprocessor/macro.h>
-#include <preprocessor/line.h>
-#include <parser/ast.h>
+#include <vector>
 
 namespace reaver
 {
     namespace assembler
     {
-        enum class format
-        {
-            binary
-        };
-
-        class assembler
+        class line
         {
         public:
-            assembler();
-            ~assembler();
+            line(std::string line, std::vector<std::pair<std::string, uint64_t>> chain) : _line(line), _include_chain(chain)
+            {
+            }
 
-            void read_input(std::istream &, std::string);
-            void preprocess(const std::map<std::string, std::shared_ptr<reaver::assembler::macro>> &);
-            void parse();
-            void generate(std::ostream &, bool, format);
+            std::string operator*()
+            {
+                return _line;
+            }
+
+            uint64_t include_count()
+            {
+                return _include_chain.size();
+            }
+
+            std::pair<std::string, uint64_t> operator[](uint64_t i)
+            {
+                if (i >= _include_chain.size())
+                {
+                    std::cout << "Internal error: include chain access out of bounds.\n";
+
+                    std::exit(-2);
+                }
+
+                return _include_chain[i];
+            }
 
         private:
-            std::string _name;
-            std::string _buffer;
-            std::vector<line> _lines;
-            reaver::assembler::ast _ast;
+            std::string _line;
+            std::vector<std::pair<std::string, uint64_t>> _include_chain;
         };
     }
 }

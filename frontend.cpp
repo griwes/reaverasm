@@ -113,3 +113,8 @@ std::ostream & reaver::assembler::frontend::output() const
 {
     return _output;
 }
+
+std::string reaver::assembler::frontend::input_name() const
+{
+    return _variables["input"].as<std::string>();
+}

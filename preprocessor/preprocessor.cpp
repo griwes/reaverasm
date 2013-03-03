@@ -24,14 +24,36 @@
  **/
 
 #include <string>
+#include <sstream>
 
 #include <preprocessor/preprocessor.h>
 
-reaver::assembler::preprocessor::preprocessor(const std::vector<std::unique_ptr<reaver::assembler::macro>> &)
+reaver::assembler::preprocessor::preprocessor(const std::map<std::string, std::shared_ptr<reaver::assembler::macro>> & macros)
+    : _macros(macros)
 {
 }
 
-std::string reaver::assembler::preprocessor::preprocess(const std::string& )
+std::vector<reaver::assembler::line> reaver::assembler::preprocessor::preprocess(const std::string & _buffer, std::string name)
 {
-    return {};
+    std::stringstream input(_buffer);
+    std::vector<std::pair<std::string, uint64_t>> include_chain{ std::make_pair(name, 0) };
+
+    _include_stream(input, include_chain);
+
+    return _lines;
+}
+
+void reaver::assembler::preprocessor::_include_stream(std::istream & input, std::vector<std::pair<std::string, uint64_t>> include_chain)
+{
+    std::string buffer;
+
+    while (std::getline(input, buffer) && ++include_chain.back().second)
+    {
+        if (buffer.find("%") == std::string::npos)
+        {
+            _lines.emplace_back(buffer, include_chain);
+
+            continue;
+        }
+    }
 }

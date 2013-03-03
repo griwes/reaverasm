@@ -126,14 +126,15 @@ namespace
     };
 }
 
-void reaver::assembler::assembler::read_input(std::istream & input)
+void reaver::assembler::assembler::read_input(std::istream & input, std::string name)
 {
     _buffer = std::string(_comment_remove_iterator<char>(input.rdbuf()), _comment_remove_iterator<char>());
+    _name = name;
 }
 
-void reaver::assembler::assembler::preprocess(const std::vector<std::unique_ptr<reaver::assembler::macro>> & macros)
+void reaver::assembler::assembler::preprocess(const std::map<std::string, std::shared_ptr<reaver::assembler::macro>> & macros)
 {
     reaver::assembler::preprocessor preprocessor(macros);
 
-    _buffer = preprocessor.preprocess(_buffer);
+    _lines = preprocessor.preprocess(_buffer, _name);
 }

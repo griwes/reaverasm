@@ -27,8 +27,10 @@
 
 #include <vector>
 #include <memory>
+#include <map>
 
 #include <preprocessor/macro.h>
+#include <preprocessor/line.h>
 
 namespace reaver
 {
@@ -37,9 +39,15 @@ namespace reaver
         class preprocessor
         {
         public:
-            preprocessor(const std::vector<std::unique_ptr<macro>> &);
+            preprocessor(const std::map<std::string, std::shared_ptr<macro>> &);
 
-            std::string preprocess(const std::string &);
+            std::vector<line> preprocess(const std::string &, std::string);
+
+        private:
+            void _include_stream(std::istream &, std::vector<std::pair<std::string, uint64_t>>);
+
+            std::map<std::string, std::shared_ptr<macro>> _macros;
+            std::vector<line> _lines;
         };
     }
 }

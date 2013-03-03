@@ -41,6 +41,8 @@ namespace reaver
             std::istream & input() const;
             std::ostream & output() const;
 
+            std::string input_name() const;
+
         private:
             boost::program_options::variables_map _variables;
 
