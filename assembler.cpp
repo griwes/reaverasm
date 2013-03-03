@@ -55,10 +55,12 @@ namespace
 
         _comment_remove_iterator(std::basic_streambuf<CharT> * buf) : _iter(buf)
         {
-            if (_iter != std::istreambuf_iterator<CharT>() && *_iter == ';')
+            if (_iter != std::istreambuf_iterator<CharT>() && (*_iter == ';' || _skip_next))
             {
                 while (_iter != std::istreambuf_iterator<CharT>() && *_iter != '\n')
                 {
+                    _skip_next = false;
+
                     ++_iter;
 
                     if (_iter != std::istreambuf_iterator<CharT>() && *_iter == '\\')
@@ -70,6 +72,8 @@ namespace
                             std::cout << "Syntax error: \\ at the end of the file" << std::endl;
                             exit(0);
                         }
+
+                        _skip_next = true;
                     }
                 }
             }
@@ -99,10 +103,12 @@ namespace
         {
             ++_iter;
 
-            if (_iter != std::istreambuf_iterator<CharT>() && *_iter == ';')
+            if (_iter != std::istreambuf_iterator<CharT>() && (*_iter == ';' || _skip_next))
             {
                 while (_iter != std::istreambuf_iterator<CharT>() && *_iter != '\n')
                 {
+                    _skip_next = false;
+
                     ++_iter;
 
                     if (_iter != std::istreambuf_iterator<CharT>() && *_iter == '\\')
@@ -114,6 +120,8 @@ namespace
                             std::cout << "Syntax error: \\ at the end of the file" << std::endl;
                             exit(0);
                         }
+
+                        _skip_next = true;
                     }
                 }
             }
@@ -123,6 +131,8 @@ namespace
 
     private:
         std::istreambuf_iterator<CharT> _iter;
+
+        bool _skip_next;
     };
 }
 
@@ -130,6 +140,8 @@ void reaver::assembler::assembler::read_input(std::istream & input, std::string 
 {
     _buffer = std::string(_comment_remove_iterator<char>(input.rdbuf()), _comment_remove_iterator<char>());
     _name = name;
+
+    std::cout << _buffer << std::endl;
 }
 
 void reaver::assembler::assembler::preprocess(const std::map<std::string, std::shared_ptr<reaver::assembler::macro>> & macros)
