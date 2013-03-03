@@ -3,6 +3,8 @@
 ; bits - 16, 32, 64
 ;
 
+%include "0.null.asm"
+
 bits    16
 
 mov     ax, bx

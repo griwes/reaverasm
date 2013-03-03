@@ -53,6 +53,11 @@ namespace reaver
             void parse();
             void generate(std::ostream &, bool, format);
 
+            std::string buffer()
+            {
+                return _buffer;
+            }
+
         private:
             std::string _name;
             std::string _buffer;

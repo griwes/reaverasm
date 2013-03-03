@@ -1,7 +1,7 @@
 CC=clang++
 LD=clang++
 CFLAGS=-c -Os -Wall -Wextra -pedantic -Werror -std=c++11 -stdlib=libc++ -Wno-unused-parameter -I . -Wno-unused-variable
-LDFLAGS=-lc++ -lboost_system -lboost_program_options
+LDFLAGS=-lc++ -lboost_system -lboost_program_options -lboost_filesystem
 SOURCES=$(shell find . -name "*.cpp")
 OBJECTS=$(SOURCES:.cpp=.o)
 TESTS=$(shell find . -name "*.asm")

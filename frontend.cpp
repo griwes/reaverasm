@@ -41,7 +41,9 @@ reaver::assembler::frontend::frontend(int argc, char ** argv)
     config.add_options()
         ("output,o", boost::program_options::value<std::string>()->default_value("output"), "specify output file")
         (",E", "preprocess only")
-        (",c", "assemble only, do not link");
+        (",c", "assemble only, do not link")
+        ("include-dir,I", boost::program_options::value<std::string>(), "specify additional include directories # TODO")
+        ("include,i", boost::program_options::value<std::string>(), "specify automatically included file # TODO");
 
     boost::program_options::options_description hidden("Hidden");
     hidden.add_options()
