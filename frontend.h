@@ -26,8 +26,12 @@
 #pragma once
 
 #include <fstream>
+#include <string>
+#include <utility>
 
 #include <boost/program_options.hpp>
+
+#include <preprocessor/macro.h>
 
 namespace reaver
 {
@@ -38,15 +42,24 @@ namespace reaver
         public:
             frontend(int, char **);
 
-            std::istream & input() const;
             std::ostream & output() const;
 
             std::string input_name() const;
+            std::string absolute_name() const;
+
+            std::map<std::string, std::shared_ptr<macro>> macros();
+
+            std::string read_file() const;
+            std::string read_file(std::string filename, std::vector<std::pair<std::string, uint64_t>>) const;
+
+            bool default_includes() const;
+            std::vector<std::string> get_default_includes() const;
 
         private:
+            std::string _resolve_name(std::string, std::vector<std::pair<std::string, uint64_t>>) const;
+
             boost::program_options::variables_map _variables;
 
-            mutable std::fstream _input;
             mutable std::fstream _output;
         };
     }

@@ -29,6 +29,7 @@
 #include <memory>
 #include <map>
 
+#include <frontend.h>
 #include <preprocessor/macro.h>
 #include <preprocessor/line.h>
 
@@ -39,16 +40,17 @@ namespace reaver
         class preprocessor
         {
         public:
-            preprocessor(const std::map<std::string, std::shared_ptr<macro>> &);
+            preprocessor(frontend &);
 
-            std::vector<line> preprocess(const std::string &, std::string);
+            std::vector<line> preprocess(const std::string &);
 
         private:
             void _include_stream(std::istream &, std::vector<std::pair<std::string, uint64_t>>);
-            void _print_include_chain(const std::vector<std::pair<std::string, uint64_t>> &) const;
 
             std::map<std::string, std::shared_ptr<macro>> _macros;
             std::vector<line> _lines;
+
+            frontend & _frontend;
 
             bool _error = false;
         };

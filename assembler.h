@@ -32,6 +32,7 @@
 #include <preprocessor/macro.h>
 #include <preprocessor/line.h>
 #include <parser/ast.h>
+#include <frontend.h>
 
 namespace reaver
 {
@@ -45,10 +46,9 @@ namespace reaver
         class assembler
         {
         public:
-            assembler();
+            assembler(int, char **);
             ~assembler();
 
-            void read_input(std::istream &, std::string);
             void preprocess(const std::map<std::string, std::shared_ptr<reaver::assembler::macro>> &);
             void parse();
             void generate(std::ostream &, bool, format);
@@ -59,6 +59,8 @@ namespace reaver
             }
 
         private:
+            frontend _frontend;
+
             std::string _name;
             std::string _buffer;
             std::vector<line> _lines;

@@ -27,20 +27,28 @@
 #include <sstream>
 #include <fstream>
 
-#include <boost/filesystem.hpp>
-
+#include <utils.h>
 #include <preprocessor/preprocessor.h>
 #include <assembler.h>
 
-reaver::assembler::preprocessor::preprocessor(const std::map<std::string, std::shared_ptr<reaver::assembler::macro>> & macros)
-    : _macros(macros)
+reaver::assembler::preprocessor::preprocessor(reaver::assembler::frontend & front) : _macros(front.macros()), _frontend(front)
 {
 }
 
-std::vector<reaver::assembler::line> reaver::assembler::preprocessor::preprocess(const std::string & _buffer, std::string name)
+std::vector<reaver::assembler::line> reaver::assembler::preprocessor::preprocess(const std::string & _buffer)
 {
+    if (_frontend.default_includes())
+    {
+        for (auto & file : _frontend.get_default_includes())
+        {
+            std::stringstream input(_frontend.read_file(file, { std::make_pair(std::string("<command line>"), 0) }));
+
+            _include_stream(input, { std::make_pair(std::string("<command line>"), 0), std::make_pair(file, 0) });
+        }
+    }
+
     std::stringstream input(_buffer);
-    std::vector<std::pair<std::string, uint64_t>> include_chain{ std::make_pair(boost::filesystem::absolute(name).string(), 0) };
+    std::vector<std::pair<std::string, uint64_t>> include_chain{ std::make_pair(_frontend.absolute_name(), 0) };
 
     _include_stream(input, include_chain);
 
@@ -79,7 +87,7 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
                 {
                     if (!std::isspace(buffer[i]))
                     {
-                        _print_include_chain(include_chain);
+                        print_include_chain(include_chain);
                         std::cout << "Error: junk after %include directive.\n";
 
                         _error = true;
@@ -92,71 +100,18 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
                 }
 
                 std::string filename = buffer.substr(opening + 1, closing - opening - 1);
-                std::fstream in;
-
-                if (boost::filesystem::is_regular_file(filename))
-                {
-                    in.open(filename);
-                }
-
-                else if (boost::filesystem::is_regular_file(boost::filesystem::path(include_chain.back().first).parent_path().string() + filename))
-                {
-                    filename = boost::filesystem::path(include_chain.back().first).parent_path().string() + filename;
-                    in.open(filename);
-                }
-
-                // TODO: -I from frontend
-
-                else
-                {
-                    _print_include_chain(include_chain);
-                    std::cout << "Error: included file " << filename << " not found.\n";
-
-                    _error = true;
-                }
+                std::string include = _frontend.read_file(filename, include_chain);
 
                 if (!_error)
                 {
-                    if (!in)
-                    {
-                        _print_include_chain(include_chain);
-                        std::cout << "Error: failed to open included file " << filename << ".\n";
+                    auto new_include_chain = include_chain;
+                    new_include_chain.emplace_back(std::make_pair(filename, 0));
 
-                        _error = true;
-                    }
+                    std::stringstream sin{include};
 
-                    else
-                    {
-                        auto new_include_chain = include_chain;
-                        new_include_chain.emplace_back(std::make_pair(filename, 0));
-
-                        assembler as;
-                        as.read_input(in, filename);
-                        buffer = as.buffer();
-                        std::stringstream sin{buffer};
-
-                        _include_stream(sin, new_include_chain);
-                    }
+                    _include_stream(sin, new_include_chain);
                 }
             }
-        }
-    }
-}
-
-void reaver::assembler::preprocessor::_print_include_chain(const std::vector<std::pair<std::string, uint64_t>> & include_chain) const
-{
-    std::cout << "In file " << include_chain.back().first << " in line " << include_chain.back().second << ":\n";
-
-    for (auto it = include_chain.crbegin() + 1; it != include_chain.crend(); ++it)
-    {
-        if (it->second != (uint64_t)-1)
-        {
-            std::cout << "Included from file " << it->first << " in line " << it->second << ":\n";
-        }
-
-        else
-        {
-            std::cout << "In expanded macro `" << it->first << "`:\n";
         }
     }
 }

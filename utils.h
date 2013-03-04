@@ -23,14 +23,25 @@
  *
  **/
 
-#include <string>
-#include <memory>
+#pragma once
 
-#include <assembler.h>
-#include <frontend.h>
-#include <preprocessor/macro.h>
+#include <iostream>
+#include <vector>
 
-int main(int argc, char ** argv)
+inline void print_include_chain(const std::vector<std::pair<std::string, uint64_t>> & include_chain)
 {
-    reaver::assembler::assembler assembler(argc, argv);
+    std::cout << "In file " << include_chain.back().first << " in line " << include_chain.back().second << ":\n";
+
+    for (auto it = include_chain.crbegin() + 1; it != include_chain.crend(); ++it)
+    {
+        if (it->second != (uint64_t)-1)
+        {
+            std::cout << "Included from " << it->first << " in line " << it->second << ":\n";
+        }
+
+        else
+        {
+            std::cout << "In expanded macro `" << it->first << "`:\n";
+        }
+    }
 }
