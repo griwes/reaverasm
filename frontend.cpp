@@ -270,9 +270,9 @@ std::string reaver::assembler::frontend::absolute_name() const
     return boost::filesystem::absolute(input_name()).string();
 }
 
-std::map<std::string, std::shared_ptr<reaver::assembler::macro>> reaver::assembler::frontend::macros()
+std::map<std::string, reaver::assembler::define> reaver::assembler::frontend::defines()
 {
-    return std::map<std::string, std::shared_ptr<reaver::assembler::macro>>();
+    return std::map<std::string, reaver::assembler::define>();
 }
 
 std::string reaver::assembler::frontend::_resolve_name(std::string filename, std::vector<std::pair<std::string, uint64_t>> inc) const
@@ -319,7 +319,7 @@ bool reaver::assembler::frontend::default_includes() const
     return _variables.count("include");
 }
 
-std::vector< std::string > reaver::assembler::frontend::get_default_includes() const
+std::vector<std::string> reaver::assembler::frontend::get_default_includes() const
 {
     return _variables["include"].as<std::vector<std::string>>();
 }

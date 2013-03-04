@@ -26,34 +26,44 @@
 #pragma once
 
 #include <vector>
-#include <memory>
-#include <map>
-
-#include <frontend.h>
-#include <preprocessor/macro.h>
-#include <preprocessor/line.h>
-#include <preprocessor/define.h>
+#include <string>
+#include <utility>
 
 namespace reaver
 {
     namespace assembler
     {
-        class preprocessor
+        class define
         {
         public:
-            preprocessor(frontend &);
+            define()
+            {
+            }
 
-            std::vector<line> preprocess(const std::string &);
+            define(std::string name, std::string definition, std::vector<std::pair<std::string, uint64_t>> include_chain)
+                : _name(name), _body(definition), _inc_chain(include_chain)
+            {
+            }
+
+            std::string name()
+            {
+                return _name;
+            }
+
+            std::string definition()
+            {
+                return _body;
+            }
+
+            std::vector<std::pair<std::string, uint64_t>> source()
+            {
+                return _inc_chain;
+            }
 
         private:
-            void _include_stream(std::istream &, std::vector<std::pair<std::string, uint64_t>>);
-            bool _valid_macro_name(const std::string &) const;
-
-            std::map<std::string, define> _defines;
-            std::map<std::string, std::shared_ptr<macro>> _macros;
-            std::vector<line> _lines;
-
-            frontend & _frontend;
+            std::string _name;
+            std::string _body;
+            std::vector<std::pair<std::string, uint64_t>> _inc_chain;
         };
     }
 }

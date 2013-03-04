@@ -28,10 +28,11 @@
 #include <fstream>
 
 #include <utils.h>
-#include <preprocessor/preprocessor.h>
 #include <assembler.h>
+#include <preprocessor/preprocessor.h>
+#include <preprocessor/macro.h>
 
-reaver::assembler::preprocessor::preprocessor(reaver::assembler::frontend & front) : _macros(front.macros()), _frontend(front)
+reaver::assembler::preprocessor::preprocessor(reaver::assembler::frontend & front) : _defines(front.defines()), _frontend(front)
 {
 }
 
@@ -51,11 +52,6 @@ std::vector<reaver::assembler::line> reaver::assembler::preprocessor::preprocess
     std::vector<std::pair<std::string, uint64_t>> include_chain{ std::make_pair(_frontend.absolute_name(), 0) };
 
     _include_stream(input, include_chain);
-
-    if (_error)
-    {
-        std::exit(-1);
-    }
 
     for (auto & x : _lines)
     {
@@ -90,28 +86,70 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
                         print_include_chain(include_chain);
                         std::cout << "Error: junk after %include directive.\n";
 
-                        _error = true;
+                        std::exit(-1);
                     }
-                }
-
-                if (_error)
-                {
-                    continue;
                 }
 
                 std::string filename = buffer.substr(opening + 1, closing - opening - 1);
                 std::string include = _frontend.read_file(filename, include_chain);
 
-                if (!_error)
+                auto new_include_chain = include_chain;
+                new_include_chain.emplace_back(std::make_pair(filename, 0));
+
+                std::stringstream sin{include};
+
+                _include_stream(sin, new_include_chain);
+            }
+
+            else if (buffer.find("%define") == 0)
+            {
+                std::stringstream in{buffer.substr(7)};
+
+                std::string name;
+                std::string definition;
+
+                in >> name;
+
+                if (!in || !_valid_macro_name(name))
                 {
-                    auto new_include_chain = include_chain;
-                    new_include_chain.emplace_back(std::make_pair(filename, 0));
+                    print_include_chain(include_chain);
+                    std::cout << "Error: %define not followed by valid macro name.\n";
 
-                    std::stringstream sin{include};
-
-                    _include_stream(sin, new_include_chain);
+                    std::exit(-1);
                 }
+
+                if (_defines.find(name) != _defines.end())
+                {
+                    print_include_chain(include_chain);
+                    std::cout << "Error: preprocessor symbol %" << name << " redefined.\n";
+                    print_include_chain(_defines[name].source());
+                    std::cout << "Note: first defined here.\n";
+
+                    std::exit(-1);
+                }
+
+                std::getline(in, definition);
+
+                _defines.emplace(name, define(name, definition, include_chain));
             }
         }
     }
+}
+
+bool reaver::assembler::preprocessor::_valid_macro_name(const std::string & name) const
+{
+    if (!std::isalpha(name[0]) && name[0] != '_')
+    {
+        return false;
+    }
+
+    for (auto it = name.begin() + 1; it != name.end(); ++it)
+    {
+        if (!std::isalnum(name[0]) && name[0] != '_')
+        {
+            return false;
+        }
+    }
+
+    return true;
 }

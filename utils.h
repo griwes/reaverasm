@@ -45,3 +45,15 @@ inline void print_include_chain(const std::vector<std::pair<std::string, uint64_
         }
     }
 }
+
+inline std::string remove_leading_whitespace(const std::string & str)
+{
+    auto it = begin(str);
+
+    while (it != end(str) && std::isspace(*it))
+    {
+        ++it;
+    }
+
+    return { it, end(str) };
+}

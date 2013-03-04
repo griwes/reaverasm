@@ -26,8 +26,8 @@ clean-test:
 	@rm -rfv tests/*.bin
 
 %.bin: %.asm
-	@yasm $< -o $@.ref
 	@./rasm $< -o $@
+	@yasm $< -o $@.ref
 	@cmp -s $< $@.ref; \
 	RETVAL=$$?; \
 	if [ $$RETVAL -eq 0 ]; then \

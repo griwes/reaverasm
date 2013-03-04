@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include <string>
+
 namespace reaver
 {
     namespace assembler
@@ -32,7 +34,10 @@ namespace reaver
         class macro
         {
         public:
-            ~macro();
+            virtual ~macro() = 0;
+
+            virtual std::string name() = 0;
+            virtual std::string definition() = 0;
         };
     }
 }

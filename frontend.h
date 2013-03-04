@@ -31,7 +31,7 @@
 
 #include <boost/program_options.hpp>
 
-#include <preprocessor/macro.h>
+#include <preprocessor/define.h>
 
 namespace reaver
 {
@@ -47,7 +47,7 @@ namespace reaver
             std::string input_name() const;
             std::string absolute_name() const;
 
-            std::map<std::string, std::shared_ptr<macro>> macros();
+            std::map<std::string, define> defines();
 
             std::string read_file() const;
             std::string read_file(std::string filename, std::vector<std::pair<std::string, uint64_t>>) const;
