@@ -189,6 +189,69 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
                     _defines.emplace(name, define(name, definition, include_chain));
                 }
             }
+
+            else if (buffer.find("%xdefine") != std::string::npos)
+            {
+
+            }
+
+            else if (buffer.find("%assign") != std::string::npos)
+            {
+
+            }
+
+            else if (buffer.find("%undef") != std::string::npos)
+            {
+
+            }
+
+            else if (buffer.find("%assign") != std::string::npos)
+            {
+
+            }
+
+            else if (buffer.find("%strlen") != std::string::npos)
+            {
+
+            }
+
+            else if (buffer.find("%substr") != std::string::npos)
+            {
+
+            }
+
+            else if (buffer.find("%macro") != std::string::npos)
+            {
+
+            }
+
+            else if (buffer.find("%if") != std::string::npos)
+            {
+
+            }
+
+            else if (buffer.find("%error") != std::string::npos)
+            {
+                print_include_chain(include_chain);
+                std::cout << "User defined error: '" << buffer.substr(7) << "'.\n";
+
+                std::exit(-1);
+            }
+
+            else if (buffer.find("%rep") != std::string::npos)
+            {
+
+            }
+
+            else if (buffer.find("%push") != std::string::npos)
+            {
+
+            }
+
+            else if (buffer.find("%pop") != std::string::npos)
+            {
+
+            }
         }
     }
 }
