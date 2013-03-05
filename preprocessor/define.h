@@ -45,6 +45,12 @@ namespace reaver
             {
             }
 
+            define(std::string name, std::vector<std::string> params, std::string definition,
+                std::vector<std::pair<std::string, uint64_t>> include_chain) : _name(name), _body(definition), _inc_chain(include_chain),
+                _params(params)
+            {
+            }
+
             std::string name()
             {
                 return _name;
@@ -60,10 +66,16 @@ namespace reaver
                 return _inc_chain;
             }
 
+            std::vector<std::string> parameters()
+            {
+                return _params;
+            }
+
         private:
             std::string _name;
             std::string _body;
             std::vector<std::pair<std::string, uint64_t>> _inc_chain;
+            std::vector<std::string> _params;
         };
     }
 }

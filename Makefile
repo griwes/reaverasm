@@ -25,7 +25,7 @@ test: $(EXECUTABLE) clean-test $(TESTS) $(TESTRESULTS)
 clean-test:
 	@rm -rfv tests/*.bin
 
-%.bin: %.asm
+%.bin: %.asm $(EXECUTABLE)
 	@./rasm $< -o $@
 	@yasm $< -o $@.ref
 	@cmp -s $< $@.ref; \

@@ -41,7 +41,7 @@ inline void print_include_chain(const std::vector<std::pair<std::string, uint64_
 
         else
         {
-            std::cout << "In expanded macro `" << it->first << "`:\n";
+            std::cout << "In expanded preprocessor directive `" << it->first << "`:\n";
         }
     }
 }

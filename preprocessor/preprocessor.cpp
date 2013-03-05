@@ -67,6 +67,14 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
 
     while (std::getline(input, buffer) && ++include_chain.back().second)
     {
+        if (buffer.back() == '\\')
+        {
+            print_include_chain(include_chain);
+            std::cout << "Error: invalid `\\` at the end of line.\n";
+
+            std::exit(-1);
+        }
+
         if (buffer.find("%") == std::string::npos)
         {
             _lines.emplace_back(buffer, include_chain);
@@ -103,17 +111,17 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
 
             else if (buffer.find("%define") == 0)
             {
-                std::stringstream in{buffer.substr(7)};
+                std::stringstream in{remove_leading_whitespace(buffer.substr(7))};
 
-                std::string name;
+                std::vector<std::string> tokenized = _tokenize(in);
+
+                std::string name = tokenized[0];
                 std::string definition;
 
-                in >> name;
-
-                if (!in || !_valid_macro_name(name))
+                if (!_valid_macro_name(name))
                 {
                     print_include_chain(include_chain);
-                    std::cout << "Error: %define not followed by valid macro name.\n";
+                    std::cout << "Error: invalid macro name `" << name << "`.\n";
 
                     std::exit(-1);
                 }
@@ -121,16 +129,65 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
                 if (_defines.find(name) != _defines.end())
                 {
                     print_include_chain(include_chain);
-                    std::cout << "Error: preprocessor symbol %" << name << " redefined.\n";
+                    std::cout << "Error: macro name `" << name << "` redefined.\n";
                     print_include_chain(_defines[name].source());
                     std::cout << "Note: first defined here.\n";
 
                     std::exit(-1);
                 }
 
-                std::getline(in, definition);
+                if (tokenized[1] == "(")
+                {
+                    std::vector<std::string> params;
 
-                _defines.emplace(name, define(name, definition, include_chain));
+                    auto it = tokenized.begin() + 2;
+                    for (; *it != ")"; ++it)
+                    {
+                        if (it == tokenized.end())
+                        {
+                            print_include_chain(include_chain);
+                            std::cout << "Error: macro parameter list not closed.\n";
+
+                            std::exit(-1);
+                        }
+
+                        if (*it == "," || remove_leading_whitespace(*it) == std::string())
+                        {
+                        }
+
+                        else if (_valid_macro_name(*it))
+                        {
+                            params.push_back(*it);
+                        }
+
+                        else
+                        {
+                            print_include_chain(include_chain);
+                            std::cout << "Error: invalid element in macro parameter list: `" << *it << "`.\n";
+
+                            std::exit(-1);
+                        }
+                    }
+
+                    ++it;
+
+                    for (; it != tokenized.end(); ++it)
+                    {
+                        definition += *it;
+                    }
+
+                    _defines.emplace(name, define(name, params, definition, include_chain));
+                }
+
+                else
+                {
+                    for (auto it = tokenized.begin() + 1; it != tokenized.end(); ++it)
+                    {
+                        definition += *it;
+                    }
+
+                    _defines.emplace(name, define(name, definition, include_chain));
+                }
             }
         }
     }
@@ -152,4 +209,50 @@ bool reaver::assembler::preprocessor::_valid_macro_name(const std::string & name
     }
 
     return true;
+}
+
+std::vector<std::string> reaver::assembler::preprocessor::_tokenize(std::istream & input) const
+{
+    std::vector<std::string> ret;
+    std::string current;
+    current.reserve(256);
+
+    for (std::istreambuf_iterator<char> it(input.rdbuf()); it != std::istreambuf_iterator<char>(); ++it)
+    {
+        if (std::isspace(*it))
+        {
+            if (current.size() == 0)
+            {
+                ret.push_back({*it});
+            }
+
+            else
+            {
+                ret.push_back(current);
+
+                current.clear();
+            }
+
+            continue;
+        }
+
+        if (*it == ',' || *it == '(' || *it == ')')
+        {
+            ret.push_back(current);
+            ret.push_back({*it});
+
+            current.clear();
+
+            continue;
+        }
+
+        current.push_back(*it);
+    }
+
+    if (current.size())
+    {
+        ret.push_back(current);
+    }
+
+    return ret;
 }
