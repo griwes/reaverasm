@@ -77,6 +77,32 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
 
         if (buffer.find("%") == std::string::npos)
         {
+            auto tokenized = _tokenize(buffer);
+            buffer.clear();
+
+            for (auto & x : tokenized)
+            {
+                if (_defines.find(x) == _defines.end())
+                {
+                    buffer.append(x);
+                }
+
+                else
+                {
+                    define macro = _defines[x];
+
+                    if (macro.parameters().size())
+                    {
+
+                    }
+
+                    else
+                    {
+                        buffer.append(macro.definition());
+                    }
+                }
+            }
+
             _lines.emplace_back(buffer, include_chain);
         }
 
@@ -111,9 +137,7 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
 
             else if (buffer.find("%define") == 0)
             {
-                std::stringstream in{remove_leading_whitespace(buffer.substr(7))};
-
-                std::vector<std::string> tokenized = _tokenize(in);
+                std::vector<std::string> tokenized = _tokenize(remove_leading_whitespace(buffer.substr(7)));
 
                 std::string name = tokenized[0];
                 std::string definition;
@@ -274,24 +298,30 @@ bool reaver::assembler::preprocessor::_valid_macro_name(const std::string & name
     return true;
 }
 
-std::vector<std::string> reaver::assembler::preprocessor::_tokenize(std::istream & input) const
+std::vector<std::string> reaver::assembler::preprocessor::_tokenize(const std::string & input) const
 {
     std::vector<std::string> ret;
     std::string current;
     current.reserve(256);
 
-    for (std::istreambuf_iterator<char> it(input.rdbuf()); it != std::istreambuf_iterator<char>(); ++it)
+    for (auto it = input.begin(); it != input.end(); ++it)
     {
         if (std::isspace(*it))
         {
             if (current.size() == 0)
             {
-                ret.push_back({*it});
+                if (ret.back() == std::string{' '})
+                {
+                    continue;
+                }
+
+                ret.push_back({' '});
             }
 
             else
             {
                 ret.push_back(current);
+                ret.push_back({' '});
 
                 current.clear();
             }
@@ -302,9 +332,7 @@ std::vector<std::string> reaver::assembler::preprocessor::_tokenize(std::istream
         if (*it == ',' || *it == '(' || *it == ')')
         {
             ret.push_back(current);
-            ret.push_back({*it});
-
-            current.clear();
+            current = *it;
 
             continue;
         }
