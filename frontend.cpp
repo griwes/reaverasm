@@ -28,6 +28,9 @@
 #include <frontend.h>
 #include <utils.h>
 
+using namespace reaver::logger;
+using namespace reaver::style;
+
 namespace
 {
     const char * version_string = "Reaver Project Assembler v0.0.1 dev\nCopyright (C) 2013 Reaver Project Team\n";
@@ -213,7 +216,7 @@ reaver::assembler::frontend::frontend(int argc, char ** argv)
 
     if (!_variables.count("input"))
     {
-        std::cout << "Error: you must specify input file.\n";
+        logger::log(error) << "you must specify input file.";
 
         std::exit(-1);
     }
@@ -221,7 +224,8 @@ reaver::assembler::frontend::frontend(int argc, char ** argv)
     _output.open(_variables["output"].as<std::string>(), std::ios::out | std::ios::binary);
     if (!_output)
     {
-        std::cout << "Error: failed to open output file `" << _variables["output"].as<std::string>() << "`.\n";
+        logger::log(error) << "failed to open output file " << style::style(colors::bgray, colors::def, styles::bold)
+            << _variables["output"].as<std::string>() << style::style() << ".";
 
         std::exit(-1);
     }
@@ -243,26 +247,29 @@ std::string reaver::assembler::frontend::read_file() const
 
     if (!input)
     {
-        std::cout << "Error: failed to open input file `" << input_name() << "`\n.";
+        logger::log(error) << "Error: failed to open input file " << style::style(colors::bgray, colors::def, styles::bold)
+            << input_name() << style::style() << ".";
         std::exit(-1);
     }
 
     return std::string(_comment_remove_iterator<char>(input.rdbuf()), _comment_remove_iterator<char>());
 }
 
-std::string reaver::assembler::frontend::read_file(std::string filename, std::vector<std::pair<std::string, uint64_t>> inc) const
+std::pair<std::string, std::string> reaver::assembler::frontend::read_file(std::string filename, std::vector<std::pair<std::string, uint64_t>> inc) const
 {
+    filename = _resolve_name(filename, inc);
     std::fstream input(_resolve_name(filename, inc), std::ios::in | std::ios::binary);
 
     if (!input)
     {
         print_include_chain(inc);
-        std::cout << "Error: failed to open file `" << filename << "`.\n";
+        logger::log(error) << "failed to open file " << style::style(colors::bgray, colors::def, styles::bold) << filename
+            << style::style() << ".";
 
         std::exit(-1);
     }
 
-    return std::string(_comment_remove_iterator<char>(input.rdbuf()), _comment_remove_iterator<char>());
+    return std::make_pair(std::string(_comment_remove_iterator<char>(input.rdbuf()), _comment_remove_iterator<char>()), filename);
 }
 
 std::string reaver::assembler::frontend::absolute_name() const
@@ -287,7 +294,8 @@ std::string reaver::assembler::frontend::_resolve_name(std::string filename, std
         else
         {
             print_include_chain(inc);
-            std::cout << "Error: file `" << filename << "` (best match for given filename) is not a regular file.\n";
+            logger::log(error) << "Error: file " << style::style(colors::bgray, colors::def, styles::bold) << filename
+                << style::style() << " (best match for given filename) is not a regular file.";
 
             std::exit(-1);
         }
@@ -307,7 +315,8 @@ std::string reaver::assembler::frontend::_resolve_name(std::string filename, std
     }
 
     print_include_chain(inc);
-    std::cout << "Error: file `" << filename << "` not found.\n";
+    logger::log(error) << "file " << style::style(colors::bgray, colors::def, styles::bold) << filename << style::style()
+        << " not found.";
 
     std::exit(-1);
 

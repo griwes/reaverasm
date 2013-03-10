@@ -28,20 +28,25 @@
 #include <iostream>
 #include <vector>
 
+#include <reaver/logger.h>
+#include <reaver/style.h>
+
 inline void print_include_chain(const std::vector<std::pair<std::string, uint64_t>> & include_chain)
 {
-    std::cout << "In file " << include_chain.back().first << " in line " << include_chain.back().second << ":\n";
+    reaver::logger::log() << "In file " << reaver::style::style(reaver::style::colors::bgray, reaver::style::colors::def,
+        reaver::style::styles::bold) << include_chain.back().first << reaver::style::style() << " in line "
+        << include_chain.back().second << ":";
 
     for (auto it = include_chain.crbegin() + 1; it != include_chain.crend(); ++it)
     {
         if (it->second != (uint64_t)-1)
         {
-            std::cout << "Included from " << it->first << " in line " << it->second << ":\n";
+            reaver::logger::log() << "Included from " << it->first << " in line " << it->second << ":";
         }
 
         else
         {
-            std::cout << "In expanded preprocessor directive `" << it->first << "`:\n";
+            reaver::logger::log() << "In expanded preprocessor directive `" << it->first << "`:";
         }
     }
 }

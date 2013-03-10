@@ -27,10 +27,17 @@
 #include <sstream>
 #include <fstream>
 
+#include <reaver/logger.h>
+#include <reaver/style.h>
+
 #include <utils.h>
 #include <assembler.h>
 #include <preprocessor/preprocessor.h>
 #include <preprocessor/macro.h>
+
+using namespace reaver::logger;
+using reaver::style::style;
+using namespace reaver::style;
 
 reaver::assembler::preprocessor::preprocessor(reaver::assembler::frontend & front) : _defines(front.defines()), _frontend(front)
 {
@@ -42,7 +49,7 @@ std::vector<reaver::assembler::line> reaver::assembler::preprocessor::preprocess
     {
         for (auto & file : _frontend.get_default_includes())
         {
-            std::stringstream input(_frontend.read_file(file, { std::make_pair(std::string("<command line>"), 0) }));
+            std::stringstream input{_frontend.read_file(file, { std::make_pair(std::string("<command line>"), 0) }).first};
 
             _include_stream(input, { std::make_pair(std::string("<command line>"), 0), std::make_pair(file, 0) });
         }
@@ -67,10 +74,15 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
 
     while (std::getline(input, buffer) && ++include_chain.back().second)
     {
+        if (include_chain.size() > 10)
+        {
+            std::exit(123);
+        }
+
         if (buffer.back() == '\\')
         {
             print_include_chain(include_chain);
-            std::cout << "Error: invalid `\\` at the end of line.\n";
+            logger::log(error) << "invalid `\\` at the end of line.";
 
             std::exit(-1);
         }
@@ -118,19 +130,33 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
                     if (!std::isspace(buffer[i]))
                     {
                         print_include_chain(include_chain);
-                        std::cout << "Error: junk after %include directive.\n";
+                        logger::log(error) << "junk after %include directive.";
 
                         std::exit(-1);
                     }
                 }
 
                 std::string filename = buffer.substr(opening + 1, closing - opening - 1);
-                std::string include = _frontend.read_file(filename, include_chain);
+
+                std::pair<std::string, std::string> include = _frontend.read_file(filename, include_chain);
+
+                if (std::find_if(include_chain.begin(), include_chain.end(),
+                    [include](std::pair<std::string, uint64_t> elem)
+                    {
+                        return elem.first == include.second;
+                    }) != include_chain.end())
+                {
+                    print_include_chain(include_chain);
+                    logger::log(error) << "file " << style::style(colors::bgray, colors::def, styles::bold) << include.second
+                        << style::style() << " included recursively.";
+
+                    std::exit(-1);
+                }
 
                 auto new_include_chain = include_chain;
-                new_include_chain.emplace_back(std::make_pair(filename, 0));
+                new_include_chain.emplace_back(std::make_pair(include.second, 0));
 
-                std::stringstream sin{include};
+                std::stringstream sin{include.first};
 
                 _include_stream(sin, new_include_chain);
             }
@@ -145,7 +171,7 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
                 if (!_valid_macro_name(name))
                 {
                     print_include_chain(include_chain);
-                    std::cout << "Error: invalid macro name `" << name << "`.\n";
+                    logger::log(error) << "invalid macro name `" << name << "`.";
 
                     std::exit(-1);
                 }
@@ -153,9 +179,10 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
                 if (_defines.find(name) != _defines.end())
                 {
                     print_include_chain(include_chain);
-                    std::cout << "Error: macro name `" << name << "` redefined.\n";
+                    logger::log(error) << "macro name `" << style::style(colors::bgray, colors::def, styles::bold) << name
+                        << style::style() << "` redefined.";
                     print_include_chain(_defines[name].source());
-                    std::cout << "Note: first defined here.\n";
+                    logger::log() << "Note: first defined here.";
 
                     std::exit(-1);
                 }
@@ -170,7 +197,7 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
                         if (it == tokenized.end())
                         {
                             print_include_chain(include_chain);
-                            std::cout << "Error: macro parameter list not closed.\n";
+                            logger::log(error) << "macro parameter list not closed.";
 
                             std::exit(-1);
                         }
@@ -187,7 +214,7 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
                         else
                         {
                             print_include_chain(include_chain);
-                            std::cout << "Error: invalid element in macro parameter list: `" << *it << "`.\n";
+                            logger::log(error) << "invalid element in macro parameter list: `" << *it << "`.";
 
                             std::exit(-1);
                         }
@@ -257,7 +284,8 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
             else if (buffer.find("%error") != std::string::npos)
             {
                 print_include_chain(include_chain);
-                std::cout << "User defined error: '" << buffer.substr(7) << "'.\n";
+                logger::log() << style::style(colors::bred, colors::def, styles::bold) << "User defined error: '"
+                    << style::style() << buffer.substr(7) << "'.";
 
                 std::exit(-1);
             }

@@ -29,6 +29,8 @@
 #include <string>
 #include <vector>
 
+#include <reaver/logger.h>
+
 namespace reaver
 {
     namespace assembler
@@ -54,7 +56,7 @@ namespace reaver
             {
                 if (i >= _include_chain.size())
                 {
-                    std::cout << "Internal error: include chain access out of bounds.\n";
+                    reaver::logger::log(reaver::logger::crash) << "include chain access out of bounds.";
 
                     std::exit(-2);
                 }

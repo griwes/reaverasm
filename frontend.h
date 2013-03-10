@@ -50,7 +50,7 @@ namespace reaver
             std::map<std::string, define> defines();
 
             std::string read_file() const;
-            std::string read_file(std::string filename, std::vector<std::pair<std::string, uint64_t>>) const;
+            std::pair<std::string, std::string> read_file(std::string filename, std::vector<std::pair<std::string, uint64_t>>) const;
 
             bool default_includes() const;
             std::vector<std::string> get_default_includes() const;

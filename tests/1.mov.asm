@@ -3,6 +3,9 @@
 ; bits - 16, 32, 64
 ;
 
+%define foo bar
+%define foo baz
+
 bits    16
 
 mov     ax, bx
