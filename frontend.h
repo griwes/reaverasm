@@ -55,10 +55,14 @@ namespace reaver
             bool default_includes() const;
             std::vector<std::string> get_default_includes() const;
 
+            bool preprocess_only() const;
+
         private:
             std::string _resolve_name(std::string, std::vector<std::pair<std::string, uint64_t>>) const;
 
             boost::program_options::variables_map _variables;
+
+            bool _prep_only, _asm_only;
 
             mutable std::fstream _output;
         };

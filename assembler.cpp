@@ -34,6 +34,25 @@ reaver::assembler::assembler::assembler(int argc, char ** argv) : _frontend(argc
 
     reaver::assembler::preprocessor preprocessor(_frontend);
     _lines = preprocessor.preprocess(_buffer);
+
+    if (_frontend.preprocess_only())
+    {
+        for (auto & x : _lines)
+        {
+            _frontend.output() << *x << std::endl;
+        }
+
+
+    }
+
+    else
+    {
+/*    reaver::assembler::parser parser(_frontend);
+    _lines = parser.parse(_lines);
+
+    reaver::assembler::generator generator(_frontend);
+    _frontend.output().write(generator.generate());*/
+    }
 }
 
 reaver::assembler::assembler::~assembler()

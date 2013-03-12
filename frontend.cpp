@@ -172,8 +172,8 @@ reaver::assembler::frontend::frontend(int argc, char ** argv)
     boost::program_options::options_description config("Configuration");
     config.add_options()
         ("output,o", boost::program_options::value<std::string>()->default_value("output"), "specify output file")
-        (",E", "preprocess only")
-        (",c", "assemble only, do not link")
+        (",E", boost::program_options::value<bool>(&_prep_only)->implicit_value(true), "preprocess only")
+        (",c", boost::program_options::value<bool>(&_asm_only)->implicit_value(true), "assemble only, do not link")
         ("include-dir,I", boost::program_options::value<std::vector<std::string>>(), "specify additional include directories")
         ("include,i", boost::program_options::value<std::vector<std::string>>(), "specify automatically included file");
 
@@ -228,6 +228,11 @@ reaver::assembler::frontend::frontend(int argc, char ** argv)
             << _variables["output"].as<std::string>() << style::style() << ".";
 
         std::exit(-1);
+    }
+
+    if (boost::filesystem::path(_variables["output"].as<std::string>()).extension() == ".o")
+    {
+        _asm_only = true;
     }
 }
 
@@ -331,4 +336,9 @@ bool reaver::assembler::frontend::default_includes() const
 std::vector<std::string> reaver::assembler::frontend::get_default_includes() const
 {
     return _variables["include"].as<std::vector<std::string>>();
+}
+
+bool reaver::assembler::frontend::preprocess_only() const
+{
+    return _prep_only;
 }
