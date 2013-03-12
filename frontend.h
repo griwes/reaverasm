@@ -62,7 +62,8 @@ namespace reaver
 
             boost::program_options::variables_map _variables;
 
-            bool _prep_only, _asm_only;
+            bool _prep_only = false;
+            bool _asm_only = false;
 
             mutable std::fstream _output;
         };

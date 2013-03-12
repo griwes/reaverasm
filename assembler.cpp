@@ -41,8 +41,6 @@ reaver::assembler::assembler::assembler(int argc, char ** argv) : _frontend(argc
         {
             _frontend.output() << *x << std::endl;
         }
-
-
     }
 
     else
