@@ -3,8 +3,7 @@
 ; bits - 16, 32, 64
 ;
 
-%define foo bar
-%define foo baz
+%define foo(a, b, c) a + b + c
 
 bits    16
 
@@ -28,3 +27,5 @@ bits    64
 mov     rsp, 0
 mov     eax, 0
 mov     qword [0], rax
+
+lea     rax, [foo(rbx, rcx, 2)]

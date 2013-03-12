@@ -49,6 +49,9 @@ namespace reaver
             void _include_stream(std::istream &, std::vector<std::pair<std::string, uint64_t>>);
             bool _valid_macro_name(const std::string &) const;
             std::vector<std::string> _tokenize(const std::string &) const;       // PPC tokenization is kinda lame...
+            std::string _apply_defines(const std::vector<std::string> &, const std::vector<std::pair<std::string, uint64_t>> &);
+
+            std::vector<std::string> _define_stack;
 
             std::map<std::string, define> _defines;
             std::map<std::string, std::shared_ptr<macro>> _macros;

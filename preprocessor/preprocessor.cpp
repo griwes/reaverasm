@@ -89,33 +89,7 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
 
         if (buffer.find("%") == std::string::npos)
         {
-            auto tokenized = _tokenize(buffer);
-            buffer.clear();
-
-            for (auto & x : tokenized)
-            {
-                if (_defines.find(x) == _defines.end())
-                {
-                    buffer.append(x);
-                }
-
-                else
-                {
-                    define macro = _defines[x];
-
-                    if (macro.parameters().size())
-                    {
-
-                    }
-
-                    else
-                    {
-                        buffer.append(macro.definition());
-                    }
-                }
-            }
-
-            _lines.emplace_back(buffer, include_chain);
+            _lines.emplace_back(_apply_defines(_tokenize(buffer), include_chain), include_chain);
         }
 
         else if (buffer.find('%') == 0)
@@ -161,7 +135,7 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
                 _include_stream(sin, new_include_chain);
             }
 
-            else if (buffer.find("%define") == 0)
+            else if (buffer.find("%define") == 0 || buffer.find("%xdefine") == 0)
             {
                 std::vector<std::string> tokenized = _tokenize(remove_leading_whitespace(buffer.substr(7)));
 
@@ -206,9 +180,17 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
                         {
                         }
 
+                        else if (std::find(params.begin(), params.end(), *it) != params.end())
+                        {
+                            print_include_chain(include_chain);
+                            logger::log(error) << "parameter name reused in macro parameter list.";
+
+                            std::exit(-1);
+                        }
+
                         else if (_valid_macro_name(*it))
                         {
-                            params.push_back(*it);
+                            params.push_back(remove_leading_whitespace(*it));
                         }
 
                         else
@@ -227,7 +209,16 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
                         definition += *it;
                     }
 
-                    _defines.emplace(name, define(name, params, definition, include_chain));
+                    if (buffer.find("%define") == 0)
+                    {
+                        _defines.emplace(name, define(name, params, remove_leading_whitespace(definition), include_chain));
+                    }
+
+                    else
+                    {
+                        _defines.emplace(name, define(name, params, _apply_defines(_tokenize(remove_leading_whitespace(definition)),
+                            include_chain), include_chain));
+                    }
                 }
 
                 else
@@ -237,51 +228,55 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
                         definition += *it;
                     }
 
-                    _defines.emplace(name, define(name, definition, include_chain));
+                    if (buffer.find("%define") == 0)
+                    {
+                        _defines.emplace(name, define(name, remove_leading_whitespace(definition), include_chain));
+                    }
+
+                    else
+                    {
+                        _defines.emplace(name, define(name, _apply_defines(_tokenize(remove_leading_whitespace(definition)),
+                            include_chain), include_chain));
+                    }
                 }
             }
 
-            else if (buffer.find("%xdefine") != std::string::npos)
+            else if (buffer.find("%assign") == 0)
             {
 
             }
 
-            else if (buffer.find("%assign") != std::string::npos)
+            else if (buffer.find("%undef") == 0)
             {
 
             }
 
-            else if (buffer.find("%undef") != std::string::npos)
+            else if (buffer.find("%assign") == 0)
             {
 
             }
 
-            else if (buffer.find("%assign") != std::string::npos)
+            else if (buffer.find("%strlen") == 0)
             {
 
             }
 
-            else if (buffer.find("%strlen") != std::string::npos)
+            else if (buffer.find("%substr") == 0)
             {
 
             }
 
-            else if (buffer.find("%substr") != std::string::npos)
+            else if (buffer.find("%macro") == 0)
             {
 
             }
 
-            else if (buffer.find("%macro") != std::string::npos)
+            else if (buffer.find("%if") == 0)
             {
 
             }
 
-            else if (buffer.find("%if") != std::string::npos)
-            {
-
-            }
-
-            else if (buffer.find("%error") != std::string::npos)
+            else if (buffer.find("%error") == 0)
             {
                 print_include_chain(include_chain);
                 logger::log() << style::style(colors::bred, colors::def, styles::bold) << "User defined error: '"
@@ -290,17 +285,17 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
                 std::exit(-1);
             }
 
-            else if (buffer.find("%rep") != std::string::npos)
+            else if (buffer.find("%rep") == 0)
             {
 
             }
 
-            else if (buffer.find("%push") != std::string::npos)
+            else if (buffer.find("%push") == 0)
             {
 
             }
 
-            else if (buffer.find("%pop") != std::string::npos)
+            else if (buffer.find("%pop") == 0)
             {
 
             }
@@ -336,7 +331,7 @@ std::vector<std::string> reaver::assembler::preprocessor::_tokenize(const std::s
     {
         if (std::isspace(*it))
         {
-            if (current.size() == 0)
+            if (current.size() == 0 && ret.size() != 0)
             {
                 if (ret.back() == std::string{' '})
                 {
@@ -357,10 +352,11 @@ std::vector<std::string> reaver::assembler::preprocessor::_tokenize(const std::s
             continue;
         }
 
-        if (*it == ',' || *it == '(' || *it == ')')
+        if (*it == ',' || *it == '(' || *it == ')' || *it == '[' || *it == ']')
         {
             ret.push_back(current);
-            current = *it;
+            ret.push_back({*it});
+            current.clear();
 
             continue;
         }
@@ -371,6 +367,138 @@ std::vector<std::string> reaver::assembler::preprocessor::_tokenize(const std::s
     if (current.size())
     {
         ret.push_back(current);
+    }
+
+    return ret;
+}
+
+std::string reaver::assembler::preprocessor::_apply_defines(const std::vector<std::string> & tokens,
+    const std::vector<std::pair<std::string, uint64_t>> & include_chain)
+{
+    std::string ret;
+
+    for (auto it = tokens.begin(); it != tokens.end(); ++it)
+    {
+        if (_defines.find(*it) != _defines.end())
+        {
+            if (std::find(_define_stack.begin(), _define_stack.end(), *it) != _define_stack.end())
+            {
+                print_include_chain(include_chain);
+                logger::log(error) << "macro `" << style::style(colors::white, colors::def, styles::bold) << *it << style::style()
+                    << "` used recursively.";
+
+                std::exit(-1);
+            }
+
+            _define_stack.push_back(*it);
+
+            if (_defines[*it].parameters().size())
+            {
+                auto definition = _tokenize(_defines[*it].definition());
+
+                if (*(it + 1) != "(")
+                {
+                    ret.append(*it);
+
+                    continue;
+                }
+
+                auto close = std::find(it + 2, tokens.end(), ")");
+
+                if (close == tokens.end())
+                {
+                    print_include_chain(include_chain);
+                    logger::log(error) << "closing brace not found.";
+
+                    std::exit(-1);
+                }
+
+                ++it;
+
+                for (auto param : _defines[_define_stack.back()].parameters())
+                {
+                    if (*it == "(")
+                    {
+                        ++it;
+                    }
+
+                    while (*it == " ")
+                    {
+                        ++it;
+                    }
+
+                    if (*it == ",")
+                    {
+                        print_include_chain(include_chain);
+                        logger::log(error) << "macro argument cannot be empty.";
+
+                        std::exit(-1);
+                    }
+
+                    std::string arg = *it;
+
+                    if (param != *(_defines[_define_stack.back()].parameters().end() - 1))
+                    {
+                        while (*++it != "," && *it != ")")
+                        {
+                            arg.append(*it);
+                        }
+
+                        if (*it == ")")
+                        {
+                            print_include_chain(include_chain);
+                            logger::log(error) << "not enough arguments for macro `" << style::style(colors::white,
+                                colors::def, styles::bold) << _define_stack.back() << style::style() << "`.";
+
+                            std::exit(-1);
+                        }
+
+                        ++it;
+                    }
+
+                    else
+                    {
+                        while (*++it != ")" && *it != ",")
+                        {
+                            arg.append(*it);
+                        }
+
+                        if (*it == ",")
+                        {
+                            print_include_chain(include_chain);
+                            logger::log(error) << "too many arguments for macro `" << style::style(colors::white,
+                                colors::def, styles::bold) << _define_stack.back() << style::style() << "`.";
+
+                            std::exit(-1);
+                        }
+
+                        ++it;
+                    }
+
+                    arg = _apply_defines(_tokenize(arg), include_chain);
+
+                    std::replace(definition.begin(), definition.end(), param, arg);
+
+                }
+
+                for (auto & x : definition)
+                {
+                    ret.append(x);
+                }
+            }
+
+            else
+            {
+                ret.append(_apply_defines(_tokenize(_defines[*it].definition()), include_chain));
+            }
+
+            _define_stack.pop_back();
+        }
+
+        else
+        {
+            ret.append(*it);
+        }
     }
 
     return ret;
