@@ -248,7 +248,18 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
 
             else if (buffer.find("%undef") == 0)
             {
+                std::string name = remove_leading_whitespace(buffer.substr(6));
 
+                if (_defines.find(name) == _defines.end())
+                {
+                    print_include_chain(include_chain);
+                    logger::log(error) << "undefining not defined macro `" << style::style(colors::white, colors::def, styles::bold)
+                        << name << style::style() << "`.";
+
+                    std::exit(-1);
+                }
+
+                _defines.erase(_defines.find(name));
             }
 
             else if (buffer.find("%assign") == 0)

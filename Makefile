@@ -20,12 +20,12 @@ clean: clean-test
 	@rm -rfv *.o
 	@rm -rfv */*.o
 
-test: $(EXECUTABLE) clean-test $(TESTS) $(TESTRESULTS)
+test: $(EXECUTABLE) $(TESTS) $(TESTRESULTS)
 
 clean-test:
 	@rm -rfv tests/*.bin
 
-%.bin: %.asm $(EXECUTABLE)
+%.bin: %.asm $(EXECUTABLE) clean-test
 	@./rasm $< -o $@
 	@yasm $< -o $@.ref
 	@cmp -s $< $@.ref; \
