@@ -23,37 +23,27 @@
  *
  **/
 
-#include <iostream>
+#pragma once
 
-#include <assembler.h>
-#include <preprocessor/preprocessor.h>
-#include <parser/parser.h>
+#include <frontend.h>
+#include <preprocessor/line.h>
+#include <parser/ast.h>
 
-reaver::assembler::assembler::assembler(int argc, char ** argv) : _frontend(argc, argv)
+namespace reaver
 {
-    _buffer = _frontend.read_file();
-
-    reaver::assembler::preprocessor preprocessor{_frontend};
-    _lines = preprocessor.preprocess(_buffer);
-
-    if (_frontend.preprocess_only())
+    namespace assembler
     {
-        for (auto & x : _lines)
+        class parser
         {
-            _frontend.output() << *x << std::endl;
-        }
+        public:
+            parser(frontend &);
+
+            ast parse(const std::vector<line> &);
+
+        private:
+            std::vector<token> _tokenize(const line &);
+
+            frontend & _frontend;
+        };
     }
-
-    else
-    {
-        reaver::assembler::parser parser(_frontend);
-        _ast = parser.parse(_lines);
-
-/*        reaver::assembler::generator generator(_frontend);
-        _frontend.output().write(generator.generate());*/
-    }
-}
-
-reaver::assembler::assembler::~assembler()
-{
 }

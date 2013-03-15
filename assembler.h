@@ -29,10 +29,10 @@
 #include <map>
 #include <memory>
 
+#include <frontend.h>
 #include <preprocessor/macro.h>
 #include <preprocessor/line.h>
 #include <parser/ast.h>
-#include <frontend.h>
 
 namespace reaver
 {
@@ -49,10 +49,6 @@ namespace reaver
             assembler(int, char **);
             ~assembler();
 
-            void preprocess(const std::map<std::string, std::shared_ptr<reaver::assembler::macro>> &);
-            void parse();
-            void generate(std::ostream &, bool, format);
-
             std::string buffer()
             {
                 return _buffer;
@@ -64,7 +60,7 @@ namespace reaver
             std::string _name;
             std::string _buffer;
             std::vector<line> _lines;
-            reaver::assembler::ast _ast;
+            ast _ast;
         };
     }
 }

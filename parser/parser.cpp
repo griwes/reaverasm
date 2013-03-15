@@ -23,37 +23,36 @@
  *
  **/
 
-#include <iostream>
-
-#include <assembler.h>
-#include <preprocessor/preprocessor.h>
 #include <parser/parser.h>
 
-reaver::assembler::assembler::assembler(int argc, char ** argv) : _frontend(argc, argv)
+reaver::assembler::parser::parser(reaver::assembler::frontend & front) : _frontend(front)
 {
-    _buffer = _frontend.read_file();
-
-    reaver::assembler::preprocessor preprocessor{_frontend};
-    _lines = preprocessor.preprocess(_buffer);
-
-    if (_frontend.preprocess_only())
-    {
-        for (auto & x : _lines)
-        {
-            _frontend.output() << *x << std::endl;
-        }
-    }
-
-    else
-    {
-        reaver::assembler::parser parser(_frontend);
-        _ast = parser.parse(_lines);
-
-/*        reaver::assembler::generator generator(_frontend);
-        _frontend.output().write(generator.generate());*/
-    }
 }
 
-reaver::assembler::assembler::~assembler()
+// parser tokenizes into:
+//  1) directive, like "org", "extern", "global", "org", "section" and alike
+//  2) label
+//  3) prefix, like "rep**" or "lock"
+//  4) address of symbol, referring to a label or extern (symbol check happens in generator)
+//  5) string literal
+//  6) character literal
+//  7) binary literal
+//  8) dec literal
+//  9) hex literal
+//  10) register name
+//  11) size override
+//  12) address (either single integer literal, or things like [rax + 4 * rbx]
+//  13) operator, like +, -, *, /, <<, >>, &, ^, |
+//  14) comma (is not returned in that vector of tokens)
+
+reaver::assembler::ast reaver::assembler::parser::parse(const std::vector<reaver::assembler::line> & lines)
 {
+    reaver::assembler::ast ret;
+
+    for (auto line : lines)
+    {
+        auto tokens = _tokenize(line);
+
+        ret.add(tokens);
+    }
 }
