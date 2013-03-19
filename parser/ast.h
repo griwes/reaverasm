@@ -25,13 +25,19 @@
 
 #pragma once
 
+#include <vector>
+#include <string>
+
+#include <parser/parsed_line.h>
+
 namespace reaver
 {
     namespace assembler
     {
-        class ast
+        struct ast
         {
-
+            std::vector<std::pair<std::string, uint64_t>> labels;
+            std::vector<parsed_line> lines;
         };
     }
 }

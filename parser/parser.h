@@ -28,6 +28,7 @@
 #include <frontend.h>
 #include <preprocessor/line.h>
 #include <parser/ast.h>
+#include <parser/token.h>
 
 namespace reaver
 {
@@ -41,7 +42,7 @@ namespace reaver
             ast parse(const std::vector<line> &);
 
         private:
-            std::vector<token> _tokenize(const line &);
+            std::vector<std::unique_ptr<token>> _tokenize(const line &);
 
             frontend & _frontend;
         };

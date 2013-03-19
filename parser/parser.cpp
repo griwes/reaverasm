@@ -41,18 +41,34 @@ reaver::assembler::parser::parser(reaver::assembler::frontend & front) : _fronte
 //  9) hex literal
 //  10) register name
 //  11) size override
-//  12) address (either single integer literal, or things like [rax + 4 * rbx]
+//  12) address (either single literal, or things like [rax + 4 * rbx])
 //  13) operator, like +, -, *, /, <<, >>, &, ^, |
-//  14) comma (is not returned in that vector of tokens)
+//  14) segment override
+//  15) instruction mnemonic
+//  16) comma (is not returned in that vector of tokens)
+//  17) operand
 
 reaver::assembler::ast reaver::assembler::parser::parse(const std::vector<reaver::assembler::line> & lines)
 {
     reaver::assembler::ast ret;
 
-    for (auto line : lines)
+    for (uint64_t i = 0; i < lines.size(); ++i)
     {
-        auto tokens = _tokenize(line);
+        auto tokens = _tokenize(lines[i]);
 
-        ret.add(tokens);
+        if (tokens.size() && tokens[0]->is_label())
+        {
+            ret.labels.push_back(std::make_pair(tokens[0]->body(), i));
+            tokens.erase(tokens.begin());
+        }
+
+//        ret.lines.emplace_back(tokens);
     }
+
+    return ret;
+}
+
+std::vector<std::unique_ptr<reaver::assembler::token>> reaver::assembler::parser::_tokenize(const reaver::assembler::line &)
+{
+    return {};
 }
