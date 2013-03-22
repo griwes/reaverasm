@@ -29,7 +29,7 @@ clean-test:
 %.bin: %.asm $(EXECUTABLE) clean-test
 	@./rasm $< -o $@
 	@yasm $< -o $@.ref
-	@cmp -s $< $@.ref; \
+	@cmp -s $@ $@.ref; \
 	RETVAL=$$?; \
 	if [ $$RETVAL -eq 0 ]; then \
 		echo $<": SAME"; \
