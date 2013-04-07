@@ -36,7 +36,6 @@
 #include <preprocessor/macro.h>
 
 using namespace reaver::logger;
-using reaver::style::style;
 using namespace reaver::style;
 
 reaver::assembler::preprocessor::preprocessor(reaver::assembler::frontend & front) : _defines(front.defines()), _frontend(front)
@@ -82,7 +81,7 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
         if (buffer.back() == '\\')
         {
             print_include_chain(include_chain);
-            logger::log(error) << "invalid `\\` at the end of line.";
+            dlog(error) << "invalid `\\` at the end of line.";
 
             std::exit(-1);
         }
@@ -104,7 +103,7 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
                     if (!std::isspace(buffer[i]))
                     {
                         print_include_chain(include_chain);
-                        logger::log(error) << "junk after %include directive.";
+                        dlog(error) << "junk after %include directive.";
 
                         std::exit(-1);
                     }
@@ -121,7 +120,7 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
                     }) != include_chain.end())
                 {
                     print_include_chain(include_chain);
-                    logger::log(error) << "file " << style::style(colors::bgray, colors::def, styles::bold) << include.second
+                    dlog(error) << "file " << style::style(colors::bgray, colors::def, styles::bold) << include.second
                         << style::style() << " included recursively.";
 
                     std::exit(-1);
@@ -145,7 +144,7 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
                 if (!_valid_macro_name(name))
                 {
                     print_include_chain(include_chain);
-                    logger::log(error) << "invalid macro name `" << name << "`.";
+                    dlog(error) << "invalid macro name `" << name << "`.";
 
                     std::exit(-1);
                 }
@@ -153,10 +152,10 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
                 if (_defines.find(name) != _defines.end())
                 {
                     print_include_chain(include_chain);
-                    logger::log(error) << "macro name `" << style::style(colors::bgray, colors::def, styles::bold) << name
+                    dlog(error) << "macro name `" << style::style(colors::bgray, colors::def, styles::bold) << name
                         << style::style() << "` redefined.";
                     print_include_chain(_defines[name].source());
-                    logger::log() << "Note: first defined here.";
+                    dlog() << "Note: first defined here.";
 
                     std::exit(-1);
                 }
@@ -171,7 +170,7 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
                         if (it == tokenized.end())
                         {
                             print_include_chain(include_chain);
-                            logger::log(error) << "macro parameter list not closed.";
+                            dlog(error) << "macro parameter list not closed.";
 
                             std::exit(-1);
                         }
@@ -183,7 +182,7 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
                         else if (std::find(params.begin(), params.end(), *it) != params.end())
                         {
                             print_include_chain(include_chain);
-                            logger::log(error) << "parameter name reused in macro parameter list.";
+                            dlog(error) << "parameter name reused in macro parameter list.";
 
                             std::exit(-1);
                         }
@@ -196,7 +195,7 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
                         else
                         {
                             print_include_chain(include_chain);
-                            logger::log(error) << "invalid element in macro parameter list: `" << *it << "`.";
+                            dlog(error) << "invalid element in macro parameter list: `" << *it << "`.";
 
                             std::exit(-1);
                         }
@@ -253,7 +252,7 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
                 if (_defines.find(name) == _defines.end())
                 {
                     print_include_chain(include_chain);
-                    logger::log(error) << "undefining not defined macro `" << style::style(colors::white, colors::def, styles::bold)
+                    dlog(error) << "undefining not defined macro `" << style::style(colors::white, colors::def, styles::bold)
                         << name << style::style() << "`.";
 
                     std::exit(-1);
@@ -290,7 +289,7 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, std:
             else if (buffer.find("%error") == 0)
             {
                 print_include_chain(include_chain);
-                logger::log() << style::style(colors::bred, colors::def, styles::bold) << "User defined error: '"
+                dlog() << style::style(colors::bred, colors::def, styles::bold) << "User defined error: '"
                     << style::style() << buffer.substr(7) << "'.";
 
                 std::exit(-1);
@@ -395,7 +394,7 @@ std::string reaver::assembler::preprocessor::_apply_defines(const std::vector<st
             if (std::find(_define_stack.begin(), _define_stack.end(), *it) != _define_stack.end())
             {
                 print_include_chain(include_chain);
-                logger::log(error) << "macro `" << style::style(colors::white, colors::def, styles::bold) << *it << style::style()
+                dlog(error) << "macro `" << style::style(colors::white, colors::def, styles::bold) << *it << style::style()
                     << "` used recursively.";
 
                 std::exit(-1);
@@ -419,7 +418,7 @@ std::string reaver::assembler::preprocessor::_apply_defines(const std::vector<st
                 if (close == tokens.end())
                 {
                     print_include_chain(include_chain);
-                    logger::log(error) << "closing brace not found.";
+                    dlog(error) << "closing brace not found.";
 
                     std::exit(-1);
                 }
@@ -441,7 +440,7 @@ std::string reaver::assembler::preprocessor::_apply_defines(const std::vector<st
                     if (*it == ",")
                     {
                         print_include_chain(include_chain);
-                        logger::log(error) << "macro argument cannot be empty.";
+                        dlog(error) << "macro argument cannot be empty.";
 
                         std::exit(-1);
                     }
@@ -458,7 +457,7 @@ std::string reaver::assembler::preprocessor::_apply_defines(const std::vector<st
                         if (*it == ")")
                         {
                             print_include_chain(include_chain);
-                            logger::log(error) << "not enough arguments for macro `" << style::style(colors::white,
+                            dlog(error) << "not enough arguments for macro `" << style::style(colors::white,
                                 colors::def, styles::bold) << _define_stack.back() << style::style() << "`.";
 
                             std::exit(-1);
@@ -477,7 +476,7 @@ std::string reaver::assembler::preprocessor::_apply_defines(const std::vector<st
                         if (*it == ",")
                         {
                             print_include_chain(include_chain);
-                            logger::log(error) << "too many arguments for macro `" << style::style(colors::white,
+                            dlog(error) << "too many arguments for macro `" << style::style(colors::white,
                                 colors::def, styles::bold) << _define_stack.back() << style::style() << "`.";
 
                             std::exit(-1);

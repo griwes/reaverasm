@@ -42,9 +42,19 @@ namespace reaver
             {
             }
 
-            std::string operator*()
+            std::string operator*() const
             {
                 return _line;
+            }
+
+            std::string * operator->()
+            {
+                return &_line;
+            }
+
+            const std::string * operator->() const
+            {
+                return &_line;
             }
 
             uint64_t include_count()
@@ -56,7 +66,7 @@ namespace reaver
             {
                 if (i >= _include_chain.size())
                 {
-                    reaver::logger::log(reaver::logger::crash) << "include chain access out of bounds.";
+                    reaver::logger::dlog(reaver::logger::crash) << "include chain access out of bounds.";
 
                     std::exit(-2);
                 }

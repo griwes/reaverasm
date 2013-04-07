@@ -31,22 +31,24 @@
 #include <reaver/logger.h>
 #include <reaver/style.h>
 
+using namespace reaver::logger;
+using namespace reaver::style;
+
 inline void print_include_chain(const std::vector<std::pair<std::string, uint64_t>> & include_chain)
 {
-    reaver::logger::log() << "In file " << reaver::style::style(reaver::style::colors::bgray, reaver::style::colors::def,
-        reaver::style::styles::bold) << include_chain.back().first << reaver::style::style() << " in line "
-        << include_chain.back().second << ":";
+    dlog() << "In file " << style(colors::bgray, colors::def, styles::bold) << include_chain.back().first
+        << style() << " in line " << include_chain.back().second << ":";
 
     for (auto it = include_chain.crbegin() + 1; it != include_chain.crend(); ++it)
     {
         if (it->second != (uint64_t)-1)
         {
-            reaver::logger::log() << "Included from " << it->first << " in line " << it->second << ":";
+            dlog() << "Included from " << it->first << " in line " << it->second << ":";
         }
 
         else
         {
-            reaver::logger::log() << "In expanded preprocessor directive `" << it->first << "`:";
+            dlog() << "In expanded preprocessor directive `" << it->first << "`:";
         }
     }
 }

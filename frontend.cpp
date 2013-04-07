@@ -137,7 +137,8 @@ namespace
 
                         if (*this == _comment_remove_iterator())
                         {
-                            std::cout << "Syntax error: \\ at the end of the file" << std::endl;
+                            dlog() << style(colors::bred, colors::def, styles::bold) << "Syntax error:" << style() <<
+                                " \\ at the end of the file.";
                             exit(0);
                         }
 
@@ -216,7 +217,7 @@ reaver::assembler::frontend::frontend(int argc, char ** argv)
 
     if (!_variables.count("input"))
     {
-        logger::log(error) << "you must specify input file.";
+        dlog(error) << "you must specify input file.";
 
         std::exit(-1);
     }
@@ -224,7 +225,7 @@ reaver::assembler::frontend::frontend(int argc, char ** argv)
     _output.open(_variables["output"].as<std::string>(), std::ios::out | std::ios::binary);
     if (!_output)
     {
-        logger::log(error) << "failed to open output file " << style::style(colors::bgray, colors::def, styles::bold)
+        dlog(error) << "failed to open output file " << style::style(colors::bgray, colors::def, styles::bold)
             << _variables["output"].as<std::string>() << style::style() << ".";
 
         std::exit(-1);
@@ -252,7 +253,7 @@ std::string reaver::assembler::frontend::read_file() const
 
     if (!input)
     {
-        logger::log(error) << "Error: failed to open input file " << style::style(colors::bgray, colors::def, styles::bold)
+        dlog(error) << "Error: failed to open input file " << style::style(colors::bgray, colors::def, styles::bold)
             << input_name() << style::style() << ".";
         std::exit(-1);
     }
@@ -268,7 +269,7 @@ std::pair<std::string, std::string> reaver::assembler::frontend::read_file(std::
     if (!input)
     {
         print_include_chain(inc);
-        logger::log(error) << "failed to open file " << style::style(colors::bgray, colors::def, styles::bold) << filename
+        dlog(error) << "failed to open file " << style::style(colors::bgray, colors::def, styles::bold) << filename
             << style::style() << ".";
 
         std::exit(-1);
@@ -299,7 +300,7 @@ std::string reaver::assembler::frontend::_resolve_name(std::string filename, std
         else
         {
             print_include_chain(inc);
-            logger::log(error) << "Error: file " << style::style(colors::bgray, colors::def, styles::bold) << filename
+            dlog(error) << "Error: file " << style::style(colors::bgray, colors::def, styles::bold) << filename
                 << style::style() << " (best match for given filename) is not a regular file.";
 
             std::exit(-1);
@@ -320,7 +321,7 @@ std::string reaver::assembler::frontend::_resolve_name(std::string filename, std
     }
 
     print_include_chain(inc);
-    logger::log(error) << "file " << style::style(colors::bgray, colors::def, styles::bold) << filename << style::style()
+    dlog(error) << "file " << style::style(colors::bgray, colors::def, styles::bold) << filename << style::style()
         << " not found.";
 
     std::exit(-1);
