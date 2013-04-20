@@ -23,39 +23,10 @@
  *
  **/
 
-#pragma once
+#include <preprocessor/preprocessor.h>
 
-#include <vector>
-#include <memory>
-#include <map>
-
-#include <frontend.h>
-#include <preprocessor/macro.h>
-#include <preprocessor/line.h>
-#include <preprocessor/define.h>
-
-namespace reaver
+reaver::assembler::preprocessor::preprocessor(reaver::assembler::frontend & front) : _frontend{ front }
 {
-    namespace assembler
-    {
-        class preprocessor
-        {
-        public:
-            preprocessor(frontend &);
-
-            std::vector<line> preprocess(const std::string &);
-
-        private:
-            void _include_stream(std::istream &, std::vector<std::pair<std::string, uint64_t>>);
-            std::string _apply_defines(const std::vector<std::string> &, const std::vector<std::pair<std::string, uint64_t>> &);
-
-            std::vector<std::string> _define_stack;
-
-            std::map<std::string, define> _defines;
-            std::map<std::string, std::shared_ptr<macro>> _macros;
-            std::vector<line> _lines;
-
-            frontend & _frontend;
-        };
-    }
 }
+
+

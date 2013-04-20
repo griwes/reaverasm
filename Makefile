@@ -3,8 +3,7 @@ LD=clang++
 CFLAGS=-c -Os -Wall -Wextra -pedantic -Werror -std=c++11 -stdlib=libc++ -Wno-unused-parameter -I . -Wno-unused-variable \
 	-Wno-unused-private-field
 LDFLAGS=-stdlib=libc++ -lc++abi -lc++ -lboost_system -lboost_program_options -lboost_filesystem
-DIRECTORIES=$(shell find -type d -not -name "*-old*")
-SOURCES=$(shell find $(DIRECTORIES) -name "*.cpp")
+SOURCES=$(shell find . -type f -name "*.cpp" ! -path "*-old*")
 OBJECTS=$(SOURCES:.cpp=.o)
 TESTS=$(shell find . -name "*.asm")
 TESTRESULTS=$(TESTS:.asm=.bin)
