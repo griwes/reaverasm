@@ -30,9 +30,8 @@
 #include <memory>
 
 #include <frontend.h>
-#include <preprocessor/macro.h>
 #include <preprocessor/line.h>
-#include <parser/ast.h>
+//#include <parser/ast.h>
 
 namespace reaver
 {
@@ -60,7 +59,7 @@ namespace reaver
             std::string _name;
             std::string _buffer;
             std::vector<line> _lines;
-            ast _ast;
+//            ast _ast;
         };
     }
 }

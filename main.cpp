@@ -32,5 +32,5 @@
 
 int main(int argc, char ** argv)
 {
-    reaver::assembler::assembler assembler(argc, argv);
+    reaver::assembler::assembler assembler{ argc, argv };
 }

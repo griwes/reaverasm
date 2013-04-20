@@ -27,13 +27,13 @@
 
 #include <assembler.h>
 #include <preprocessor/preprocessor.h>
-#include <parser/parser.h>
+//#include <parser/parser.h>
 
 reaver::assembler::assembler::assembler(int argc, char ** argv) : _frontend(argc, argv)
 {
     _buffer = _frontend.read_file();
 
-    reaver::assembler::preprocessor preprocessor{_frontend};
+    reaver::assembler::preprocessor preprocessor{ _frontend };
     _lines = preprocessor.preprocess(_buffer);
 
     if (_frontend.preprocess_only())
@@ -44,14 +44,14 @@ reaver::assembler::assembler::assembler(int argc, char ** argv) : _frontend(argc
         }
     }
 
-    else
+/*    else
     {
-        reaver::assembler::parser parser(_frontend);
+        reaver::assembler::parser parser{ _frontend };
         _ast = parser.parse(_lines);
 
-/*        reaver::assembler::generator generator(_frontend);
-        _frontend.output().write(generator.generate());*/
-    }
+        reaver::assembler::generator generator(_frontend);
+        _frontend.output().write(generator.generate());
+    }*/
 }
 
 reaver::assembler::assembler::~assembler()

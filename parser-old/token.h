@@ -12,7 +12,7 @@ namespace reaver
         public:
             virtual ~token() {}
 
-            virtual std::string body() = 0;
+            virtual std::string body();
 
             virtual bool is_label()
             {
@@ -104,6 +104,16 @@ namespace reaver
             {
                 return true;
             }
+
+            static const std::vector<std::string> values;
+        };
+
+        class bits_directive : public directive
+        {
+        public:
+            bits_directive(std::string);
+
+            virtual ~bits_directive() {}
         };
 
         class label : public token

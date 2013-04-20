@@ -42,7 +42,7 @@ namespace reaver
             ast parse(const std::vector<line> &);
 
         private:
-            std::vector<std::unique_ptr<token>> _tokenize(const line &);
+            std::vector<std::shared_ptr<token>> _tokenize(const line &);
 
             frontend & _frontend;
         };
