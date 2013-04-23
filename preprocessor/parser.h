@@ -55,9 +55,9 @@ namespace reaver
         struct preprocessor_lexer
         {
             preprocessor_lexer() : directive{ assembler::directive, "%[a-z]+" }, identifier{ assembler::identifier,
-                "\.?[a-zA-Z_][a-zA-Z0-9_]*" }, number{ assembler::number, "([0-9]+)|(0x[0-9a-fA-F]+)|(0b[01]+)|\
-                ([0-9a-fA-F]+h)|([0-9]*\.[0-9]*)" }, character{ assembler::character, "'.'" }, string{ assembler::string,
-                "\"([^\"\\]*(\\.[^\"\\]*)*)\"" }, symbol{ assembler::symbol, "[\]\[!&*+/<=>\^|~-(),]" },
+                "\\.?[a-zA-Z_][a-zA-Z0-9_]*" }, number{ assembler::number, "([0-9]+)|(0x[0-9a-fA-F]+)|(0b[01]+)|\
+                ([0-9a-fA-F]+h)|([0-9]*\\.[0-9]*)" }, character{ assembler::character, "'.'" }, string{ assembler::string,
+                "\"([^\"\\]*(\\.[^\"\\]*)*)\"" }, symbol{ assembler::symbol, "[\\]\\[!&*+/<=>\\^|~-(),]" },
                 whitespace{ assembler::whitespace, "[ \t\r\n\v\f]" }
             {
                 desc.add(directive)(identifier)(number)(character)(string)(symbol)(whitespace);
