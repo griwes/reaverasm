@@ -24,6 +24,7 @@
  **/
 
 #include <preprocessor/preprocessor.h>
+#include <preprocessor/parser.h>
 
 reaver::assembler::preprocessor::preprocessor(reaver::assembler::frontend & front) : _frontend{ front }
 {
