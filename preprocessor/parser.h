@@ -36,54 +36,21 @@ namespace reaver
             boost::optional<std::vector<std::string>> args;
         };
 
-        struct include_match
-        {
-
-        };
-
-        struct undef_match
-        {
-
-        };
-
-        struct error_match
-        {
-
-        };
-
         struct assign_match
         {
-
-        };
-
-        struct macro_match
-        {
-
-        };
-
-        struct endmacro_match
-        {
-
+            std::string name;
+            std::string value;
         };
 
         struct if_match
         {
-
-        };
-
-        struct elseif_match
-        {
-
-        };
-
-        struct else_match
-        {
-
+            std::string type;
+            std::string condition;
         };
 
         struct rep_match
         {
-
+            std::string dummy;
         };
 
         enum tokens
@@ -126,12 +93,12 @@ namespace reaver
                 define = parser::token(lex.directive)({ "%define", "%xdefine" }) >> parser::token(lex.identifier) >>
                     -(~parser::token(lex.symbol)({ "(" }) >> parser::token(lex.identifier) % parser::token(lex.symbol)({ "," })
                     >> ~parser::token(lex.symbol)({ ")" }));
-                include = parser::token(lex.directive)({ "%include" }) >> parser::token(lex.string);
-                undef = parser::token(lex.directive)({ "%undef" }) >> parser::token(lex.identifier);
-                error = parser::token(lex.directive)({ "%error" }) >> parser::token(lex.string);
-                assign = parser::token(lex.directive)({ "%assign" }) >> parser::token(lex.identifier) >> parser::token(lex.number);
-                macro = parser::token(lex.directive)({ "%macro" }) >> parser::token(lex.identifier);
-                endmacro = parser::token(lex.directive)({ "%endmacro" });
+                include = ~parser::token(lex.directive)({ "%include" }) >> parser::token(lex.string);
+                undef = ~parser::token(lex.directive)({ "%undef" }) >> parser::token(lex.identifier);
+                error = ~parser::token(lex.directive)({ "%error" }) >> parser::token(lex.string);
+                assign = ~parser::token(lex.directive)({ "%assign" }) >> parser::token(lex.identifier) >> parser::token(lex.number);
+                macro = ~parser::token(lex.directive)({ "%macro" }) >> parser::token(lex.identifier);
+                endmacro = parser::token(lex.directive)({ "%endmacro" });           // parser TODO: `rule<>`
                 if_directive = parser::token(lex.directive)({ "%if", "%ifdef" });   // TODO
                 elseif = parser::token(lex.directive)({ "%elseif", "%elif" });      // TODO
                 else_directive = parser::token(lex.directive)({ "%else" });         // TODO
@@ -139,15 +106,15 @@ namespace reaver
             }
 
             parser::rule<assembler::define_match> define;
-            parser::rule<assembler::include_match> include;
-            parser::rule<assembler::undef_match> undef;
-            parser::rule<assembler::error_match> error;
+            parser::rule<std::string> include;
+            parser::rule<std::string> undef;
+            parser::rule<std::string> error;
             parser::rule<assembler::assign_match> assign;
-            parser::rule<assembler::macro_match> macro;
-            parser::rule<assembler::endmacro_match> endmacro;
+            parser::rule<std::string> macro;
+            parser::rule<std::string> endmacro;                 // rule<>
             parser::rule<assembler::if_match> if_directive;
-            parser::rule<assembler::elseif_match> elseif;
-            parser::rule<assembler::else_match> else_directive;
+            parser::rule<std::string> elseif;
+            parser::rule<std::string> else_directive;           // rule<>
             parser::rule<assembler::rep_match> rep;
 
             parser::rule<std::string> skip;
