@@ -29,17 +29,62 @@ namespace reaver
 {
     namespace assembler
     {
-        struct define;
-        struct include;
-        struct undef;
-        struct error;
-        struct assign;
-        struct macro;
-        struct endmacro;
-        struct if_directive;
-        struct elseif;
-        struct else_directive;
-        struct rep;
+        struct define_match
+        {
+            std::string directive;
+            std::string name;
+            boost::optional<std::vector<std::string>> args;
+        };
+
+        struct include_match
+        {
+
+        };
+
+        struct undef_match
+        {
+
+        };
+
+        struct error_match
+        {
+
+        };
+
+        struct assign_match
+        {
+
+        };
+
+        struct macro_match
+        {
+
+        };
+
+        struct endmacro_match
+        {
+
+        };
+
+        struct if_match
+        {
+
+        };
+
+        struct elseif_match
+        {
+
+        };
+
+        struct else_match
+        {
+
+        };
+
+        struct rep_match
+        {
+
+        };
 
         enum tokens
         {
@@ -78,14 +123,14 @@ namespace reaver
         {
             preprocessor_parser(const preprocessor_lexer & lex)
             {
-                define = parser::token(lex.directive)({ "%define", "%xdefine" }) << (parser::token(lex.identifier)
-                    | (parser::token(lex.identifier) << parser::token(lex.symbol)({ "(" }) << parser::token(lex.identifier)
-                    % parser::token(lex.symbol)({ "," }) << parser::token(lex.symbol)({ ")" })));
-                include = parser::token(lex.directive)({ "%include" }) << parser::token(lex.string);
-                undef = parser::token(lex.directive)({ "%undef" }) << parser::token(lex.identifier);
-                error = parser::token(lex.directive)({ "%error" }) << parser::token(lex.string);
-                assign = parser::token(lex.directive)({ "%assign" }) << parser::token(lex.identifier) << parser::token(lex.number);
-                macro = parser::token(lex.directive)({ "%macro" }) << parser::token(lex.identifier);
+                define = parser::token(lex.directive)({ "%define", "%xdefine" }) >> parser::token(lex.identifier) >>
+                    -(~parser::token(lex.symbol)({ "(" }) >> parser::token(lex.identifier) % parser::token(lex.symbol)({ "," })
+                    >> ~parser::token(lex.symbol)({ ")" }));
+                include = parser::token(lex.directive)({ "%include" }) >> parser::token(lex.string);
+                undef = parser::token(lex.directive)({ "%undef" }) >> parser::token(lex.identifier);
+                error = parser::token(lex.directive)({ "%error" }) >> parser::token(lex.string);
+                assign = parser::token(lex.directive)({ "%assign" }) >> parser::token(lex.identifier) >> parser::token(lex.number);
+                macro = parser::token(lex.directive)({ "%macro" }) >> parser::token(lex.identifier);
                 endmacro = parser::token(lex.directive)({ "%endmacro" });
                 if_directive = parser::token(lex.directive)({ "%if", "%ifdef" });   // TODO
                 elseif = parser::token(lex.directive)({ "%elseif", "%elif" });      // TODO
@@ -93,17 +138,17 @@ namespace reaver
                 rep = parser::token(lex.directive)({ "%rep" });                     // TODO
             }
 
-            parser::rule<assembler::define> define;
-            parser::rule<assembler::include> include;
-            parser::rule<assembler::undef> undef;
-            parser::rule<assembler::error> error;
-            parser::rule<assembler::assign> assign;
-            parser::rule<assembler::macro> macro;
-            parser::rule<assembler::endmacro> endmacro;
-            parser::rule<assembler::if_directive> if_directive;
-            parser::rule<assembler::elseif> elseif;
-            parser::rule<assembler::else_directive> else_directive;
-            parser::rule<assembler::rep> rep;
+            parser::rule<assembler::define_match> define;
+            parser::rule<assembler::include_match> include;
+            parser::rule<assembler::undef_match> undef;
+            parser::rule<assembler::error_match> error;
+            parser::rule<assembler::assign_match> assign;
+            parser::rule<assembler::macro_match> macro;
+            parser::rule<assembler::endmacro_match> endmacro;
+            parser::rule<assembler::if_match> if_directive;
+            parser::rule<assembler::elseif_match> elseif;
+            parser::rule<assembler::else_match> else_directive;
+            parser::rule<assembler::rep_match> rep;
 
             parser::rule<std::string> skip;
         };
