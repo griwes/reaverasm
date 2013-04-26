@@ -25,3 +25,5 @@ bits    64
 mov     rsp, 0
 mov     eax, 0
 mov     qword [0], rax
+
+%define foo(a, b) bar

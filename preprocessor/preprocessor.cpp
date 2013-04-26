@@ -95,5 +95,18 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, incl
 
         preprocessor_lexer lexer;
         auto tokens = reaver::lexer::tokenize(buffer, lexer.desc);
+
+        preprocessor_parser parser{ lexer };
+
+        auto begin = tokens.cbegin();
+
+        {
+            auto define = parser.define.match(begin, tokens.cend(), parser.skip);
+
+            if (define)
+            {
+                dlog() << "Define matched; name: " << define->name;
+            }
+        }
     }
 }
