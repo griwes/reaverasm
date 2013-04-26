@@ -59,7 +59,7 @@ std::vector<reaver::assembler::line> reaver::assembler::preprocessor::preprocess
 void reaver::assembler::preprocessor::_include_stream(std::istream & input, include_chain include_chain)
 {
     std::string buffer;
-    uint64_t new_lines;
+    uint64_t new_lines = 1;
 
     while (std::getline(input, buffer) && (include_chain.back().line += new_lines))
     {
@@ -105,7 +105,34 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, incl
 
             if (define)
             {
-                dlog() << "Define matched; name: " << define->name;
+                dlog() << define->directive << ", " << define->name;
+
+                if (_defines.find(define->name) != _defines.end())
+                {
+                    print_include_chain(include_chain);
+                    dlog(error) << "macro name `" << style::style(colors::bgray, colors::def, styles::bold) << define->name
+                        << style::style() << "` redefined.";
+                    print_include_chain(_defines[define->name].source());
+                    dlog() << "Note: first defined here.";
+                }
+
+                if (define->directive == "%xdefine" && !define->args)
+                {
+                }
+
+                else if (define->directive == "%define" && !define->args)
+                {
+                }
+
+                else if (define->directive == "%xdefine")
+                {
+                }
+
+                else
+                {
+                }
+
+                continue;
             }
         }
     }

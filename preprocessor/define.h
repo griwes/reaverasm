@@ -29,6 +29,8 @@
 #include <string>
 #include <utility>
 
+#include <include_chain.h>
+
 namespace reaver
 {
     namespace assembler
@@ -40,14 +42,13 @@ namespace reaver
             {
             }
 
-            define(std::string name, std::string definition, std::vector<std::pair<std::string, uint64_t>> include_chain)
-                : _name(name), _body(definition), _inc_chain(include_chain)
+            define(std::string name, std::string definition, include_chain include_chain)
+                : _name{ name }, _body{ definition }, _inc_chain{ std::move(include_chain) }
             {
             }
 
-            define(std::string name, std::vector<std::string> params, std::string definition,
-                std::vector<std::pair<std::string, uint64_t>> include_chain) : _name(name), _body(definition), _inc_chain(include_chain),
-                _params(params)
+            define(std::string name, std::vector<std::string> params, std::string definition, include_chain include_chain)
+                : _name{ name }, _body{ definition }, _inc_chain{ std::move(include_chain) }, _params{ std::move(params) }
             {
             }
 
@@ -61,7 +62,7 @@ namespace reaver
                 return _body;
             }
 
-            std::vector<std::pair<std::string, uint64_t>> source()
+            include_chain source()
             {
                 return _inc_chain;
             }
@@ -74,7 +75,7 @@ namespace reaver
         private:
             std::string _name;
             std::string _body;
-            std::vector<std::pair<std::string, uint64_t>> _inc_chain;
+            include_chain _inc_chain;
             std::vector<std::string> _params;
         };
     }
