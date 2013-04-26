@@ -56,4 +56,44 @@ std::vector<reaver::assembler::line> reaver::assembler::preprocessor::preprocess
     return _lines;
 }
 
+void reaver::assembler::preprocessor::_include_stream(std::istream & input, include_chain include_chain)
+{
+    std::string buffer;
+    uint64_t new_lines;
 
+    while (std::getline(input, buffer) && (include_chain.back().line += new_lines))
+    {
+        new_lines = 1;
+        std::vector<std::string> v{ buffer };
+
+        if (include_chain.size() > 128)
+        {
+            print_include_chain(include_chain);
+            dlog(error) << "maximum include (or macro) depth (128) reached.";
+
+            std::exit(-1);
+        }
+
+        while (buffer.size() && buffer.back() == '\\')
+        {
+            buffer.pop_back();
+
+            std::string next;
+
+            if (!std::getline(input, next))
+            {
+                print_include_chain(include_chain);
+                dlog(error) << "invalid `\\` at the end of file.";
+
+                std::exit(-1);
+            }
+
+            buffer.append(next);
+            v.push_back(next);
+            ++new_lines;
+        }
+
+        preprocessor_lexer lexer;
+        auto tokens = reaver::lexer::tokenize(buffer, lexer.desc);
+    }
+}

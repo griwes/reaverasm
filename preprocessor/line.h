@@ -31,6 +31,8 @@
 
 #include <reaver/logger.h>
 
+#include <include_chain.h>
+
 namespace reaver
 {
     namespace assembler
@@ -38,7 +40,8 @@ namespace reaver
         class line
         {
         public:
-            line(std::string line, std::vector<std::pair<std::string, uint64_t>> chain) : _line(line), _include_chain(chain)
+            line(std::string line, include_chain chain, std::vector<std::string> original) : _line{ line }, _original{ original },
+                _include_chain{ chain }
             {
             }
 
@@ -57,12 +60,17 @@ namespace reaver
                 return &_line;
             }
 
+            std::vector<std::string> original() const
+            {
+                return _original;
+            }
+
             uint64_t include_count()
             {
                 return _include_chain.size();
             }
 
-            std::pair<std::string, uint64_t> operator[](uint64_t i)
+            include operator[](uint64_t i)
             {
                 if (i >= _include_chain.size())
                 {
@@ -76,7 +84,8 @@ namespace reaver
 
         private:
             std::string _line;
-            std::vector<std::pair<std::string, uint64_t>> _include_chain;
+            std::vector<std::string> _original;
+            include_chain _include_chain;
         };
     }
 }
