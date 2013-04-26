@@ -25,9 +25,35 @@
 
 #include <preprocessor/preprocessor.h>
 #include <preprocessor/parser.h>
+#include <utils.h>
 
 reaver::assembler::preprocessor::preprocessor(reaver::assembler::frontend & front) : _frontend{ front }
 {
+}
+
+std::vector<reaver::assembler::line> reaver::assembler::preprocessor::preprocess(const std::string & _buffer)
+{
+    if (_frontend.default_includes())
+    {
+        for (auto & file : _frontend.get_default_includes())
+        {
+            std::stringstream input{ _frontend.read_file(file, { { std::string("<command line>"), 0, false } }).first };
+
+            _include_stream(input, { { std::string("<command line>"), 0, false }, { file, 0, false } });
+        }
+    }
+
+    std::stringstream input(_buffer);
+    include_chain include_chain{ { _frontend.absolute_name(), 0, false } };
+
+    _include_stream(input, include_chain);
+
+    for (auto & x : _lines)
+    {
+        std::cout << *x << std::endl;
+    }
+
+    return _lines;
 }
 
 

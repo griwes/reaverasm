@@ -261,7 +261,7 @@ std::string reaver::assembler::frontend::read_file() const
     return std::string(_comment_remove_iterator<char>(input.rdbuf()), _comment_remove_iterator<char>());
 }
 
-std::pair<std::string, std::string> reaver::assembler::frontend::read_file(std::string filename, std::vector<std::pair<std::string, uint64_t>> inc) const
+std::pair<std::string, std::string> reaver::assembler::frontend::read_file(std::string filename, const reaver::assembler::include_chain & inc) const
 {
     filename = _resolve_name(filename, inc);
     std::fstream input(_resolve_name(filename, inc), std::ios::in | std::ios::binary);
@@ -288,7 +288,7 @@ std::map<std::string, reaver::assembler::define> reaver::assembler::frontend::de
     return std::map<std::string, reaver::assembler::define>();
 }
 
-std::string reaver::assembler::frontend::_resolve_name(std::string filename, std::vector<std::pair<std::string, uint64_t>> inc) const
+std::string reaver::assembler::frontend::_resolve_name(std::string filename, const reaver::assembler::include_chain & inc) const
 {
     if (boost::filesystem::path(filename).is_absolute())
     {

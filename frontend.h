@@ -32,6 +32,7 @@
 #include <boost/program_options.hpp>
 
 #include <preprocessor/define.h>
+#include <include_chain.h>
 
 namespace reaver
 {
@@ -50,7 +51,7 @@ namespace reaver
             std::map<std::string, define> defines();
 
             std::string read_file() const;
-            std::pair<std::string, std::string> read_file(std::string filename, std::vector<std::pair<std::string, uint64_t>>) const;
+            std::pair<std::string, std::string> read_file(std::string filename, const include_chain &) const;
 
             bool default_includes() const;
             std::vector<std::string> get_default_includes() const;
@@ -58,7 +59,7 @@ namespace reaver
             bool preprocess_only() const;
 
         private:
-            std::string _resolve_name(std::string, std::vector<std::pair<std::string, uint64_t>>) const;
+            std::string _resolve_name(std::string, const include_chain &) const;
 
             boost::program_options::variables_map _variables;
 

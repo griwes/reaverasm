@@ -25,44 +25,20 @@
 
 #pragma once
 
-#include <iostream>
 #include <vector>
+#include <string>
 
-#include <reaver/logger.h>
-#include <reaver/style.h>
-
-#include <include_chain.h>
-
-using namespace reaver::logger;
-using namespace reaver::style;
-
-inline void print_include_chain(const reaver::assembler::include_chain & include_chain)
+namespace reaver
 {
-    dlog() << "In file " << style(colors::bgray, colors::def, styles::bold) << include_chain.back().name
-        << style() << " in line " << include_chain.back().line << ":";
-
-    for (auto it = include_chain.crbegin() + 1; it != include_chain.crend(); ++it)
+    namespace assembler
     {
-        if (!it->macro)
+        struct include
         {
-            dlog() << "Included from " << it->name << " in line " << it->line << ":";
-        }
+            std::string name;
+            uint64_t line;
+            bool macro;
+        };
 
-        else
-        {
-            dlog() << "In expanded preprocessor directive `" << it->name << "` in line " << it->line << ":";
-        }
+        using include_chain = std::vector<include>;
     }
-}
-
-inline std::string remove_leading_whitespace(const std::string & str)
-{
-    auto it = begin(str);
-
-    while (it != end(str) && std::isspace(*it))
-    {
-        ++it;
-    }
-
-    return { it, end(str) };
 }

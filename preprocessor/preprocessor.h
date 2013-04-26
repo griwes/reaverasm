@@ -33,6 +33,7 @@
 #include <preprocessor/macro.h>
 #include <preprocessor/line.h>
 #include <preprocessor/define.h>
+#include <include_chain.h>
 
 namespace reaver
 {
@@ -46,8 +47,8 @@ namespace reaver
             std::vector<line> preprocess(const std::string &);
 
         private:
-            void _include_stream(std::istream &, std::vector<std::pair<std::string, uint64_t>>);
-            std::string _apply_defines(const std::vector<std::string> &, const std::vector<std::pair<std::string, uint64_t>> &);
+            void _include_stream(std::istream &, include_chain);
+            std::string _apply_defines(const std::vector<std::string> &, const include_chain &);
 
             std::vector<std::string> _define_stack;
 
