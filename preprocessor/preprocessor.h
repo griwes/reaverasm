@@ -29,6 +29,8 @@
 #include <memory>
 #include <map>
 
+#include <reaver/parser/lexer.h>
+
 #include <frontend.h>
 #include <preprocessor/macro.h>
 #include <preprocessor/line.h>
@@ -48,7 +50,8 @@ namespace reaver
 
         private:
             void _include_stream(std::istream &, include_chain);
-            std::string _apply_defines(const std::vector<std::string> &, const include_chain &);
+            std::string _apply_defines(std::string, const include_chain &) const;
+            std::string _apply_defines(std::vector<lexer::token>::const_iterator, std::vector<lexer::token>::const_iterator) const;
 
             std::vector<std::string> _define_stack;
 

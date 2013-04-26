@@ -101,12 +101,10 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, incl
         auto begin = tokens.cbegin();
 
         {
-            auto define = parser.define.match(begin, tokens.cend(), parser.skip);
+            auto define = reaver::parser::parse(parser.define, begin, tokens.cend(), parser.skip);
 
             if (define)
             {
-                dlog() << define->directive << ", " << define->name;
-
                 if (_defines.find(define->name) != _defines.end())
                 {
                     print_include_chain(include_chain);
@@ -116,12 +114,22 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, incl
                     dlog() << "Note: first defined here.";
                 }
 
-                if (define->directive == "%xdefine" && !define->args)
+                if (define->directive == "%define" && !define->args)
                 {
+                    std::string definition;
+
+                    for (; begin != tokens.cend(); ++begin)
+                    {
+                        definition.append(begin->as<std::string>());
+                    }
+
+                    _defines.emplace(define->name, assembler::define{ define->name, definition, include_chain });
                 }
 
-                else if (define->directive == "%define" && !define->args)
+                else if (define->directive == "%xdefine" && !define->args)
                 {
+                    _defines.emplace(define->name, assembler::define{ define->name, _apply_defines(begin, tokens.cend()),
+                        include_chain});
                 }
 
                 else if (define->directive == "%xdefine")
