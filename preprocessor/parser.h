@@ -71,7 +71,7 @@ namespace reaver
                 number{ assembler::number, "(0x[0-9a-fA-F]+)|(0b[01]+)|([0-9a-fA-F]+h)|([0-9]*\\.[0-9]*)|([0-9]+)" },
                 character{ assembler::character, "'.'" },
                 string{ assembler::string, "\"([^\"\\\\]*(\\.[^\"\\\\]*)*)\"" },
-                symbol{ assembler::symbol, "[\\]\\[\\!\\&\\*\\+\\/\\<\\=\\>\\^\\|\\~\\-\\(\\)\\,\\:]" },
+                symbol{ assembler::symbol, "[[:punct:]]" },
                 whitespace{ assembler::whitespace, "[ \t\r\n\v\f]+" }
             {
                 desc.add(directive)(identifier)(number)(character)(string)(symbol)(whitespace);
