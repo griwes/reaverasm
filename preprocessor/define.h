@@ -52,22 +52,22 @@ namespace reaver
             {
             }
 
-            std::string name()
+            std::string name() const
             {
                 return _name;
             }
 
-            std::string definition()
+            std::string definition() const
             {
                 return _body;
             }
 
-            include_chain source()
+            include_chain source() const
             {
                 return _inc_chain;
             }
 
-            std::vector<std::string> parameters()
+            std::vector<std::string> parameters() const
             {
                 return _params;
             }

@@ -36,6 +36,7 @@
 #include <preprocessor/line.h>
 #include <preprocessor/define.h>
 #include <include_chain.h>
+#include <preprocessor/parser.h>
 
 namespace reaver
 {
@@ -50,8 +51,9 @@ namespace reaver
 
         private:
             void _include_stream(std::istream &, include_chain);
-            std::string _apply_defines(std::string, const include_chain &) const;
-            std::string _apply_defines(std::vector<lexer::token>::const_iterator, std::vector<lexer::token>::const_iterator) const;
+            std::string _apply_defines(std::string, include_chain) const;
+            std::string _apply_defines(std::vector<lexer::token>::const_iterator, std::vector<lexer::token>::const_iterator,
+                include_chain) const;
 
             std::vector<std::string> _define_stack;
 
@@ -60,6 +62,9 @@ namespace reaver
             std::vector<line> _lines;
 
             frontend & _frontend;
+
+            preprocessor_lexer _lexer;
+            preprocessor_parser _parser;
         };
     }
 }

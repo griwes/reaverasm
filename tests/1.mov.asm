@@ -21,10 +21,10 @@ mov     eax, cr0
 mov     [0xb8000], edx
 
 bits    64
-\
+
+%define foo(a, b) [a + b]
+
 mov     rsp, 0
 mov     eax, 0
-mov     qword [0], rax
+mov     qword foo(0, 0), rax
 
-%define foo bar
-%define foo baz

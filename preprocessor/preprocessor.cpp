@@ -24,10 +24,9 @@
  **/
 
 #include <preprocessor/preprocessor.h>
-#include <preprocessor/parser.h>
 #include <utils.h>
 
-reaver::assembler::preprocessor::preprocessor(reaver::assembler::frontend & front) : _frontend{ front }
+reaver::assembler::preprocessor::preprocessor(reaver::assembler::frontend & front) : _frontend{ front }, _parser{ _lexer }
 {
 }
 
@@ -93,15 +92,11 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, incl
             ++new_lines;
         }
 
-        preprocessor_lexer lexer;
-        auto tokens = reaver::lexer::tokenize(buffer, lexer.desc);
-
-        preprocessor_parser parser{ lexer };
-
+        auto tokens = reaver::lexer::tokenize(buffer, _lexer.desc);
         auto begin = tokens.cbegin();
 
         {
-            auto define = reaver::parser::parse(parser.define, begin, tokens.cend(), parser.skip);
+            auto define = reaver::parser::parse(_parser.define, begin, tokens.cend(), _parser.skip);
 
             if (define)
             {
@@ -128,20 +123,85 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, incl
 
                 else if (define->directive == "%xdefine" && !define->args)
                 {
-                    _defines.emplace(define->name, assembler::define{ define->name, _apply_defines(begin, tokens.cend()),
-                        include_chain});
+                    _defines.emplace(define->name, assembler::define{ define->name, _apply_defines(begin, tokens.cend(),
+                        include_chain), include_chain});
                 }
 
-                else if (define->directive == "%xdefine")
+                else if (define->directive == "%define")
                 {
+                    std::string definition;
+
+                    while (begin != tokens.cend())
+                    {
+                        definition.append((begin++)->as<std::string>());
+                    }
+
+                    _defines.emplace(define->name, assembler::define{ define->name, *define->args, definition,
+                        include_chain });
                 }
 
                 else
                 {
+                    _defines.emplace(define->name, assembler::define{ define->name, *define->args, _apply_defines(begin,
+                        tokens.cend(), include_chain), include_chain });
                 }
 
                 continue;
             }
+
+            _lines.emplace_back(_apply_defines(buffer, include_chain), include_chain, v);
         }
     }
+}
+
+std::string reaver::assembler::preprocessor::_apply_defines(std::vector<lexer::token>::const_iterator begin,
+    std::vector<lexer::token>::const_iterator end, include_chain inc) const
+{
+    std::string ret;
+
+    while (begin != end)
+    {
+        if (_defines.find(begin->as<std::string>()) != _defines.end())
+        {
+            auto & macro = _defines.at(begin->as<std::string>());
+
+            if (macro.parameters().size())
+            {
+                auto t = begin;
+                auto match = reaver::parser::parse(_parser.macro_call, t, end, _parser.skip);
+
+                if (match)
+                {
+
+                }
+
+                else
+                {
+                    print_include_chain(inc);
+                    dlog(error) << "No parameters supplied for macro `" << style::style(colors::white, colors::def, styles::bold)
+                        << macro.name() << style::style() << "` taking " << macro.parameters().size() << " arguments.";
+                }
+            }
+
+            else
+            {
+                ret.append(_apply_defines(macro.definition(), inc));
+            }
+        }
+
+        else
+        {
+            ret.append(begin->as<std::string>());
+        }
+
+        ++begin;
+    }
+
+    return ret;
+}
+
+std::string reaver::assembler::preprocessor::_apply_defines(std::string str, include_chain inc) const
+{
+    auto t = reaver::lexer::tokenize(str, _lexer.desc);
+    return _apply_defines(t.cbegin(), t.cend(), inc);
 }

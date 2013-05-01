@@ -23,6 +23,8 @@
  *
  **/
 
+#pragma once
+
 #include <reaver/parser/parser.h>
 
 namespace reaver
@@ -66,13 +68,13 @@ namespace reaver
 
         struct preprocessor_lexer
         {
-            preprocessor_lexer() : directive{ assembler::directive, "%[a-z]+" },
-                identifier{ assembler::identifier, "\\.?[a-zA-Z_][a-zA-Z0-9_]*" },
-                number{ assembler::number, "(0x[0-9a-fA-F]+)|(0b[01]+)|([0-9a-fA-F]+h)|([0-9]*\\.[0-9]*)|([0-9]+)" },
-                character{ assembler::character, "'.'" },
-                string{ assembler::string, "\"([^\"\\\\]*(\\.[^\"\\\\]*)*)\"" },
-                symbol{ assembler::symbol, "[[:punct:]]" },
-                whitespace{ assembler::whitespace, "[ \t\r\n\v\f]+" }
+            preprocessor_lexer() : directive{ reaver::assembler::directive, "%[a-z]+" },
+                identifier{ reaver::assembler::identifier, "\\.?[a-zA-Z_][a-zA-Z0-9_]*" },
+                number{ reaver::assembler::number, "(0x[0-9a-fA-F]+)|(0b[01]+)|([0-9a-fA-F]+h)|([0-9]*\\.[0-9]*)|([0-9]+)" },
+                character{ reaver::assembler::character, "'.'" },
+                string{ reaver::assembler::string, "\"([^\"\\\\]*(\\.[^\"\\\\]*)*)\"" },
+                symbol{ reaver::assembler::symbol, "[[:punct:]]" },
+                whitespace{ reaver::assembler::whitespace, "[ \t\r\n\v\f]+" }
             {
                 desc.add(directive)(identifier)(number)(character)(string)(symbol)(whitespace);
             }
@@ -109,17 +111,17 @@ namespace reaver
                 skip = parser::token(lex.whitespace);
             }
 
-            parser::rule<assembler::define_match> define;
+            parser::rule<reaver::assembler::define_match> define;
             parser::rule<std::string> include;
             parser::rule<std::string> undef;
             parser::rule<std::string> error;
-            parser::rule<assembler::assign_match> assign;
+            parser::rule<reaver::assembler::assign_match> assign;
             parser::rule<std::string> macro;
             parser::rule<std::string> endmacro;                 // rule<>
-            parser::rule<assembler::if_match> if_directive;
+            parser::rule<reaver::assembler::if_match> if_directive;
             parser::rule<std::string> elseif;
             parser::rule<std::string> else_directive;           // rule<>
-            parser::rule<assembler::rep_match> rep;
+            parser::rule<reaver::assembler::rep_match> rep;
 
             parser::rule<std::string> skip;
         };
