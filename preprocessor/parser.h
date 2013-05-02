@@ -55,6 +55,12 @@ namespace reaver
             std::string dummy;
         };
 
+        struct macro_call_match
+        {
+            std::string name;
+            std::vector<std::string> args;
+        };
+
         enum tokens
         {
             directive,
@@ -108,6 +114,13 @@ namespace reaver
                 else_directive = parser::token(lex.directive)({ "%else" });         // TODO
                 rep = parser::token(lex.directive)({ "%rep" });                     // TODO
 
+                anything_but_comma_and_parens = +((parser::token(lex.identifier) | parser::token(lex.character)
+                    | parser::token(lex.number) | parser::token(lex.string) | parser::token(lex.symbol))
+                    - parser::token(lex.symbol)({ ",", "(", ")" }));
+
+                macro_call = parser::token(lex.identifier) >> ~parser::token(lex.symbol)({ "(" }) >> anything_but_comma_and_parens
+                    % parser::token(lex.symbol)({ "," }) >> ~parser::token(lex.symbol)({ ")" });
+
                 skip = parser::token(lex.whitespace);
             }
 
@@ -122,6 +135,10 @@ namespace reaver
             parser::rule<std::string> elseif;
             parser::rule<std::string> else_directive;           // rule<>
             parser::rule<reaver::assembler::rep_match> rep;
+
+            parser::rule<reaver::assembler::macro_call_match> macro_call;
+
+            parser::rule<std::string> anything_but_comma_and_parens;
 
             parser::rule<std::string> skip;
         };

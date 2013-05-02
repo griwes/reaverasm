@@ -47,10 +47,10 @@ std::vector<reaver::assembler::line> reaver::assembler::preprocessor::preprocess
 
     _include_stream(input, include_chain);
 
-    for (auto & x : _lines)
-    {
-        std::cout << *x << std::endl;
-    }
+//    for (auto & x : _lines)
+  //  {
+    //    std::cout << *x << std::endl;
+    //}
 
     return _lines;
 }
@@ -172,14 +172,24 @@ std::string reaver::assembler::preprocessor::_apply_defines(std::vector<lexer::t
 
                 if (match)
                 {
+                    if (match->args.size() != macro.parameters().size())
+                    {
+                        print_include_chain(inc);
+                        dlog(error) << "wrong number of parameters for macro `" << style::style(colors::white, colors::def,
+                            styles::bold) << macro.name() << style::style() << "`; expected " << macro.parameters().size()
+                            << ", got " << match->args.size() << ".";
 
+                        std::exit(-1);
+                    }
                 }
 
                 else
                 {
                     print_include_chain(inc);
-                    dlog(error) << "No parameters supplied for macro `" << style::style(colors::white, colors::def, styles::bold)
+                    dlog(error) << "no parameters supplied for macro `" << style::style(colors::white, colors::def, styles::bold)
                         << macro.name() << style::style() << "` taking " << macro.parameters().size() << " arguments.";
+
+                    std::exit(-1);
                 }
             }
 
