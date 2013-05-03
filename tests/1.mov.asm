@@ -27,4 +27,3 @@ bits    64
 mov     rsp, 0
 mov     eax, 0
 mov     qword foo(0, 0), rax
-

@@ -49,7 +49,7 @@ std::vector<reaver::assembler::line> reaver::assembler::preprocessor::preprocess
 
     for (auto & x : _lines)
     {
-        std::cout << *x << std::endl;
+        dlog() << *x;
     }
 
     return _lines;
@@ -90,6 +90,11 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, incl
             buffer.append(next);
             v.push_back(next);
             ++new_lines;
+        }
+
+        if (buffer.empty())
+        {
+            continue;
         }
 
         auto tokens = reaver::lexer::tokenize(buffer, _lexer.desc);
@@ -213,6 +218,25 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, incl
                 _defines.erase(_defines.find(*undef));
 
                 continue;
+            }
+        }
+
+        {
+            begin = tokens.cbegin();
+
+            if (begin->type() == assembler::directive && begin->as<std::string>() == "%error")
+            {
+                std::string error;
+
+                while ((++begin)->type() == assembler::whitespace) {}
+
+                while (begin != tokens.cend())
+                {
+                    error.append((begin++)->as<std::string>());
+                }
+
+                print_include_chain(include_chain);
+                dlog(logger::error) << error;
             }
         }
 

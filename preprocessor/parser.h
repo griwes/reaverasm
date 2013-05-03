@@ -105,7 +105,6 @@ namespace reaver
                     >> ~parser::token(lex.symbol)({ ")" }));
                 include = ~parser::token(lex.directive)({ "%include" }) >> parser::token(lex.string);
                 undef = ~parser::token(lex.directive)({ "%undef" }) >> parser::token(lex.identifier);
-                error = ~parser::token(lex.directive)({ "%error" }) >> parser::token(lex.string);
                 assign = ~parser::token(lex.directive)({ "%assign" }) >> parser::token(lex.identifier) >> parser::token(lex.number);
                 macro = ~parser::token(lex.directive)({ "%macro" }) >> parser::token(lex.identifier);
                 endmacro = parser::token(lex.directive)({ "%endmacro" });           // parser TODO: `rule<>`
@@ -127,7 +126,6 @@ namespace reaver
             parser::rule<reaver::assembler::define_match> define;
             parser::rule<std::string> include;
             parser::rule<std::string> undef;
-            parser::rule<std::string> error;
             parser::rule<reaver::assembler::assign_match> assign;
             parser::rule<std::string> macro;
             parser::rule<std::string> endmacro;                 // rule<>
