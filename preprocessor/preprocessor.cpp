@@ -187,6 +187,35 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, incl
             }
         }
 
+        {
+            begin = tokens.cbegin();
+            auto undef = parser::parse(_parser.undef, begin, tokens.cend(), _parser.skip);
+
+            if (undef)
+            {
+                if (begin != tokens.cend())
+                {
+                    print_include_chain(include_chain);
+                    dlog(error) << "junk after %undef directive.";
+
+                    std::exit(-1);
+                }
+
+                if (_defines.find(*undef) == _defines.end())
+                {
+                    print_include_chain(include_chain);
+                    dlog(error) << "unknown define: `" << style::style(colors::white, colors::def, styles::bold) << *undef
+                        << style::style() << "`.";
+
+                    std::exit(-1);
+                }
+
+                _defines.erase(_defines.find(*undef));
+
+                continue;
+            }
+        }
+
         _lines.emplace_back(_apply_defines(buffer, include_chain), include_chain, v);
     }
 }
