@@ -47,10 +47,10 @@ std::vector<reaver::assembler::line> reaver::assembler::preprocessor::preprocess
 
     _include_stream(input, include_chain);
 
-//    for (auto & x : _lines)
-  //  {
-    //    std::cout << *x << std::endl;
-    //}
+    for (auto & x : _lines)
+    {
+        std::cout << *x << std::endl;
+    }
 
     return _lines;
 }
@@ -172,6 +172,8 @@ std::string reaver::assembler::preprocessor::_apply_defines(std::vector<lexer::t
 
                 if (match)
                 {
+                    begin = t - 1;
+
                     if (match->args.size() != macro.parameters().size())
                     {
                         print_include_chain(inc);
@@ -180,6 +182,25 @@ std::string reaver::assembler::preprocessor::_apply_defines(std::vector<lexer::t
                             << ", got " << match->args.size() << ".";
 
                         std::exit(-1);
+                    }
+
+                    std::map<std::string, std::string> params;
+                    for (uint64_t i = 0; i < macro.parameters().size(); ++i)
+                    {
+                        params[macro.parameters()[i]] = match->args[i];
+                    }
+
+                    for (auto & x : lexer::tokenize(macro.definition(), _lexer.desc))
+                    {
+                        if (params.find(x.as<std::string>()) != params.end())
+                        {
+                            ret.append(_apply_defines(params[x.as<std::string>()], inc));
+                        }
+
+                        else
+                        {
+                            ret.append(_apply_defines(x.as<std::string>(), inc));
+                        }
                     }
                 }
 
