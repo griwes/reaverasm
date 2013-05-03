@@ -148,9 +148,46 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, incl
 
                 continue;
             }
-
-            _lines.emplace_back(_apply_defines(buffer, include_chain), include_chain, v);
         }
+
+        {
+            begin = tokens.cbegin();
+            auto include = parser::parse(_parser.include, begin, tokens.cend(), _parser.skip);
+
+            if (include)
+            {
+                auto file = _frontend.read_file(include->substr(1, include->size() - 2), include_chain);
+
+                if (begin != tokens.cend())
+                {
+                    print_include_chain(include_chain);
+                    dlog(error) << "junk after %include directive.";
+
+                    std::exit(-1);
+                }
+
+                if (std::find_if(include_chain.begin(), include_chain.end(), [file](const reaver::assembler::include & i)
+                    {
+                        return file.second == i.name;
+                    }) != include_chain.end())
+                {
+                    print_include_chain(include_chain);
+                    dlog(error) << "file " << style::style(colors::white, colors::def, styles::bold) << file.second <<
+                        style::style() << " included recursively.";
+
+                    std::exit(-1);
+                }
+
+                auto new_inc = include_chain;
+                new_inc.push_back({ file.second, 0, false });
+                std::stringstream stream{ file.first };
+                _include_stream(stream, new_inc);
+
+                continue;
+            }
+        }
+
+        _lines.emplace_back(_apply_defines(buffer, include_chain), include_chain, v);
     }
 }
 

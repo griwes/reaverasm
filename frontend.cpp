@@ -309,7 +309,7 @@ std::string reaver::assembler::frontend::_resolve_name(std::string filename, con
 
     std::vector<std::string> paths = _variables.count("include-dir") ? _variables["include-dir"].as<std::vector<std::string>>()
         : std::vector<std::string>();
-    paths.insert(paths.begin(), boost::filesystem::absolute(".").string());
+    paths.insert(paths.begin(), boost::filesystem::current_path().string());
     paths.insert(paths.begin() + 1, boost::filesystem::path(absolute_name()).parent_path().string());
 
     for (auto & path : paths)
