@@ -32,6 +32,7 @@
 #include <reaver/logger.h>
 
 #include <include_chain.h>
+#include <utils.h>
 
 namespace reaver
 {
@@ -74,9 +75,7 @@ namespace reaver
             {
                 if (i >= _include_chain.size())
                 {
-                    reaver::logger::dlog(reaver::logger::crash) << "include chain access out of bounds.";
-
-                    std::exit(-2);
+                    throw exception{ crash } << "include chain access out of bounds.";
                 }
 
                 return _include_chain[i];

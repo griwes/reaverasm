@@ -26,11 +26,35 @@
 #include <string>
 #include <memory>
 
+#include <reaver/parser/lexer.h>
+
 #include <assembler.h>
 #include <frontend.h>
 #include <preprocessor/macro.h>
+#include <utils.h>
 
 int main(int argc, char ** argv)
 {
-    reaver::assembler::assembler assembler{ argc, argv };
+    try
+    {
+        reaver::assembler::assembler assembler{ argc, argv };
+    }
+
+    catch (reaver::lexer::unexpected_characters & e)
+    {
+        dlog() << style::style(colors::bred, colors::def, styles::bold) << "Lexer error:" << style::style()
+            << e.what();
+    }
+
+    catch (reaver::assembler::exception & e)
+    {
+        e.print(dlog);
+
+        if (e.level() == crash)
+        {
+            return -2;
+        }
+
+        return -1;
+    }
 }

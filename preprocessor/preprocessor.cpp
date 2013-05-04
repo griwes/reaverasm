@@ -67,10 +67,7 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, incl
 
         if (include_chain.size() > 128)
         {
-            print_include_chain(include_chain);
-            dlog(error) << "maximum include (or macro) depth (128) reached.";
-
-            std::exit(-1);
+            throw exception{ error, include_chain } << "maximum include (or macro) depth (128) reached.";
         }
 
         while (buffer.size() && buffer.back() == '\\')
@@ -81,10 +78,7 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, incl
 
             if (!std::getline(input, next))
             {
-                print_include_chain(include_chain);
-                dlog(error) << "invalid `\\` at the end of file.";
-
-                std::exit(-1);
+                throw exception{ error, include_chain } << "invalid `\\` at the end of file.";
             }
 
             buffer.append(next);
@@ -107,11 +101,9 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, incl
             {
                 if (_defines.find(define->name) != _defines.end())
                 {
-                    print_include_chain(include_chain);
-                    dlog(error) << "macro name `" << style::style(colors::bgray, colors::def, styles::bold) << define->name
-                        << style::style() << "` redefined.";
-                    print_include_chain(_defines[define->name].source());
-                    dlog() << "Note: first defined here.";
+                    throw exception_note{ exception{ error, include_chain } << "macro name `" << style::style(colors::bgray,
+                        colors::def, styles::bold) << define->name << style::style() << "` redefined.", exception{
+                        _defines[define->name].source() } << "Note: first defined here." };
                 }
 
                 if (define->directive == "%define" && !define->args)
@@ -165,10 +157,7 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, incl
 
                 if (begin != tokens.cend())
                 {
-                    print_include_chain(include_chain);
-                    dlog(error) << "junk after %include directive.";
-
-                    std::exit(-1);
+                    throw exception{ error, include_chain } << "junk after %include directive.";
                 }
 
                 if (std::find_if(include_chain.begin(), include_chain.end(), [file](const reaver::assembler::include & i)
@@ -176,11 +165,8 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, incl
                         return file.second == i.name;
                     }) != include_chain.end())
                 {
-                    print_include_chain(include_chain);
-                    dlog(error) << "file " << style::style(colors::white, colors::def, styles::bold) << file.second <<
-                        style::style() << " included recursively.";
-
-                    std::exit(-1);
+                    throw exception{ error, include_chain } << "file " << style::style(colors::white, colors::def, styles::bold)
+                        << file.second << style::style() << " included recursively.";
                 }
 
                 auto new_inc = include_chain;
@@ -200,19 +186,13 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, incl
             {
                 if (begin != tokens.cend())
                 {
-                    print_include_chain(include_chain);
-                    dlog(error) << "junk after %undef directive.";
-
-                    std::exit(-1);
+                    throw exception{ error, include_chain } << "junk after %undef directive.";
                 }
 
                 if (_defines.find(*undef) == _defines.end())
                 {
-                    print_include_chain(include_chain);
-                    dlog(error) << "unknown define: `" << style::style(colors::white, colors::def, styles::bold) << *undef
-                        << style::style() << "`.";
-
-                    std::exit(-1);
+                    throw exception{ error, include_chain } << "unknown define: `" << style::style(colors::white, colors::def,
+                        styles::bold) << *undef << style::style() << "`.";
                 }
 
                 _defines.erase(_defines.find(*undef));
@@ -235,8 +215,7 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, incl
                     error.append((begin++)->as<std::string>());
                 }
 
-                print_include_chain(include_chain);
-                dlog(logger::error) << error;
+                throw exception{ logger::error, include_chain } << error;
             }
         }
 
@@ -266,12 +245,9 @@ std::string reaver::assembler::preprocessor::_apply_defines(std::vector<lexer::t
 
                     if (match->args.size() != macro.parameters().size())
                     {
-                        print_include_chain(inc);
-                        dlog(error) << "wrong number of parameters for macro `" << style::style(colors::white, colors::def,
-                            styles::bold) << macro.name() << style::style() << "`; expected " << macro.parameters().size()
+                        throw exception{ error, inc } << "wrong number of parameters for macro `" << style::style(colors::white,
+                            colors::def, styles::bold) << macro.name() << style::style() << "`; expected " << macro.parameters().size()
                             << ", got " << match->args.size() << ".";
-
-                        std::exit(-1);
                     }
 
                     std::map<std::string, std::string> params;
@@ -296,11 +272,9 @@ std::string reaver::assembler::preprocessor::_apply_defines(std::vector<lexer::t
 
                 else
                 {
-                    print_include_chain(inc);
-                    dlog(error) << "no parameters supplied for macro `" << style::style(colors::white, colors::def, styles::bold)
-                        << macro.name() << style::style() << "` taking " << macro.parameters().size() << " arguments.";
-
-                    std::exit(-1);
+                    throw exception{ error, inc } << "no parameters supplied for macro `" << style::style(colors::white,
+                        colors::def, styles::bold) << macro.name() << style::style() << "` taking " << macro.parameters().size()
+                        << " arguments.";
                 }
             }
 
