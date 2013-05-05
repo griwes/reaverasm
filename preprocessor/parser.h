@@ -61,26 +61,26 @@ namespace reaver
             std::vector<std::string> args;
         };
 
-        enum tokens
+        enum preprocessing_tokens
         {
-            directive,
-            identifier,
-            number,
-            character,
-            string,
-            symbol,
-            whitespace
+            pp_directive,
+            pp_identifier,
+            pp_number,
+            pp_character,
+            pp_string,
+            pp_symbol,
+            pp_whitespace
         };
 
         struct preprocessor_lexer
         {
-            preprocessor_lexer() : directive{ reaver::assembler::directive, "%[a-z]+" },
-                identifier{ reaver::assembler::identifier, "\\.?[a-zA-Z_][a-zA-Z0-9_]*" },
-                number{ reaver::assembler::number, "(0x[0-9a-fA-F]+)|(0b[01]+)|([0-9a-fA-F]+h)|([0-9]*\\.[0-9]*)|([0-9]+)" },
-                character{ reaver::assembler::character, "'.'" },
-                string{ reaver::assembler::string, "\"([^\"\\\\]*(\\.[^\"\\\\]*)*)\"" },
-                symbol{ reaver::assembler::symbol, "[[:punct:]]" },
-                whitespace{ reaver::assembler::whitespace, "[ \t\r\n\v\f]+" }
+            preprocessor_lexer() : directive{ reaver::assembler::pp_directive, "%[a-z]+" },
+                identifier{ reaver::assembler::pp_identifier, "\\.?[a-zA-Z_][a-zA-Z0-9_]*" },
+                number{ reaver::assembler::pp_number, "(0x[0-9a-fA-F]+)|(0b[01]+)|([0-9a-fA-F]+[hH])|([0-9]*\\.[0-9]*)|([0-9]+)" },
+                character{ reaver::assembler::pp_character, "'\\\\?.'" },
+                string{ reaver::assembler::pp_string, "\"([^\"\\\\]*(\\.[^\"\\\\]*)*)\"" },
+                symbol{ reaver::assembler::pp_symbol, "[[:punct:]]" },
+                whitespace{ reaver::assembler::pp_whitespace, "[ \t\r\n\v\f]+" }
             {
                 desc.add(directive)(identifier)(number)(character)(string)(symbol)(whitespace);
             }

@@ -204,11 +204,11 @@ void reaver::assembler::preprocessor::_include_stream(std::istream & input, incl
         {
             begin = tokens.cbegin();
 
-            if (begin->type() == assembler::directive && begin->as<std::string>() == "%error")
+            if (begin->type() == assembler::pp_directive && begin->as<std::string>() == "%error")
             {
                 std::string error;
 
-                while ((++begin)->type() == assembler::whitespace) {}
+                while ((++begin)->type() == assembler::pp_whitespace) {}
 
                 while (begin != tokens.cend())
                 {
