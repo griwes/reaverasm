@@ -4,3 +4,4 @@ rasm
 *output
 *.bin
 *.bin.ref
+*.kate-swp

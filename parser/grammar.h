@@ -52,7 +52,7 @@ namespace reaver
                 symbol{ reaver::assembler::symbol, "[[:punct:]]" },
                 whitespace{ reaver::assembler::symbol, "[ \t\r\n\v\f]+" }
             {
-                desc(identifier)(integer_literal)(fp_literal)(character)(string)(symbol)(whitespace);
+                desc.add(identifier)(integer_literal)(fp_literal)(character)(string)(symbol)(whitespace);
             }
 
             reaver::lexer::token_definition<std::string> identifier;
@@ -77,7 +77,8 @@ namespace reaver
                 string = reaver::parser::token(lex.string);
                 symbol = reaver::parser::token(lex.symbol);
 
-                not_a_register = identifier - (register64 | segment_register | size);
+                not_a_register = identifier - (register64 | segment_register | size | identifier({ "bits", "extern",
+                    "global", "org", "section" }));
                 label_definition = not_a_register >> ~symbol({ ":" });
 
                 size = identifier({ "byte", "word", "dword", "qword" });
@@ -101,11 +102,11 @@ namespace reaver
                     | (-override_size >> not_a_register)) >> *(symbol({ "+", "-", "*", "/" }) > (register64 | integer
                     | (-override_size >> not_a_register))) >> ~symbol({ "]" });
 
-                bits_directive = identifier({ "bits" }) > reaver::parser::token(lex.integer_literal);
-                extern_directive = identifier({ "extern" }) > not_a_register;
-                global_directive = identifier({ "global" }) > not_a_register;
-                org_directive = identifier({ "org" }) > reaver::parser::token(lex.integer_literal);
-                section_directive = identifier({ "section" }) > reaver::parser::token(lex.string);
+                bits_directive = ~identifier({ "bits" }) > reaver::parser::token(lex.integer_literal);
+                extern_directive = ~identifier({ "extern" }) > not_a_register;
+                global_directive = ~identifier({ "global" }) > not_a_register;
+                org_directive = ~identifier({ "org" }) > reaver::parser::token(lex.integer_literal);
+                section_directive = ~identifier({ "section" }) > reaver::parser::token(lex.string);
 
                 skip = reaver::parser::token(lex.whitespace);
             }
