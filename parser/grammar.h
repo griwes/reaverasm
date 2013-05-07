@@ -27,6 +27,10 @@
 
 #include <reaver/parser/parser.h>
 
+#include <cpu/address.h>
+#include <cpu/overrides.h>
+#include <cpu/register.h>
+
 namespace reaver
 {
     namespace assembler
@@ -66,6 +70,100 @@ namespace reaver
             reaver::lexer::tokens_description desc;
         };
 
+        struct integer
+        {
+            integer(boost::optional<std::string> sign, uint64_t val) : positive{ sign ? *sign == "+" : true }, value{ val }
+            {
+            }
+
+            bool positive;
+            uint64_t value;
+        };
+
+        struct ch
+        {
+            ch(std::string str)
+            {
+                if (str[0] != '\\')
+                {
+                    character = str[0];
+                    return;
+                }
+
+                switch (str[1])
+                {
+                    case 'n':
+                        character = '\n';
+                        return;
+                    case 'r':
+                        character = '\r';
+                        return;
+                    case 't':
+                        character = '\t';
+                        return;
+                    case '\\':
+                        character = '\\';
+                        return;
+                    case '\'':
+                        character = '\'';
+                        return;
+                    case 'b':
+                        character = '\b';
+                        return;
+                    default:
+                        throw "invalid escape sequence";
+                }
+            }
+
+            char character;
+        };
+
+        struct str
+        {
+            str(std::string str)
+            {
+                for (uint64_t i = 0; i < str.size(); ++i)
+                {
+                    if (str[i] != '\\')
+                    {
+                        string.push_back(str[i]);
+                        return;
+                    }
+
+                    switch (str[i + 1])
+                    {
+                        case 'n':
+                            string.push_back('\n');
+                            return;
+                        case 'r':
+                            string.push_back('\r');
+                            return;
+                        case 't':
+                            string.push_back('\t');
+                            return;
+                        case '\\':
+                            string.push_back('\\');
+                            return;
+                        case '\'':
+                            string.push_back('\'');
+                            return;
+                        case 'b':
+                            string.push_back('\b');
+                            return;
+                        default:
+                            throw "invalid escape sequence";
+                    }
+
+                    if (i + 1 == str.size())
+                    {
+                        throw "invalid escape sequence";
+                    }
+                }
+            }
+
+            std::string string;
+        };
+
         struct parser
         {
             parser(const reaver::assembler::lexer & lex)
@@ -95,8 +193,8 @@ namespace reaver
                 override_size = size;
 
                 // TODO for addresses: allow additional math operators for assemble-time constants
-                address = ~symbol({ "[" }) >> -override_size >> -override_segment >> (register32 | integer
-                    | (-override_size >> not_a_register)) >> *(symbol({ "+", "-", "*", "/" }) >> (register32 | integer
+                address = ~symbol({ "[" }) >> -override_size >> -override_segment > (register32 | integer
+                    | (-override_size >> not_a_register)) >> *(symbol({ "+", "-", "*", "/" }) > (register32 | integer
                     | (-override_size >> not_a_register))) >> ~symbol({ "]" });
                 address64 = ~symbol({ "[" }) >> -override_size >> -override_segment > (register64 | integer
                     | (-override_size >> not_a_register)) >> *(symbol({ "+", "-", "*", "/" }) > (register64 | integer
