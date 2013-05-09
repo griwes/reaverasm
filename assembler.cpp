@@ -44,16 +44,6 @@ reaver::assembler::assembler::assembler(int argc, char ** argv) : _frontend(argc
         }
     }
 
-    lexer l;
-    parser p{ l };
-
-    for (auto & x : _lines)
-    {
-        std::cout << *x << std::endl;;
-
-        auto t = reaver::lexer::tokenize(*x, l.desc);
-    }
-
 /*    else
     {
         reaver::assembler::parser parser{ _frontend };

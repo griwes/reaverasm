@@ -31,6 +31,8 @@
 #include <cpu/overrides.h>
 #include <cpu/register.h>
 
+#include <utils.h>
+
 namespace reaver
 {
     namespace assembler
@@ -49,7 +51,28 @@ namespace reaver
         struct lexer
         {
             lexer() : identifier{ reaver::assembler::identifier, "\\.?[a-zA-Z_][0-9a-zA-Z_]*" },
-                integer_literal{ reaver::assembler::integer_literal, "(0x[0-9a-fA-F]+)|([0-9a-fA-F]+[hH])|(0b[01]+)|([0-9]+)" },
+                integer_literal{ reaver::assembler::integer_literal, "(0x[0-9a-fA-F]+)|([0-9a-fA-F]+[hH])|(0b[01]+)|([0-9]+)",
+                    [](const std::string & str) -> uint64_t
+                    {
+                        if (str[0] == '0' && str[1] == 'b')
+                        {
+                            std::bitset<64> set{ str.substr(2) };
+                            return set.to_ullong();
+                        }
+
+                        std::stringstream s{ str };
+                        uint64_t a = 0;
+
+                        if ((str[0] == '0' && str[1] == 'x') || str.back() == 'h' || str.back() == 'H')
+                        {
+                            s >> std::hex;
+                        }
+
+                        s >> a;
+
+                        return a;
+                    }
+                },
                 fp_literal{ reaver::assembler::fp_literal, "0.00" },
                 character{ reaver::assembler::character, "'\\\\?.'" },
                 string{ reaver::assembler::string, "\"([^\"\\\\]*(\\.[^\"\\\\]*)*)\"" },
