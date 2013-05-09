@@ -25,25 +25,36 @@
 
 #pragma once
 
+#include <string>
+
 namespace reaver
 {
     namespace assembler
     {
-        class effective_address_operand
+        class mnemonic
         {
         public:
-            template<typename... Ts>
-            effective_address_operand(const Ts &...)
+            mnemonic(std::string)
             {
 
             }
         };
 
-        class effective_address
+        class operand
         {
         public:
             template<typename... Ts>
-            effective_address(const Ts &...)
+            operand(const Ts &...)
+            {
+
+            }
+        };
+
+        class instruction
+        {
+        public:
+            template<typename... Ts>
+            instruction(const Ts &...)
             {
 
             }

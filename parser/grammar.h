@@ -30,6 +30,8 @@
 #include <cpu/address.h>
 #include <cpu/overrides.h>
 #include <cpu/register.h>
+#include <cpu/instruction.h>
+#include <cpu/cpu.h>
 
 #include <utils.h>
 
@@ -215,13 +217,17 @@ namespace reaver
                 override_segment = segment_register >> ~symbol({ ":" });
                 override_size = size;
 
+                override_symbol_size = -override_size >> address_operand;
+                address_operand = register64 | integer | override_symbol_size;
+
                 // TODO for addresses: allow additional math operators for assemble-time constants
-                address = ~symbol({ "[" }) >> -override_size >> -override_segment > (register32 | integer
-                    | (-override_size >> not_a_register)) >> *(symbol({ "+", "-", "*", "/" }) > (register32 | integer
-                    | (-override_size >> not_a_register))) >> ~symbol({ "]" });
-                address64 = ~symbol({ "[" }) >> -override_size >> -override_segment > (register64 | integer
-                    | (-override_size >> not_a_register)) >> *(symbol({ "+", "-", "*", "/" }) > (register64 | integer
-                    | (-override_size >> not_a_register))) >> ~symbol({ "]" });
+                address = -override_size >> ~symbol({ "[" }) >> -override_size >> -override_segment > address_operand >>
+                    *(symbol({ "+", "-", "*", "/" }) > address_operand) >> ~symbol({ "]" });
+
+                instruction_operand = override_symbol_size | address | register64 | integer;
+                instruction_mnemonic = identifier(get_known_mnemonics());
+
+                assembly_instruction = instruction_mnemonic >> -(instruction_operand % symbol({ "," }));
 
                 bits_directive = ~identifier({ "bits" }) > reaver::parser::token(lex.integer_literal);
                 extern_directive = ~identifier({ "extern" }) > not_a_register;
@@ -250,10 +256,16 @@ namespace reaver
 
             // TODO: FP, SSE, AVX and other shenaniganish registers
 
+            reaver::parser::rule<size_overriden_symbol> override_symbol_size;
+            reaver::parser::rule<effective_address_operand> address_operand;
+
             reaver::parser::rule<segment_override> override_segment;
             reaver::parser::rule<size_override> override_size;
-            reaver::parser::rule<effective_address> address; // 16 and 32
-            reaver::parser::rule<effective_address> address64;
+            reaver::parser::rule<effective_address> address;
+
+            reaver::parser::rule<operand> instruction_operand;
+            reaver::parser::rule<mnemonic> instruction_mnemonic;
+            reaver::parser::rule<instruction> assembly_instruction;
 
             // the following should be nullary, and soon will be nullary, but it will require some additional features
             // for `reaver::parser::rule`

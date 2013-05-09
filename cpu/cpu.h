@@ -25,28 +25,16 @@
 
 #pragma once
 
+#include <vector>
+#include <string>
+
 namespace reaver
 {
     namespace assembler
     {
-        class effective_address_operand
+        inline std::vector<std::string> get_known_mnemonics()
         {
-        public:
-            template<typename... Ts>
-            effective_address_operand(const Ts &...)
-            {
-
-            }
-        };
-
-        class effective_address
-        {
-        public:
-            template<typename... Ts>
-            effective_address(const Ts &...)
-            {
-
-            }
-        };
+            return {};
+        }
     }
 }

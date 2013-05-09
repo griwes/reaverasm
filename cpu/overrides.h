@@ -48,5 +48,15 @@ namespace reaver
 
             }
         };
+
+        class size_overriden_symbol
+        {
+        public:
+            template<typename... Ts>
+            size_overriden_symbol(const Ts &...)
+            {
+
+            }
+        };
     }
 }
