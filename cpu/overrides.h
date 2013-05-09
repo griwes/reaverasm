@@ -25,38 +25,18 @@
 
 #pragma once
 
+#include <string>
+
+#include <boost/optional.hpp>
+
 namespace reaver
 {
     namespace assembler
     {
-        class size_override
+        struct size_overriden_identifier
         {
-        public:
-            template<typename... Ts>
-            size_override(const Ts &...)
-            {
-
-            }
-        };
-
-        class segment_override
-        {
-        public:
-            template<typename... Ts>
-            segment_override(const Ts &...)
-            {
-
-            }
-        };
-
-        class size_overriden_symbol
-        {
-        public:
-            template<typename... Ts>
-            size_overriden_symbol(const Ts &...)
-            {
-
-            }
+            boost::optional<std::string> size_override;
+            std::string name;
         };
     }
 }

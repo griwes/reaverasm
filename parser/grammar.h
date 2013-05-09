@@ -97,12 +97,44 @@ namespace reaver
 
         struct integer
         {
-            integer(boost::optional<std::string> sign, uint64_t val) : positive{ sign ? *sign == "+" : true }, value{ val }
+            integer(boost::optional<std::string> s, boost::optional<std::string> sign, uint64_t val)
+                : positive{ sign ? *sign == "+" : true }, value{ val }
             {
+                if (!s)
+                {
+                    return;
+                }
+
+                if (*s == "byte")
+                {
+                    size = byte;
+                }
+
+                else if (*s == "word")
+                {
+                    size = word;
+                }
+
+                else if (*s == "dword")
+                {
+                    size = dword;
+                }
+
+                else if (*s == "qword")
+                {
+                    size = qword;
+                }
             }
 
             bool positive;
             uint64_t value;
+            enum
+            {
+                byte,
+                word,
+                dword,
+                qword
+            } size;
         };
 
         struct ch
@@ -194,37 +226,32 @@ namespace reaver
             parser(const reaver::assembler::lexer & lex)
             {
                 identifier = reaver::parser::token(lex.identifier);
-                integer = -symbol({ "+", "-" }) >> reaver::parser::token(lex.integer_literal);
+                integer = -override_size >> -symbol({ "+", "-" }) >> reaver::parser::token(lex.integer_literal);
                 fp = reaver::parser::token(lex.fp_literal);
                 character = reaver::parser::token(lex.character);
                 string = reaver::parser::token(lex.string);
                 symbol = reaver::parser::token(lex.symbol);
 
-                not_a_register = identifier - (register64 | segment_register | size | identifier({ "bits", "extern",
+                not_a_register = identifier - (cpureg | segment_register | size | identifier({ "bits", "extern",
                     "global", "org", "section" }));
                 label_definition = not_a_register >> ~symbol({ ":" });
 
                 size = identifier({ "byte", "word", "dword", "qword" });
-                register16 = identifier({ "al", "ah", "bl", "bh", "cl", "ch", "dl", "dh", "ax", "bx", "cx", "dx",
-                    "bp", "sp", "di", "si" });
-                register32 = identifier({ "eax", "ebx", "ecx", "edx", "ebp", "esp", "esi", "edi" }) | register16;
-                register64 = identifier({ "rax", "rbx", "rcx", "rdx", "rbp", "rsp", "rsi", "rdi", "r8", "r9", "r10",
-                    "r11", "r12", "r13", "r14", "r15", "r8b", "r9b", "r10b", "r11b", "r12b", "r13b", "r14b", "r15b",
-                    "r8w", "r9w", "r10w", "r11w", "r12w", "r13w", "r14w", "r15w", "r8d", "r9d", "r10d", "r11d", "r12d",
-                    "r13d", "r14d", "r15d" }) | register32;
-                segment_register = identifier({ "cs", "ds", "es", "fs", "gs", "ss" });
+                cpureg = identifier(byte_registers()) | identifier(word_registers()) | identifier(dword_registers())
+                    | identifier(qword_registers());
+                segment_register = identifier(segment_registers());
 
                 override_segment = segment_register >> ~symbol({ ":" });
                 override_size = size;
 
-                override_symbol_size = -override_size >> address_operand;
-                address_operand = register64 | integer | override_symbol_size;
+                override_symbol_size = -override_size >> not_a_register;
+                address_operand = cpureg | integer | override_symbol_size;
 
                 // TODO for addresses: allow additional math operators for assemble-time constants
                 address = -override_size >> ~symbol({ "[" }) >> -override_size >> -override_segment > address_operand >>
                     *(symbol({ "+", "-", "*", "/" }) > address_operand) >> ~symbol({ "]" });
 
-                instruction_operand = override_symbol_size | address | register64 | integer;
+                instruction_operand = override_symbol_size | address | cpureg | integer;
                 instruction_mnemonic = identifier(get_known_mnemonics());
 
                 assembly_instruction = instruction_mnemonic >> -(instruction_operand % symbol({ "," }));
@@ -249,18 +276,16 @@ namespace reaver
             reaver::parser::rule<std::string> label_definition;
 
             reaver::parser::rule<std::string> size;
-            reaver::parser::rule<cpu_register> register16;
-            reaver::parser::rule<cpu_register> register32;
-            reaver::parser::rule<cpu_register> register64;
+            reaver::parser::rule<cpu_register> cpureg;
             reaver::parser::rule<cpu_register> segment_register;
 
             // TODO: FP, SSE, AVX and other shenaniganish registers
 
-            reaver::parser::rule<size_overriden_symbol> override_symbol_size;
+            reaver::parser::rule<size_overriden_identifier> override_symbol_size;
             reaver::parser::rule<effective_address_operand> address_operand;
 
-            reaver::parser::rule<segment_override> override_segment;
-            reaver::parser::rule<size_override> override_size;
+            reaver::parser::rule<cpu_register> override_segment;
+            reaver::parser::rule<std::string> override_size;
             reaver::parser::rule<effective_address> address;
 
             reaver::parser::rule<operand> instruction_operand;
