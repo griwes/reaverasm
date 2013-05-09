@@ -31,7 +31,12 @@ namespace reaver
     {
         class cpu_register
         {
+        public:
+            template<typename... Ts>
+            cpu_register(const Ts &...)
+            {
 
+            }
         };
     }
 }

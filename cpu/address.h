@@ -31,7 +31,12 @@ namespace reaver
     {
         class effective_address
         {
+        public:
+            template<typename... Ts>
+            effective_address(const Ts &...)
+            {
 
+            }
         };
     }
 }

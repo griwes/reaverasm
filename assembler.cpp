@@ -27,7 +27,7 @@
 
 #include <assembler.h>
 #include <preprocessor/preprocessor.h>
-//#include <parser/parser.h>
+#include <parser/grammar.h>
 
 reaver::assembler::assembler::assembler(int argc, char ** argv) : _frontend(argc, argv)
 {
@@ -42,6 +42,16 @@ reaver::assembler::assembler::assembler(int argc, char ** argv) : _frontend(argc
         {
             _frontend.output() << *x << std::endl;
         }
+    }
+
+    lexer l;
+    parser p{ l };
+
+    for (auto & x : _lines)
+    {
+        std::cout << *x << std::endl;;
+
+        auto t = reaver::lexer::tokenize(*x, l.desc);
     }
 
 /*    else

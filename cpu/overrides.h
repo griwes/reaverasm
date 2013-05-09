@@ -31,12 +31,22 @@ namespace reaver
     {
         class size_override
         {
+        public:
+            template<typename... Ts>
+            size_override(const Ts &...)
+            {
 
+            }
         };
 
         class segment_override
         {
+        public:
+            template<typename... Ts>
+            segment_override(const Ts &...)
+            {
 
+            }
         };
     }
 }

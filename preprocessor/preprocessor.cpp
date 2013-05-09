@@ -47,11 +47,6 @@ std::vector<reaver::assembler::line> reaver::assembler::preprocessor::preprocess
 
     _include_stream(input, include_chain);
 
-    for (auto & x : _lines)
-    {
-        dlog() << *x;
-    }
-
     return _lines;
 }
 

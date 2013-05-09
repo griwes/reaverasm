@@ -49,12 +49,12 @@ namespace reaver
         struct lexer
         {
             lexer() : identifier{ reaver::assembler::identifier, "\\.?[a-zA-Z_][0-9a-zA-Z_]*" },
-                integer_literal{ reaver::assembler::integer_literal, "(0x[0-9a-fA-F]+)|([0-9a-fA-F]+[hH])|(0b[01]+)|[0-9]+)" },
-                fp_literal{ reaver::assembler::fp_literal, "" },
+                integer_literal{ reaver::assembler::integer_literal, "(0x[0-9a-fA-F]+)|([0-9a-fA-F]+[hH])|(0b[01]+)|([0-9]+)" },
+                fp_literal{ reaver::assembler::fp_literal, "0.00" },
                 character{ reaver::assembler::character, "'\\\\?.'" },
                 string{ reaver::assembler::string, "\"([^\"\\\\]*(\\.[^\"\\\\]*)*)\"" },
                 symbol{ reaver::assembler::symbol, "[[:punct:]]" },
-                whitespace{ reaver::assembler::symbol, "[ \t\r\n\v\f]+" }
+                whitespace{ reaver::assembler::whitespace, "[ \t\r\n\v\f]+" }
             {
                 desc.add(identifier)(integer_literal)(fp_literal)(character)(string)(symbol)(whitespace);
             }

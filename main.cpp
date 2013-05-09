@@ -42,7 +42,7 @@ int main(int argc, char ** argv)
 
     catch (reaver::lexer::unexpected_characters & e)
     {
-        dlog() << style::style(colors::bred, colors::def, styles::bold) << "Lexer error:" << style::style()
+        dlog() << style::style(colors::bred, colors::def, styles::bold) << "Lexer error: " << style::style()
             << e.what();
     }
 
