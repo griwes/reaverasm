@@ -34,9 +34,24 @@ namespace reaver
     {
         inline const std::vector<std::string> & long_mode_registers()
         {
-            static std::vector<std::string> ret = { "r8", "r8b", "r8w", "r8d", "r9", "r9b", "r9w", "r9d", "r10", "r10b",
-                "r10w", "r10d", "r11", "r11b", "r11w", "r11d", "r12", "r12b", "r12w", "r12d", "r13", "r13b", "r13w",
-                "r13d", "r14", "r14b", "r14w", "r14d", "r15", "r15b", "r15w", "r15d" };
+            static std::vector<std::string> ret = { "r8", "r8b", "r8l", "r8w", "r8d", "r9", "r9b", "r9l", "r9w", "r9d",
+                "r10", "r10b", "r10l", "r10w", "r10d", "r11", "r11b", "r11l", "r11w", "r11d", "r12", "r12b", "r12l",
+                "r12w", "r12d", "r13", "r13b", "r13l", "r13w", "r13d", "r14", "r14b", "r14l", "r14w", "r14d", "r15",
+                "r15b", "r15l", "r15w", "r15d", "spl", "bpl", "sil", "dil" };
+
+            return ret;
+        }
+
+        inline const std::vector<std::string> & rex_enforce_registers()
+        {
+            static std::vector<std::string> ret = { "spl", "bpl", "sil", "dil" };
+
+            return ret;
+        }
+
+        inline const std::vector<std::string> & rex_disable_registers()
+        {
+            static std::vector<std::string> ret = { "ah", "bh", "ch", "dh" };
 
             return ret;
         }
@@ -44,7 +59,8 @@ namespace reaver
         inline const std::vector<std::string> & byte_registers()
         {
             static std::vector<std::string> ret = { "ah", "al", "bh", "bl", "ch", "cl", "dh", "dl", "spl", "bpl", "sil",
-                "dil", "r8b", "r9b", "r10b", "r11b", "r12b", "r13b", "r14b", "r15b" };
+                "dil", "r8b", "r8l", "r9b", "r9l", "r10b", "r10l", "r11b", "r11l", "r12b", "r12l", "r13b", "r13l", "r14b",
+                "r15b", "r15l" };
 
             return ret;
         }

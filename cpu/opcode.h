@@ -25,66 +25,18 @@
 
 #pragma once
 
-#include <vector>
-#include <string>
-#include <map>
-
-#include <cpu/opcode.h>
-
 namespace reaver
 {
     namespace assembler
     {
-        enum mode
+        class opcode
         {
-            bits16,
-            bits32,
-            bits64,
-            mode16,
-            mode32,
-            all
-        };
+        public:
+            template<typename... Ts>
+            opcode(const Ts &...)
+            {
 
-        enum operand_type
-        {
-            rel8,
-            rel16,
-            rel32,
-            ptr16_16,
-            ptr16_32,
-            r8,
-            r16,
-            r32,
-            r64,
-            imm8,
-            imm16,
-            imm32,
-            imm64,
-            rm8,
-            rm16,
-            rm32,
-            rm64,
-            m,
-            m8,
-            m16,
-            m32,
-            m64,
-            m128,
-            m16_16,
-            m16_32,
-            m16_64,
-            moffs8,
-            moffs16,
-            moffs32,
-            moffs64,
-            sreg,
-            al,
-            ax,
-            eax,
-            rax
+            }
         };
-
-        const std::multimap<std::string, opcode> & get_opcodes();
-        const std::vector<std::string> & get_known_mnemonics();
     }
 }
