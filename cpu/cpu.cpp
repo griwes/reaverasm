@@ -116,6 +116,68 @@ const std::multimap<std::string, reaver::assembler::opcode> & reaver::assembler:
         _add("bts", { rm16, imm8 }, { all, mode16 }, { 0x0F, 0xBA }, 0, 5, true);
         _add("bts", { rm32, imm8 }, { all, mode32 }, { 0x0F, 0xBA }, 0, 5, true);
         _add("bts", { rm64, imm8 }, { bits64 }, { 0x48, 0x0F, 0xBA }, 0, 5, true);
+
+        _add("call", { rel16 }, { bits16, bits32, mode16 }, { 0xE8 }, 0);
+        _add("call", { rel32 }, { all, mode32 }, { 0xE8 }, 0);
+        _add("call", { rm16 }, { bits16, bits32, mode16 }, { 0xFF }, 0, 2, true);
+        _add("call", { rm32 }, { bits16, bits32, mode32 }, { 0xFF }, 0, 2, true);
+        _add("call", { rm64 }, { bits64 }, { 0xFF }, 0, 2, true);
+        _add("call", { ptr16_16 }, { bits16, bits32, mode16 }, { 0x9A });
+        _add("call", { ptr16_32 }, { bits16, bits32, mode32 }, { 0x9A });
+        _add("call", { m16_16 }, { all, mode16 }, { 0xFF }, 0, 3, true);
+        _add("call", { m16_32 }, { all, mode32 }, { 0xFF }, 0, 3, true);
+        _add("call", { m16_64 }, { bits64 }, { 0x48, 0xFF }, 0, 3, true);
+
+        _add("clc", {}, { all }, { 0xF8 });
+        _add("cld", {}, { all }, { 0xFC });
+        _add("cli", {}, { all }, { 0xFA });
+        _add("clts", {}, { all }, { 0x0F, 0x06 });
+        _add("cmc", {}, { all }, { 0xF5 });
+
+        _add("cmp", { al, imm8 }, { all }, { 0x3C });
+        _add("cmp", { ax, imm16 }, { all, mode16 }, { 0x3D });
+        _add("cmp", { eax, imm32 }, { all, mode32 }, { 0x3D });
+        _add("cmp", { rax, imm64 }, { bits64 }, { 0x48, 0x3D });
+        _add("cmp", { rm8, imm8 }, { all }, { 0x80 }, 0, 7, true);
+        _add("cmp", { rm8, imm8 }, { bits64 }, { 0x40, 0x80 }, 0, 7, true);
+        _add("cmp", { rm16, imm16 }, { all, mode16 }, { 0x81 }, 0, 7, true);
+        _add("cmp", { rm32, imm32 }, { all, mode32 }, { 0x81 }, 0, 7, true);
+        _add("cmp", { rm64, imm32 }, { bits64 }, { 0x48, 0x81 }, 0, 7, true);
+        _add("cmp", { rm16, imm8 }, { all, mode16 }, { 0x83 }, 0, 7, true);
+        _add("cmp", { rm32, imm8 }, { all, mode32 }, { 0x83 }, 0, 7, true);
+        _add("cmp", { rm64, imm8 }, { bits64 }, { 0x40, 0x83 }, 0, 7, true);
+        _add("cmp", { rm8, r8 }, { all }, { 0x38 }, 0, 1);
+        _add("cmp", { rm8, r8 }, { bits64 }, { 0x38 }, 0, 1);
+        _add("cmp", { rm16, r16 }, { all, mode16 }, { 0x39 }, 0, 1);
+        _add("cmp", { rm32, r32 }, { all, mode32 }, { 0x39 }, 0, 1);
+        _add("cmp", { rm64, r64 }, { bits64 }, { 0x48, 0x39 }, 0, 1);
+        _add("cmp", { r8, rm8 }, { all }, { 0x3A }, 1, 0);
+        _add("cmp", { r8, rm8 }, { bits64 }, { 0x3A }, 1, 0);
+        _add("cmp", { r16, rm16 }, { all, mode16 }, { 0x3B }, 1, 0);
+        _add("cmp", { r32, rm32 }, { all, mode32 }, { 0x3B }, 1, 0);
+        _add("cmp", { r64, rm64 }, { bits64 }, { 0x48, 0x3B }, 1, 0);
+
+        _add("cmpxchg", { rm8, r8 }, { all }, { 0x0F, 0xB0 }, 0, 1);
+        _add("cmpxchg", { rm8, r8 }, { bits64 }, { 0x40, 0x0F, 0xB0 }, 0, 1);
+        _add("cmpxchg", { rm16, r16 }, { all, mode16 }, { 0x0F, 0xB1 }, 0, 1);
+        _add("cmpxchg", { rm32, r32 }, { all, mode32 }, { 0x0F, 0xB1 }, 0, 1);
+        _add("cmpxchg", { rm64, r64 }, { bits64 }, { 0x48, 0x0F, 0xB1 }, 0, 1);
+
+        _add("cpuid", {}, { all }, { 0x0F, 0xA2 });
+
+        _add("dec", { rm8 }, { all }, { 0xFE }, 0, 1, true);
+        _add("dec", { rm8 }, { bits64 }, { 0x40, 0xFE }, 0, 1, true);
+        _add("dec", { rm16 }, { all, mode16 }, { 0xFF }, 0, 1, true);
+        _add("dec", { rm32 }, { all, mode32 }, { 0xFF }, 0, 1, true);
+        _add("dec", { rm64 }, { bits64 }, { 0x40, 0xFF }, 0, 1, true);
+        _add("dec", { r16 }, { bits16, bits32, mode16, rw }, { 0x48 });
+        _add("dec", { r32 }, { bits16, bits32, mode32, rd }, { 0x48 });
+
+        _add("div", { rm8 }, { all }, { 0xF6 }, 0, 6, true);
+        _add("div", { rm8 }, { bits64 }, { 0x40, 0xF6 }, 0, 6, true);
+        _add("div", { rm16 }, { all, mode16 }, { 0xF7 }, 0, 6, true);
+        _add("div", { rm32 }, { all, mode32 }, { 0xF7 }, 0, 6, true);
+        _add("div", { rm64 }, { bits64 }, { 0x40, 0xF7 }, 0, 6, true);
     }
 
     return _opcodes;
