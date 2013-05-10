@@ -178,6 +178,51 @@ const std::multimap<std::string, reaver::assembler::opcode> & reaver::assembler:
         _add("div", { rm16 }, { all, mode16 }, { 0xF7 }, 0, 6, true);
         _add("div", { rm32 }, { all, mode32 }, { 0xF7 }, 0, 6, true);
         _add("div", { rm64 }, { bits64 }, { 0x40, 0xF7 }, 0, 6, true);
+
+        _add("hlt", {}, { all }, { 0xF4 });
+
+        _add("idiv", { rm8 }, { all }, { 0xF6 }, 0, 7, true);
+        _add("idiv", { rm8 }, { bits64 }, { 0x40, 0xF6 }, 0, 7, true);
+        _add("idiv", { rm16 }, { all, mode16 }, { 0xF7 }, 0, 7, true);
+        _add("idiv", { rm32 }, { all, mode32 }, { 0xF7 }, 0, 7, true);
+        _add("idiv", { rm64 }, { bits64 }, { 0x40, 0xF7 }, 0, 7, true);
+
+        _add("imul", { rm8 }, { all }, { 0xF6 }, 0, 5, true);
+        _add("imul", { rm16 }, { all, mode16 }, { 0xF7 }, 0, 5, true);
+        _add("imul", { rm32 }, { all, mode32 }, { 0xF7 }, 0, 5, true);
+        _add("imul", { rm64 }, { bits64 }, { 0x48, 0xF7 }, 0, 5, true);
+        _add("imul", { r16, rm16 }, { all, mode16 }, { 0x0F, 0xAF }, 1, 0);
+        _add("imul", { r32, rm32 }, { all, mode32 }, { 0x0F, 0xAF }, 1, 0);
+        _add("imul", { r64, rm64 }, { bits64 }, { 0x48, 0x0F, 0xAF }, 1, 0);
+        _add("imul", { r16, rm16, imm8 }, { all, mode16 }, { 0x6B }, 1, 0);
+        _add("imul", { r32, rm32, imm8 }, { all, mode32 }, { 0x6B }, 1, 0);
+        _add("imul", { r64, rm64, imm8 }, { bits64 }, { 0x48, 0x6B }, 1, 0);
+        _add("imul", { r16, rm16, imm16 }, { all, mode16 }, { 0x69 }, 1, 0);
+        _add("imul", { r32, rm32, imm32 }, { all, mode32 }, { 0x69 }, 1, 0);
+        _add("imul", { r64, rm64, imm32 }, { bits64 }, { 0x48, 0x69 }, 1, 0);
+
+        _add("in", { al, imm8 }, { all }, { 0xE4 });
+        _add("in", { ax, imm8 }, { all, mode16 }, { 0xE5 });
+        _add("in", { eax, imm8 }, { all, mode32 }, { 0xE5 });
+        _add("in", { al, dx }, { all }, { 0xEC });
+        _add("in", { ax, dx }, { all, mode16 }, { 0xED });
+        _add("in", { eax, dx }, { all, mode32 }, { 0xED });
+
+        _add("inc", { rm8 }, { all }, { 0xFE }, 0, 0, true);
+        _add("inc", { rm8 }, { bits64 }, { 0x40, 0xFE }, 0, 0, true);
+        _add("inc", { rm16 }, { all, mode16 }, { 0xFF }, 0, 0, true);
+        _add("inc", { rm32 }, { all, mode32 }, { 0xFF }, 0, 0, true);
+        _add("inc", { rm64 }, { bits64 }, { 0x40, 0xFF }, 0, 0, true);
+        _add("inc", { r16 }, { bits16, bits32, mode16, rw }, { 0x40 });
+        _add("inc", { r32 }, { bits16, bits32, mode32, rd }, { 0x40 });
+
+        _add("int3", {}, { all }, { 0xCC });
+        _add("int", { imm8 }, { all }, { 0xCD });
+        _add("into", {}, { all }, { 0xCE });
+
+        _add("iret", {}, { all }, { 0xCF });
+        _add("iretd", {}, { all }, { 0xCF });
+        _add("iretq", {}, { all }, { 0x48, 0xCF });
     }
 
     return _opcodes;

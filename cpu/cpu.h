@@ -42,6 +42,10 @@ namespace reaver
             bits64,
             mode16,
             mode32,
+            rb,
+            rw,
+            rd,
+            ro,
             all
         };
 
@@ -82,10 +86,7 @@ namespace reaver
             ax,
             eax,
             rax,
-            rb,
-            rw,
-            rd,
-            ro
+            dx
         };
 
         const std::multimap<std::string, opcode> & get_opcodes();
