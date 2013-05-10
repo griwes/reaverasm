@@ -88,6 +88,34 @@ const std::multimap<std::string, reaver::assembler::opcode> & reaver::assembler:
         _add("and", { r16, rm16 }, { all, mode16 }, { 0x23 }, 1, 0);
         _add("and", { r32, rm32 }, { all, mode32 }, { 0x23 }, 1, 0);
         _add("and", { r64, rm64 }, { bits64 }, { 0x48, 0x23 }, 1, 0);
+
+        _add("bt", { rm16, r16 }, { all, mode16 }, { 0x0F, 0xA3 }, 0, 1);
+        _add("bt", { rm32, r32 }, { all, mode32 }, { 0x0F, 0xA3 }, 0, 1);
+        _add("bt", { rm64, r64 }, { bits64 }, { 0x48, 0x0F, 0xA3 }, 0, 1);
+        _add("bt", { rm16, imm8 }, { all, mode16 }, { 0x0F, 0xBA }, 0, 4, true);
+        _add("bt", { rm32, imm8 }, { all, mode32 }, { 0x0F, 0xBA }, 0, 4, true);
+        _add("bt", { rm64, imm8 }, { bits64 }, { 0x48, 0x0F, 0xBA }, 0, 4, true);
+
+        _add("btc", { rm16, r16 }, { all, mode16 }, { 0x0F, 0xBB }, 0, 1);
+        _add("btc", { rm32, r32 }, { all, mode32 }, { 0x0F, 0xBB }, 0, 1);
+        _add("btc", { rm64, r64 }, { bits64 }, { 0x48, 0x0F, 0xBB }, 0, 1);
+        _add("btc", { rm16, imm8 }, { all, mode16 }, { 0x0F, 0xBA }, 0, 7, true);
+        _add("btc", { rm32, imm8 }, { all, mode32 }, { 0x0F, 0xBA }, 0, 7, true);
+        _add("btc", { rm64, imm8 }, { bits64 }, { 0x48, 0x0F, 0xBA }, 0, 7, true);
+
+        _add("btr", { rm16, r16 }, { all, mode16 }, { 0x0F, 0xB3 }, 0, 1);
+        _add("btr", { rm32, r32 }, { all, mode32 }, { 0x0F, 0xB3 }, 0, 1);
+        _add("btr", { rm64, r64 }, { bits64 }, { 0x48, 0x0F, 0xB3 }, 0, 1);
+        _add("btr", { rm16, imm8 }, { all, mode16 }, { 0x0F, 0xBA }, 0, 6, true);
+        _add("btr", { rm32, imm8 }, { all, mode32 }, { 0x0F, 0xBA }, 0, 6, true);
+        _add("btr", { rm64, imm8 }, { bits64 }, { 0x48, 0x0F, 0xBA }, 0, 6, true);
+
+        _add("bts", { rm16, r16 }, { all, mode16 }, { 0x0F, 0xAB }, 0, 1);
+        _add("bts", { rm32, r32 }, { all, mode32 }, { 0x0F, 0xAB }, 0, 1);
+        _add("bts", { rm64, r64 }, { bits64 }, { 0x48, 0x0F, 0xAB }, 0, 1);
+        _add("bts", { rm16, imm8 }, { all, mode16 }, { 0x0F, 0xBA }, 0, 5, true);
+        _add("bts", { rm32, imm8 }, { all, mode32 }, { 0x0F, 0xBA }, 0, 5, true);
+        _add("bts", { rm64, imm8 }, { bits64 }, { 0x48, 0x0F, 0xBA }, 0, 5, true);
     }
 
     return _opcodes;
