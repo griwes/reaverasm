@@ -94,7 +94,12 @@ namespace reaver
             rax,
             dx,
             r16m16,
-            r32m16
+            r32m16,
+            ds,
+            es,
+            fs,
+            gs,
+            ss
         };
 
         const std::multimap<std::string, opcode> & get_opcodes();

@@ -407,7 +407,92 @@ const std::multimap<std::string, reaver::assembler::opcode> & reaver::assembler:
         _add("mov", { dreg, r32 }, { bits16, bits32 }, { 0xF0, 0x23 }, 1, 0);
         _add("mov", { dreg, r64 }, { bits64 }, { 0xF0, 0x23 }, 1, 0);
 
+        _add("movzx", { r16, rm8 }, { all, mode16 }, { 0x0F, 0xB6 }, 1, 0);
+        _add("movzx", { r32, rm8 }, { all, mode32 }, { 0x0F, 0xB6 }, 1, 0);
+        _add("movzx", { r64, rm8 }, { bits64, rexw }, { 0x0F, 0xB6 }, 1, 0);
+        _add("movzx", { r32, rm16 }, { all }, { 0x0F, 0xB7 }, 1, 0);
+        _add("movzx", { r64, rm16 }, { bits64, rexw }, { 0x0F, 0xB7 }, 1, 0);
 
+        _add("mul", { rm8 }, { all }, { 0xF6 }, 0, 4, true);
+        _add("mul", { rm8 }, { bits64, rex }, { 0xF6 }, 0, 4, true);
+        _add("mul", { rm16 }, { all, mode16 }, { 0xF7 }, 0, 4, true);
+        _add("mul", { rm32 }, { all, mode32 }, { 0xF7 }, 0, 4, true);
+        _add("mul", { rm64 }, { bits64, rexw }, { 0xF7 }, 0, 4, true);
+
+        _add("mul", { rm8 }, { all }, { 0xF6 }, 0, 3, true);
+        _add("mul", { rm8 }, { bits64, rex }, { 0xF6 }, 0, 3, true);
+        _add("mul", { rm16 }, { all, mode16 }, { 0xF7 }, 0, 3, true);
+        _add("mul", { rm32 }, { all, mode32 }, { 0xF7 }, 0, 3, true);
+        _add("mul", { rm64 }, { bits64, rexw }, { 0xF7 }, 0, 3, true);
+
+        _add("nop", {}, { all }, { 0x90 });
+        _add("nop", { rm16 }, { all, mode16 }, { 0x0F, 0x1F }, 0, 0, true);
+        _add("nop", { rm32 }, { all, mode32 }, { 0x0F, 0x1F }, 0, 0, true);
+
+        _add("mul", { rm8 }, { all }, { 0xF6 }, 0, 2, true);
+        _add("mul", { rm8 }, { bits64, rex }, { 0xF6 }, 0, 2, true);
+        _add("mul", { rm16 }, { all, mode16 }, { 0xF7 }, 0, 2, true);
+        _add("mul", { rm32 }, { all, mode32 }, { 0xF7 }, 0, 2, true);
+        _add("mul", { rm64 }, { bits64, rexw }, { 0xF7 }, 0, 2, true);
+
+        _add("or", { al, imm8 }, { all }, { 0x0C });
+        _add("or", { ax, imm16 }, { all, mode16 }, { 0x0D });
+        _add("or", { eax, imm32 }, { all, mode32 }, { 0x0D });
+        _add("or", { rax, imm64 }, { bits64, rexw }, { 0x0D });
+        _add("or", { rm8, imm8 }, { all }, { 0x80 }, 0, 1, true);
+        _add("or", { rm8, imm8 }, { bits64, rex }, { 0x80 }, 0, 1, true);
+        _add("or", { rm16, imm16 }, { all, mode16 }, { 0x81 }, 0, 1, true);
+        _add("or", { rm32, imm32 }, { all, mode32 }, { 0x81 }, 0, 1, true);
+        _add("or", { rm64, imm32 }, { bits64, rexw }, { 0x81 }, 0, 1, true);
+        _add("or", { rm16, imm8 }, { all, mode16 }, { 0x83 }, 0, 1, true);
+        _add("or", { rm32, imm8 }, { all, mode32 }, { 0x83 }, 0, 1, true);
+        _add("or", { rm64, imm8 }, { bits64, rex }, { 0x83 }, 0, 1, true);
+        _add("or", { rm8, r8 }, { all }, { 0x08 }, 0, 1);
+        _add("or", { rm8, r8 }, { bits64 }, { 0x08 }, 0, 1);
+        _add("or", { rm16, r16 }, { all, mode16 }, { 0x09 }, 0, 1);
+        _add("or", { rm32, r32 }, { all, mode32 }, { 0x09 }, 0, 1);
+        _add("or", { rm64, r64 }, { bits64, rexw }, { 0x09 }, 0, 1);
+        _add("or", { r8, rm8 }, { all }, { 0x0A }, 1, 0);
+        _add("or", { r8, rm8 }, { bits64 }, { 0x0A }, 1, 0);
+        _add("or", { r16, rm16 }, { all, mode16 }, { 0x0B }, 1, 0);
+        _add("or", { r32, rm32 }, { all, mode32 }, { 0x0B }, 1, 0);
+        _add("or", { r64, rm64 }, { bits64, rexw }, { 0x0B }, 1, 0);
+
+        _add("out", { imm8, al }, { all }, { 0xE6 });
+        _add("out", { imm8, ax }, { all, mode16 }, { 0xE7 });
+        _add("out", { imm8, eax }, { all, mode32 }, { 0xE7 });
+        _add("out", { dx, al }, { all }, { 0xEE });
+        _add("out", { dx, ax }, { all, mode16 }, { 0xEF });
+        _add("out", { dx, eax }, { all, mode32 }, { 0xEF });
+
+        _add("pause", {}, { all }, { 0xF3, 0x90 });
+
+        _add("pop", { rm16 }, { all, mode16 }, { 0x8F }, 0);
+        _add("pop", { rm32 }, { bits16, bits32, mode32 }, { 0x8F }, 0);
+        _add("pop", { rm64 }, { bits64 }, { 0x8F }, 0);
+        _add("pop", { r16 }, { all, rw }, { 0x58 });
+        _add("pop", { r32 }, { bits16, bits32, rd }, { 0x58 });
+        _add("pop", { r64 }, { bits64, rd }, { 0x58 });
+        _add("pop", { ds }, { bits16, bits32 }, { 0x1F });
+        _add("pop", { es }, { bits16, bits32 }, { 0x07 });
+        _add("pop", { ss }, { bits16, bits32 }, { 0x17 });
+        _add("pop", { fs }, { bits64 }, { 0x0F, 0xA1 });
+        _add("pop", { fs }, { all, mode16 }, { 0x0F, 0xA1 });
+        _add("pop", { fs }, { bits16, bits32, mode32 }, { 0x0F, 0xA1 });
+        _add("pop", { gs }, { bits64 }, { 0x0F, 0xA9 });
+        _add("pop", { gs }, { all, mode16 }, { 0x0F, 0xA9 });
+        _add("pop", { gs }, { bits16, bits32, mode32 }, { 0x0F, 0xA9 });
+
+        _add("popa", {}, { bits16, bits32, mode16 }, { 0x61 });
+        _add("popad", {}, { bits16, bits32, mode32 }, { 0x61 });
+
+        _add("rdtsc", {}, { all }, { 0x0F, 0x31 });
+        _add("rdtscp", {}, { all }, { 0x0F, 0x01, 0xF9 });
+
+        _add("ret", {}, { all }, { 0xC3 });
+        _add("retf", {}, { all }, { 0xCB });
+        _add("ret", { imm16 }, { all }, { 0xC2 });
+        _add("ret", { imm32 }, { all }, { 0xCA });
     }
 
     return _opcodes;
