@@ -48,6 +48,7 @@ namespace reaver
             ro,
             rex,
             rexw,
+            rexr,
             all
         };
 
@@ -84,6 +85,9 @@ namespace reaver
             moffs32,
             moffs64,
             sreg,
+            creg,
+            dreg,
+            cr8,
             al,
             ax,
             eax,

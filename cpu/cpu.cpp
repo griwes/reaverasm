@@ -372,6 +372,42 @@ const std::multimap<std::string, reaver::assembler::opcode> & reaver::assembler:
         _add("mov", { rm16, sreg }, { all }, { 0x8C }, 0, 1);
         _add("mov", { rm32, sreg }, { all }, { 0x8C }, 0, 1);
         _add("mov", { rm64, sreg }, { bits64, rexw }, { 0x8C }, 0, 1);
+        _add("mov", { sreg, rm16 }, { all }, { 0x8E }, 1, 0);
+        _add("mov", { sreg, rm32 }, { all }, { 0x8E }, 1, 0);
+        _add("mov", { sreg, rm64 }, { bits64, rexw }, { 0x8E }, 1, 0);
+        _add("mov", { al, moffs8 }, { all }, { 0xA0 });
+        _add("mov", { al, moffs8 }, { bits64, rexw }, { 0xA0 });
+        _add("mov", { ax, moffs16 }, { all, mode16 }, { 0xA1 });
+        _add("mov", { eax, moffs32 }, { all, mode32 }, { 0xA1 });
+        _add("mov", { rax, moffs64 }, { bits64, rexw }, { 0xA1 });
+        _add("mov", { moffs8, al }, { all }, { 0xA2 });
+        _add("mov", { moffs8, al }, { bits64, rexw }, { 0xA2 });
+        _add("mov", { moffs16, ax }, { all, mode16 }, { 0xA3 });
+        _add("mov", { moffs32, eax }, { all, mode32 }, { 0xA3 });
+        _add("mov", { moffs64, rax }, { bits64, rexw }, { 0xA3 });
+        _add("mov", { r8, imm8 }, { all, rb }, { 0xB0 });
+        _add("mov", { r8, imm8 }, { all, rb, rex }, { 0xB0 });
+        _add("mov", { r16, imm16 }, { all, mode16, rw }, { 0xB8 });
+        _add("mov", { r32, imm32 }, { all, mode32, rd }, { 0xB8 });
+        _add("mov", { r64, imm64 }, { bits64, rexw, rd }, { 0xB8 });
+        _add("mov", { rm8, imm8 }, { all }, { 0xC6 }, 0, 0, true);
+        _add("mov", { rm8, imm8 }, { bits64, rexw }, { 0xC6 }, 0, 0, true);
+        _add("mov", { rm16, imm16 }, { all, mode16 }, { 0xC7 }, 0, 0, true);
+        _add("mov", { rm32, imm32 }, { all, mode32 }, { 0xC7 }, 0, 0, true);
+        _add("mov", { rm64, imm32 }, { bits64, rexw }, { 0xC7 }, 0, 0, true);
+
+        _add("mov", { r32, creg }, { bits16, bits32 }, { 0x0F, 0x20 }, 0, 1);
+        _add("mov", { r64, creg }, { bits64 }, { 0x0F, 0x20 }, 0, 1);
+        _add("mov", { r64, cr8 }, { bits64, rexr }, { 0x0F, 0x20 }, 0, 0, true);
+        _add("mov", { creg, r32 }, { bits16, bits32 }, { 0xF0, 0x22 }, 1, 0);
+        _add("mov", { creg, r64 }, { bits64 }, { 0xF0, 0x22 }, 1, 0);
+        _add("mov", { cr8, r64 }, { bits64, rexr }, { 0xF0, 0x22 }, 1, 0, true);
+        _add("mov", { r32, dreg }, { bits16, bits32 }, { 0xF0, 0x21 }, 0, 1);
+        _add("mov", { r64, dreg }, { bits64 }, { 0xF0, 0x21 }, 0, 1);
+        _add("mov", { dreg, r32 }, { bits16, bits32 }, { 0xF0, 0x23 }, 1, 0);
+        _add("mov", { dreg, r64 }, { bits64 }, { 0xF0, 0x23 }, 1, 0);
+
+
     }
 
     return _opcodes;
