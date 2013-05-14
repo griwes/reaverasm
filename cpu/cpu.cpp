@@ -493,6 +493,77 @@ const std::multimap<std::string, reaver::assembler::opcode> & reaver::assembler:
         _add("retf", {}, { all }, { 0xCB });
         _add("ret", { imm16 }, { all }, { 0xC2 });
         _add("ret", { imm32 }, { all }, { 0xCA });
+
+        _add("sfence", {}, { all }, { 0x0F, 0xAE }, -1, 7, true);
+
+        _add("stc", {}, { all }, { 0xF9 });
+        _add("std", {}, { all }, { 0xFD });
+        _add("sti", {}, { all }, { 0xFB });
+
+        _add("sub", { al, imm8 }, { all }, { 0x2C });
+        _add("sub", { ax, imm16 }, { all, mode16 }, { 0x2D });
+        _add("sub", { eax, imm32 }, { all, mode32 }, { 0x2D });
+        _add("sub", { rax, imm64 }, { bits64, rexw }, { 0x2D });
+        _add("sub", { rm8, imm8 }, { all }, { 0x80 }, 0, 5, true);
+        _add("sub", { rm8, imm8 }, { bits64, rex }, { 0x80 }, 0, 5, true);
+        _add("sub", { rm16, imm16 }, { all, mode16 }, { 0x81 }, 0, 5, true);
+        _add("sub", { rm32, imm32 }, { all, mode32 }, { 0x81 }, 0, 5, true);
+        _add("sub", { rm64, imm32 }, { bits64, rexw }, { 0x81 }, 0, 5, true);
+        _add("sub", { rm16, imm8 }, { all, mode16 }, { 0x83 }, 0, 5, true);
+        _add("sub", { rm32, imm8 }, { all, mode32 }, { 0x83 }, 0, 5, true);
+        _add("sub", { rm64, imm8 }, { bits64, rex }, { 0x83 }, 0, 5, true);
+        _add("sub", { rm8, r8 }, { all }, { 0x28 }, 0, 1);
+        _add("sub", { rm8, r8 }, { bits64 }, { 0x28 }, 0, 1);
+        _add("sub", { rm16, r16 }, { all, mode16 }, { 0x29 }, 0, 1);
+        _add("sub", { rm32, r32 }, { all, mode32 }, { 0x29 }, 0, 1);
+        _add("sub", { rm64, r64 }, { bits64, rexw }, { 0x29 }, 0, 1);
+        _add("sub", { r8, rm8 }, { all }, { 0x2A }, 1, 0);
+        _add("sub", { r8, rm8 }, { bits64 }, { 0x2A }, 1, 0);
+        _add("sub", { r16, rm16 }, { all, mode16 }, { 0x2B }, 1, 0);
+        _add("sub", { r32, rm32 }, { all, mode32 }, { 0x2B }, 1, 0);
+        _add("sub", { r64, rm64 }, { bits64, rexw }, { 0x2B }, 1, 0);
+
+        _add("syscall", {}, { bits64 }, { 0x0F, 0x05 });
+        _add("sysenter", {}, { all }, { 0x0F, 0x34 });
+        _add("sysexit", {}, { all }, { 0x0F, 0x35 });
+        _add("sysexitd", {}, { all, rexw }, { 0x0F, 0x35 });
+        _add("sysret", {}, { all }, { 0x0F, 0x07 });
+        _add("sysretd", {}, { all, rexw }, { 0x0F, 0x07 });
+
+        _add("test", { al, imm8 }, { all }, { 0xA8 });
+        _add("test", { ax, imm16 }, { all, mode16 }, { 0xA9 });
+        _add("test", { eax, imm32 }, { all, mode32 }, { 0xA9 });
+        _add("test", { rax, imm32 }, { bits64, rexw }, { 0xA9 });
+        _add("test", { rm8, imm8 }, { all }, { 0xF6 }, 0, 0, true);
+        _add("test", { rm8, imm8 }, { bits64, rexw }, { 0xF6 }, 0, 0, true);
+        _add("test", { rm16, imm16 }, { all, mode16 }, { 0xF7 }, 0, 0, true);
+        _add("test", { rm32, imm32 }, { all, mode32 }, { 0xF7 }, 0, 0, true);
+        _add("test", { rm64, imm32 }, { bits64, rexw }, { 0xF7 }, 0, 0, true);
+        _add("test", { rm8, r8 }, { all }, { 0x84 }, 0, 1);
+        _add("test", { rm8, r8 }, { bits64, rex }, { 0x84 }, 0, 1);
+        _add("test", { rm16, r16 }, { all, mode16 }, { 0x85 }, 0, 1);
+        _add("test", { rm32, r32 }, { all, mode32 }, { 0x85 }, 0, 1);
+        _add("test", { rm64, r64 }, { bits64, rexw }, { 0x85 }, 0, 1);
+
+        _add("xor", { al, imm8 }, { all }, { 0x34 });
+        _add("xor", { ax, imm16 }, { all, mode16 }, { 0x35 });
+        _add("xor", { eax, imm32 }, { all, mode32 }, { 0x35 });
+        _add("xor", { rax, imm32 }, { bits64, rexw }, { 0x35 });
+        _add("xor", { rm8, imm8 }, { all }, { 0x80 }, 0, 6, true);
+        _add("xor", { rm8, imm8 }, { bits64, rex }, { 0x80 }, 0, 6, true);
+        _add("xor", { rm16, imm16 }, { all, mode16 }, { 0x81 }, 0, 6, true);
+        _add("xor", { rm32, imm32 }, { all, mode32 }, { 0x81 }, 0, 6, true);
+        _add("xor", { rm64, imm32 }, { bits64, rexw }, { 0x81 }, 0, 6, true);
+        _add("xor", { rm8, r8 }, { all }, { 0x30 }, 0, 1);
+        _add("xor", { rm8, r8 }, { bits64, rex }, { 0x30 }, 0, 1);
+        _add("xor", { rm16, r16 }, { all, mode16 }, { 0x31 }, 0, 1);
+        _add("xor", { rm32, r32 }, { all, mode32 }, { 0x31 }, 0, 1);
+        _add("xor", { rm64, r64 }, { bits64, rexw }, { 0x31 }, 0, 1);
+        _add("xor", { r8, rm8 }, { all }, { 0x32 }, 1, 0);
+        _add("xor", { r8, rm8 }, { bits64, rex }, { 0x32 }, 1, 0);
+        _add("xor", { r16, rm16 }, { all, mode16 }, { 0x33 }, 1, 0);
+        _add("xor", { r32, rm32 }, { all, mode32 }, { 0x33 }, 1, 0);
+        _add("xor", { r64, rm64 }, { bits64, rexw }, { 0x33 }, 1, 0);
     }
 
     return _opcodes;

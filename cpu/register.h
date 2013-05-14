@@ -157,6 +157,16 @@ namespace reaver
                 {
                     size = qword;
                 }
+
+                if (std::find(rex_enforce_registers().begin(), rex_enforce_registers().end(), str) != rex_enforce_registers().end())
+                {
+                    rex = enforce;
+                }
+
+                else if (std::find(rex_disable_registers().begin(), rex_disable_registers().end(), str) != rex_disable_registers().end())
+                {
+                    rex = disable;
+                }
             }
 
             bool long_mode_only = false;
@@ -177,6 +187,13 @@ namespace reaver
                 dword,
                 qword
             } size = implicit;
+
+            enum
+            {
+                enforce,
+                disable,
+                na
+            } rex = na;
 
             std::string name;
         };
