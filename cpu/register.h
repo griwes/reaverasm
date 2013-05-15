@@ -171,7 +171,7 @@ namespace reaver
 
             bool long_mode_only = false;
 
-            enum
+            enum types
             {
                 general_purpose,
                 debug,
@@ -179,7 +179,7 @@ namespace reaver
                 segment
             } type = general_purpose;
 
-            enum
+            enum sizes
             {
                 implicit,
                 byte,
@@ -190,9 +190,9 @@ namespace reaver
 
             enum
             {
+                na,
                 enforce,
-                disable,
-                na
+                disable
             } rex = na;
 
             std::string name;
