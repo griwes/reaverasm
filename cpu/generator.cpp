@@ -25,39 +25,38 @@
 
 #pragma once
 
-#include <vector>
+#include <cpu/generator.h>
+#include <cpu/opcode.h>
+#include <cpu/cpu.h>
 
-#include <cpu/instruction.h>
-
-namespace reaver
+namespace
 {
-    namespace assembler
+    const reaver::assembler::opcode & _find(const reaver::assembler::instruction &, reaver::assembler::mode m)
     {
-        class generator
-        {
-        public:
-            virtual ~generator() {}
 
-            virtual std::vector<uint8_t> generate(const instruction &) = 0;
-        };
+    }
+}
 
-        class pmode_generator : public generator
-        {
-        public:
-            pmode_generator(bool bits32) : _bits32{ bits32 }
-            {
-            }
+std::vector<uint8_t> reaver::assembler::pmode_generator::generate(const reaver::assembler::instruction & i)
+{
+    std::vector<uint8_t> ret;
 
-            virtual std::vector<uint8_t> generate(const instruction &);
+    auto opcode = _find(i, _bits32 ? bits32 : bits16);
 
-        private:
-            bool _bits32;
-        };
+    if (opcode.mode().find(_bits32 ? mode16 : mode32) != opcode.mode().end())
+    {
+        ret.push_back(0x66);
+    }
+}
 
-        class lmode_generator : public generator
-        {
-        public:
-            virtual std::vector<uint8_t> generate(const instruction &);
-        };
+std::vector<uint8_t> reaver::assembler::lmode_generator::generate(const reaver::assembler::instruction & i)
+{
+    std::vector<uint8_t> ret;
+
+    auto opcode = _find(i, bits64);
+
+    if (opcode.mode().find(mode16) != opcode.mode().end())
+    {
+        ret.push_back(0x66);
     }
 }
