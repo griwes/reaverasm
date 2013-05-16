@@ -25,28 +25,36 @@
 
 #pragma once
 
+#include <boost/variant.hpp>
+
+#include <cpu/overrides.h>
+#include <cpu/register.h>
+
+#include <parser/helpers.h>
+
+#include <utils.h>
+
 namespace reaver
 {
     namespace assembler
     {
-        class effective_address_operand
-        {
-        public:
-            template<typename... Ts>
-            effective_address_operand(const Ts &...)
-            {
-
-            }
-        };
-
         class effective_address
         {
         public:
-            template<typename... Ts>
-            effective_address(const Ts &...)
+            effective_address(const boost::optional<cpu_register> seg, const std::vector<boost::variant<cpu_register,
+                integer, size_overriden_identifier>> & v)
             {
+                if (v.size() > 4)
+                {
+                    throw "too many address operands for effective address";
+                }
 
+                operands = v;
+                segment = seg;
             }
+
+            boost::optional<cpu_register> segment;
+            std::vector<boost::variant<cpu_register, integer, size_overriden_identifier>> operands;
         };
     }
 }

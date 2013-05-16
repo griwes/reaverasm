@@ -25,30 +25,13 @@
 
 #pragma once
 
-#include <string>
-
 namespace reaver
 {
     namespace assembler
     {
-        class operand
+        class generator
         {
-        public:
-            template<typename... Ts>
-            operand(const Ts &...)
-            {
 
-            }
-        };
-
-        class instruction
-        {
-        public:
-            template<typename... Ts>
-            instruction(const Ts &...)
-            {
-
-            }
         };
     }
 }

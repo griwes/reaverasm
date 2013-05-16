@@ -33,6 +33,8 @@
 #include <cpu/instruction.h>
 #include <cpu/cpu.h>
 
+#include <parser/helpers.h>
+
 #include <utils.h>
 
 namespace reaver
@@ -95,132 +97,6 @@ namespace reaver
             reaver::lexer::tokens_description desc;
         };
 
-        struct integer
-        {
-            integer(boost::optional<std::string> s, boost::optional<std::string> sign, uint64_t val)
-                : positive{ sign ? *sign == "+" : true }, value{ val }
-            {
-                if (!s)
-                {
-                    return;
-                }
-
-                if (*s == "byte")
-                {
-                    size = byte;
-                }
-
-                else if (*s == "word")
-                {
-                    size = word;
-                }
-
-                else if (*s == "dword")
-                {
-                    size = dword;
-                }
-
-                else if (*s == "qword")
-                {
-                    size = qword;
-                }
-            }
-
-            bool positive;
-            uint64_t value;
-            enum
-            {
-                byte,
-                word,
-                dword,
-                qword
-            } size;
-        };
-
-        struct ch
-        {
-            ch(std::string str)
-            {
-                if (str[0] != '\\')
-                {
-                    character = str[0];
-                    return;
-                }
-
-                switch (str[1])
-                {
-                    case 'n':
-                        character = '\n';
-                        return;
-                    case 'r':
-                        character = '\r';
-                        return;
-                    case 't':
-                        character = '\t';
-                        return;
-                    case '\\':
-                        character = '\\';
-                        return;
-                    case '\'':
-                        character = '\'';
-                        return;
-                    case 'b':
-                        character = '\b';
-                        return;
-                    default:
-                        throw "invalid escape sequence";
-                }
-            }
-
-            char character;
-        };
-
-        struct str
-        {
-            str(std::string str)
-            {
-                for (uint64_t i = 0; i < str.size(); ++i)
-                {
-                    if (str[i] != '\\')
-                    {
-                        string.push_back(str[i]);
-                        return;
-                    }
-
-                    switch (str[i + 1])
-                    {
-                        case 'n':
-                            string.push_back('\n');
-                            return;
-                        case 'r':
-                            string.push_back('\r');
-                            return;
-                        case 't':
-                            string.push_back('\t');
-                            return;
-                        case '\\':
-                            string.push_back('\\');
-                            return;
-                        case '\'':
-                            string.push_back('\'');
-                            return;
-                        case 'b':
-                            string.push_back('\b');
-                            return;
-                        default:
-                            throw "invalid escape sequence";
-                    }
-
-                    if (i + 1 == str.size())
-                    {
-                        throw "invalid escape sequence";
-                    }
-                }
-            }
-
-            std::string string;
-        };
-
         struct parser
         {
             parser(const reaver::assembler::lexer & lex)
@@ -248,19 +124,19 @@ namespace reaver
                 address_operand = cpureg | integer | override_symbol_size;
 
                 // TODO for addresses: allow additional math operators for assemble-time constants
-                address = -override_size >> ~symbol({ "[" }) >> -override_size >> -override_segment > address_operand >>
-                    *(symbol({ "+", "-", "*", "/" }) > address_operand) >> ~symbol({ "]" });
+                address = ~symbol({ "[" }) >> -override_segment > address_operand % symbol({ "+", "-", "*", "/" }) >> ~symbol({ "]" });
 
                 instruction_operand = override_symbol_size | address | cpureg | integer;
-                instruction_mnemonic = identifier(get_known_mnemonics());
 
-                assembly_instruction = instruction_mnemonic >> -(instruction_operand % symbol({ "," }));
+                assembly_instruction = identifier >> instruction_operand % symbol({ "," });
 
                 bits_directive = ~identifier({ "bits" }) > reaver::parser::token(lex.integer_literal);
                 extern_directive = ~identifier({ "extern" }) > not_a_register;
                 global_directive = ~identifier({ "global" }) > not_a_register;
                 org_directive = ~identifier({ "org" }) > reaver::parser::token(lex.integer_literal);
                 section_directive = ~identifier({ "section" }) > reaver::parser::token(lex.string);
+
+                data = identifier({ "db", "dw", "dd", "dq" }) > ((character | string | integer) % symbol({ ","}));
 
                 skip = reaver::parser::token(lex.whitespace);
             }
@@ -282,14 +158,13 @@ namespace reaver
             // TODO: FP, SSE, AVX and other shenaniganish registers
 
             reaver::parser::rule<size_overriden_identifier> override_symbol_size;
-            reaver::parser::rule<effective_address_operand> address_operand;
+            reaver::parser::rule< boost::variant<cpu_register, reaver::assembler::integer, size_overriden_identifier>> address_operand;
 
             reaver::parser::rule<cpu_register> override_segment;
             reaver::parser::rule<std::string> override_size;
             reaver::parser::rule<effective_address> address;
 
             reaver::parser::rule<operand> instruction_operand;
-            reaver::parser::rule<mnemonic> instruction_mnemonic;
             reaver::parser::rule<instruction> assembly_instruction;
 
             // the following should be nullary, and soon will be nullary, but it will require some additional features
@@ -299,6 +174,8 @@ namespace reaver
             reaver::parser::rule<std::string> global_directive;
             reaver::parser::rule<uint64_t> org_directive;
             reaver::parser::rule<std::string> section_directive;
+
+            reaver::parser::rule<reaver::assembler::data> data;
 
             reaver::parser::rule<std::string> skip;
         };
