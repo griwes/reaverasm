@@ -29,9 +29,31 @@
 
 namespace
 {
-    const reaver::assembler::opcode & _find(const reaver::assembler::instruction &, reaver::assembler::mode m)
+    const reaver::assembler::opcode & _find(const reaver::assembler::instruction & i, reaver::assembler::mode m)
     {
+        const auto & ops = reaver::assembler::get_opcodes();
 
+        if (ops.count(i.mnemonic()))
+        {
+            for (auto current = ops.lower_bound(i.mnemonic()), last = ops.upper_bound(i.mnemonic()); current != last;
+                ++current)
+            {
+                if (current->second.operands().size() == i.operands().size())
+                {
+                    for (uint64_t i = 0; i < i.operands().size(); ++i)
+                    {
+                        if (!current->second.operands()[i]->match(i.operands()[i]))
+                        {
+                            break;
+                        }
+                    }
+
+                    return *current;
+                }
+            }
+        }
+
+        throw "unknown mnemonic";
     }
 }
 
