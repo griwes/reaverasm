@@ -32,10 +32,11 @@ namespace
     std::multimap<std::string, reaver::assembler::opcode> _opcodes;
     std::vector<std::string> _mnemonics;
 
-    void _add(std::string name, std::vector<reaver::assembler::operand_type> operands, std::set<reaver::assembler::mode> modes,
-        std::vector<uint8_t> code, uint8_t rm_index = -1, uint8_t reg_index = -1, bool special_reg = false)
+    void _add(std::string name, std::vector<reaver::assembler::operand_type> && operands, std::set<reaver::assembler::mode> && modes,
+        std::vector<uint8_t> && code, int8_t rm_index = -1, int8_t reg_index = -1, bool special_reg = false)
     {
-        _opcodes.insert(std::make_pair(name, reaver::assembler::opcode{ name, operands, modes, code, rm_index, reg_index, special_reg }));
+        _opcodes.insert(std::make_pair(name, reaver::assembler::opcode{ name, std::move(operands), std::move(modes), std::move(code),
+            rm_index, reg_index, special_reg }));
     }
 }
 

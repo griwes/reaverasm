@@ -23,8 +23,6 @@
  *
  **/
 
-#pragma once
-
 #include <cpu/generator.h>
 #include <cpu/opcode.h>
 #include <cpu/cpu.h>
@@ -39,24 +37,66 @@ namespace
 
 std::vector<uint8_t> reaver::assembler::pmode_generator::generate(const reaver::assembler::instruction & i)
 {
-    std::vector<uint8_t> ret;
-
     auto opcode = _find(i, _bits32 ? bits32 : bits16);
+
+    if (opcode.operands().empty())
+    {
+        return opcode.code();
+    }
+
+    std::vector<uint8_t> ret;
 
     if (opcode.mode().find(_bits32 ? mode16 : mode32) != opcode.mode().end())
     {
         ret.push_back(0x66);
     }
+
+    if (opcode.rm_index() == -1 && opcode.reg_index() == -1)
+    {
+        std::copy(opcode.code().begin(), opcode.code().end(), ret.end());
+
+        for (auto & operand : i.operands())
+        {
+            auto encoded_imm = operand.encode();
+            std::copy(encoded_imm.begin(), encoded_imm.end(), ret.end());
+        }
+
+        return ret;
+    }
+
+    uint8_t modrm = 0;
+    uint8_t sib = 0;
+
+    if (opcode.special_reg())
+    {
+        modrm |= opcode.reg_index() << 3;
+    }
+
+    else if (opcode.reg_index() != -1)
+    {
+        if (i.operands()[opcode.reg()]);
+
+        modrm |= _encode_reg(i.operands()[opcode.reg()]);
+    }
+
+    if (opcode.rm_index() != -1)
+    {
+        auto enc = _encode_rm(_bits32 ? mode32 : mode16, i.operands()[opcode.rm_index()]);
+        modrm |= enc.first;
+        sib = enc.second;
+    }
 }
 
 std::vector<uint8_t> reaver::assembler::lmode_generator::generate(const reaver::assembler::instruction & i)
 {
-    std::vector<uint8_t> ret;
-
     auto opcode = _find(i, bits64);
+
+    std::vector<uint8_t> ret;
 
     if (opcode.mode().find(mode16) != opcode.mode().end())
     {
         ret.push_back(0x66);
     }
+
+    uint8_t enc_rex = 0;
 }
