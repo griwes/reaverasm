@@ -28,6 +28,11 @@
 #include <string>
 #include <vector>
 
+#include <parser/helpers.h>
+#include <cpu/register.h>
+#include <cpu/overrides.h>
+#include <cpu/address.h>
+
 namespace reaver
 {
     namespace assembler
@@ -35,13 +40,25 @@ namespace reaver
         class operand
         {
         public:
-            operand()
+            operand(const reaver::assembler::integer &)
+            {
+            }
+
+            operand(const reaver::assembler::cpu_register &)
+            {
+            }
+
+            operand(const reaver::assembler::size_overriden_identifier &)
+            {
+            }
+
+            operand(const reaver::assembler::effective_address &)
             {
             }
 
             std::vector<uint8_t> encode() const
             {
-                return {};
+                throw "NIY";
             }
         };
 

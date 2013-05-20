@@ -29,6 +29,8 @@
 #include <set>
 #include <vector>
 
+#include <cpu/operand_matcher.h>
+
 namespace reaver
 {
     namespace assembler
@@ -50,55 +52,52 @@ namespace reaver
             all
         };
 
-        enum operand_type
-        {
-            rel8,
-            rel16,
-            rel32,
-            ptr16_16,
-            ptr16_32,
-            r8,
-            r16,
-            r32,
-            r64,
-            imm8,
-            imm16,
-            imm32,
-            imm64,
-            rm8,
-            rm16,
-            rm32,
-            rm64,
-            m,
-            m8,
-            m16,
-            m32,
-            m64,
-            m128,
-            m16_16,
-            m16_32,
-            m16_64,
-            moffs8,
-            moffs16,
-            moffs32,
-            moffs64,
-            sreg,
-            creg,
-            dreg,
-            cr8,
-            al,
-            ax,
-            eax,
-            rax,
-            dx,
-            r16m16,
-            r32m16,
-            ds,
-            es,
-            fs,
-            gs,
-            ss
-        };
+        extern operand_type rel8;
+        extern operand_type rel16;
+        extern operand_type rel32;
+        extern operand_type ptr16_16;
+        extern operand_type ptr16_32;
+        extern operand_type r8;
+        extern operand_type r16;
+        extern operand_type r32;
+        extern operand_type r64;
+        extern operand_type imm8;
+        extern operand_type imm16;
+        extern operand_type imm32;
+        extern operand_type imm64;
+        extern operand_type rm8;
+        extern operand_type rm16;
+        extern operand_type rm32;
+        extern operand_type rm64;
+        extern operand_type m;
+        extern operand_type m8;
+        extern operand_type m16;
+        extern operand_type m32;
+        extern operand_type m64;
+        extern operand_type m128;
+        extern operand_type m16_16;
+        extern operand_type m16_32;
+        extern operand_type m16_64;
+        extern operand_type moffs8;
+        extern operand_type moffs16;
+        extern operand_type moffs32;
+        extern operand_type moffs64;
+        extern operand_type sreg;
+        extern operand_type creg;
+        extern operand_type dreg;
+        extern operand_type cr8;
+        extern operand_type al;
+        extern operand_type ax;
+        extern operand_type eax;
+        extern operand_type rax;
+        extern operand_type dx;
+        extern operand_type r16m16;
+        extern operand_type r32m16;
+        extern operand_type ds;
+        extern operand_type es;
+        extern operand_type fs;
+        extern operand_type gs;
+        extern operand_type ss;
 
         class opcode
         {

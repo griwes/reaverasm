@@ -160,5 +160,22 @@ namespace reaver
         private:
             cpu_register::types _type;
         };
+
+        class operand_type
+        {
+        public:
+            template<typename T, typename = typename std::enable_if<std::is_base_of<operand_matcher, T>::value>::type>
+            operand_type(T && t) : _ptr{ std::make_shared<T>(std::move(t)) }
+            {
+            }
+
+            operand_matcher * operator->()
+            {
+                return &*_ptr;
+            }
+
+        private:
+            std::shared_ptr<operand_matcher> _ptr;
+        };
     }
 }

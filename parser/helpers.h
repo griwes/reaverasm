@@ -26,6 +26,7 @@
 #pragma once
 
 #include <boost/optional.hpp>
+#include <boost/variant.hpp>
 
 namespace reaver
 {
