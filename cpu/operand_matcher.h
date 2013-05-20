@@ -148,7 +148,7 @@ namespace reaver
             {
                 if (op.is_register())
                 {
-                    if (op.get_register()->type == _type)
+                    if (op.get_register().type == _type)
                     {
                         return true;
                     }

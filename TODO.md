@@ -3,3 +3,4 @@
    and should be changed soon.
  * Preprocessor: remove excessive RAM usage by reducing amount of copies of exactly
    (or almost exactly) same `include_chain`s here and there.
+ * Everywhere, again: ***sane error handling!***

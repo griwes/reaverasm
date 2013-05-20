@@ -32,10 +32,34 @@ namespace reaver
 {
     namespace assembler
     {
-        struct integer
+        class cpu_register;
+        struct integer;
+        struct size_overriden_identifier;
+        class effective_address;
+
+        struct operand_base
+        {
+            virtual ~operand_base()
+            {
+            }
+
+            virtual const cpu_register & get_register() const
+            {
+                throw "get_register() on non-register operand, consider this internal error";
+            }
+
+            virtual std::string name() const
+            {
+                throw "name() on unnamed operand, consider this internal error";
+            }
+
+            virtual uint64_t size() const = 0;
+        };
+
+        struct integer : public operand_base
         {
             integer(boost::optional<std::string> s, boost::optional<std::string> sign, uint64_t val)
-            : positive{ sign ? *sign == "+" : true }, value{ val }
+                : positive{ sign ? *sign == "+" : true }, value{ val }
             {
                 if (!s)
                 {
@@ -44,22 +68,43 @@ namespace reaver
 
                 if (*s == "byte")
                 {
-                    size = byte;
+                    size_enum = byte;
                 }
 
                 else if (*s == "word")
                 {
-                    size = word;
+                    size_enum = word;
                 }
 
                 else if (*s == "dword")
                 {
-                    size = dword;
+                    size_enum = dword;
                 }
 
                 else if (*s == "qword")
                 {
-                    size = qword;
+                    size_enum = qword;
+                }
+            }
+
+            integer(uint8_t i) : positive{ true }, value{ i }
+            {
+            }
+
+            virtual uint64_t size() const
+            {
+                switch (size_enum)
+                {
+                    case byte:
+                        return 8;
+                    case word:
+                        return 16;
+                    case dword:
+                        return 32;
+                    case qword:
+                        return 64;
+                    case implicit:
+                        throw "TODO: implement implicit size() of an integer";
                 }
             }
 
@@ -70,8 +115,9 @@ namespace reaver
                 byte,
                 word,
                 dword,
-                qword
-            } size;
+                qword,
+                implicit
+            } size_enum = implicit;
         };
 
         struct ch
@@ -110,6 +156,11 @@ namespace reaver
             }
 
             char character;
+
+            operator integer() const
+            {
+                return static_cast<uint8_t>(character);
+            }
         };
 
         struct str

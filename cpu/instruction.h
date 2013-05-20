@@ -40,19 +40,19 @@ namespace reaver
         class operand
         {
         public:
-            operand(const reaver::assembler::integer &)
+            operand(const integer & i) : _type{ _integer }, _ptr{ std::make_shared<integer>(i) }
             {
             }
 
-            operand(const reaver::assembler::cpu_register &)
+            operand(const cpu_register & reg) : _type{ _register }, _ptr{ std::make_shared<cpu_register>(reg) }
             {
             }
 
-            operand(const reaver::assembler::size_overriden_identifier &)
+            operand(const size_overriden_identifier & l) : _type{ _label }, _ptr{ std::make_shared<size_overriden_identifier>(l) }
             {
             }
 
-            operand(const reaver::assembler::effective_address &)
+            operand(const effective_address & addr) : _type{ _address }, _ptr{ std::make_shared<effective_address>(addr) }
             {
             }
 
@@ -60,6 +60,52 @@ namespace reaver
             {
                 throw "NIY";
             }
+
+            bool is_register() const
+            {
+                return _type == _register;
+            }
+
+            bool is_integer() const
+            {
+                return _type == _integer;
+            }
+
+            bool is_label() const
+            {
+                return _type == _label;
+            }
+
+            bool is_address() const
+            {
+                return _type == _address;
+            }
+
+            const cpu_register & get_register() const
+            {
+                return _ptr->get_register();
+            }
+
+            uint64_t size() const
+            {
+                return _ptr->size();
+            }
+
+            std::string name() const
+            {
+                return _ptr->name();
+            }
+
+        private:
+            enum
+            {
+                _register,
+                _integer,
+                _label,
+                _address
+            } _type;
+
+            std::shared_ptr<operand_base> _ptr;
         };
 
         class instruction
