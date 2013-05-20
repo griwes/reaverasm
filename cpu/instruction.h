@@ -86,6 +86,16 @@ namespace reaver
                 return _ptr->get_register();
             }
 
+            const cpu_register & get_segment_override() const
+            {
+                return _ptr->get_segment_override();
+            }
+
+            bool has_segment_override() const
+            {
+                return _type == _address && _ptr->has_segment_override();
+            }
+
             uint64_t size() const
             {
                 return _ptr->size();

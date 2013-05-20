@@ -55,6 +55,16 @@ namespace reaver
 
             boost::optional<cpu_register> segment;
             std::vector<boost::variant<cpu_register, integer, size_overriden_identifier>> operands;
+
+            virtual bool has_segment_override() const
+            {
+                return segment;
+            }
+
+            virtual const cpu_register & get_segment_override() const
+            {
+                return *segment;
+            }
         };
     }
 }

@@ -68,6 +68,48 @@ std::vector<uint8_t> reaver::assembler::pmode_generator::generate(const reaver::
 
     std::vector<uint8_t> ret;
 
+    for (auto & x : i.operands())
+    {
+        if (x.has_segment_override())
+        {
+            auto name = x.get_segment_override().name;
+
+            if (name == "cs")
+            {
+                ret.push_back(0x2E);
+            }
+
+            else if (name == "ds")
+            {
+                ret.push_back(0x36);
+            }
+
+            else if (name == "es")
+            {
+                ret.push_back(0x3E);
+            }
+
+            else if (name == "fs")
+            {
+                ret.push_back(0x64);
+            }
+
+            else if (name == "gs")
+            {
+                ret.push_back(0x65);
+            }
+
+            else
+            {
+                throw "invalid segment override";
+            }
+
+            break;
+        }
+    }
+
+    // TODO: address size override prefix, 0x67
+
     if (opcode.mode().find(_bits32 ? mode16 : mode32) != opcode.mode().end())
     {
         ret.push_back(0x66);
@@ -125,6 +167,50 @@ std::vector<uint8_t> reaver::assembler::lmode_generator::generate(const reaver::
     auto opcode = _find(i, bits64);
 
     std::vector<uint8_t> ret;
+
+    for (auto & x : i.operands())
+    {
+        if (x.has_segment_override())
+        {
+            // TODO: ignored segment warnings
+
+            auto name = x.get_segment_override().name;
+
+            if (name == "cs")
+            {
+                ret.push_back(0x2E);
+            }
+
+            else if (name == "ds")
+            {
+                ret.push_back(0x36);
+            }
+
+            else if (name == "es")
+            {
+                ret.push_back(0x3E);
+            }
+
+            else if (name == "fs")
+            {
+                ret.push_back(0x64);
+            }
+
+            else if (name == "gs")
+            {
+                ret.push_back(0x65);
+            }
+
+            else
+            {
+                throw "invalid segment override";
+            }
+
+            break;
+        }
+    }
+
+    // TODO: address size override prefix, 0x67
 
     if (opcode.mode().find(mode16) != opcode.mode().end())
     {

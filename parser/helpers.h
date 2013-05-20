@@ -57,6 +57,16 @@ namespace reaver
             {
                 throw "size() on not-sized operand, consider this internal error";
             }
+
+            virtual const cpu_register & get_segment_override() const
+            {
+                throw "get_segment_override() called on not-address, consider this internal error";
+            }
+
+            virtual bool has_segment_override() const
+            {
+                return false;
+            }
         };
 
         struct integer : public operand_base
