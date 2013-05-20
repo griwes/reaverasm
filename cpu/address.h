@@ -38,7 +38,7 @@ namespace reaver
 {
     namespace assembler
     {
-        class effective_address
+        class effective_address : public operand_base
         {
         public:
             effective_address(const boost::optional<cpu_register> seg, const std::vector<boost::variant<cpu_register,

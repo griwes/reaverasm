@@ -53,7 +53,10 @@ namespace reaver
                 throw "name() on unnamed operand, consider this internal error";
             }
 
-            virtual uint64_t size() const = 0;
+            virtual uint64_t size() const
+            {
+                throw "size() on not-sized operand, consider this internal error";
+            }
         };
 
         struct integer : public operand_base

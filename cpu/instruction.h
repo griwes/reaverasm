@@ -56,7 +56,7 @@ namespace reaver
             {
             }
 
-            std::vector<uint8_t> encode() const
+            std::vector<uint8_t> encode(uint64_t) const
             {
                 throw "NIY";
             }

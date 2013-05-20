@@ -38,6 +38,11 @@ namespace reaver
             virtual ~operand_matcher() {}
 
             virtual bool operator()(const operand &) const = 0;
+
+            virtual uint64_t size() const
+            {
+                throw "called size() on not-sized operand matcher; consider this an internal error";
+            }
         };
 
         class register_matcher : public operand_matcher
@@ -69,6 +74,11 @@ namespace reaver
                 return false;
             }
 
+            virtual uint64_t size() const
+            {
+                return _size * 8;
+            }
+
         private:
             std::string _name;
             cpu_register::sizes _size;
@@ -92,6 +102,11 @@ namespace reaver
                 }
 
                 return false;
+            }
+
+            virtual uint64_t size() const
+            {
+                return _size * 8;
             }
 
         private:
@@ -133,6 +148,11 @@ namespace reaver
                 return false;
             }
 
+            virtual uint64_t size() const
+            {
+                return _size * 8;
+            }
+
         private:
             cpu_register::sizes _size;
         };
@@ -169,9 +189,14 @@ namespace reaver
             {
             }
 
-            operand_matcher * operator->()
+            bool match(const operand & op) const
             {
-                return &*_ptr;
+                return (*_ptr)(op);
+            }
+
+            uint64_t size() const
+            {
+                return _ptr->size();
             }
 
         private:

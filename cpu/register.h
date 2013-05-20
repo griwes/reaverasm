@@ -28,6 +28,8 @@
 #include <string>
 #include <vector>
 
+#include <parser/helpers.h>
+
 namespace reaver
 {
     namespace assembler
@@ -110,7 +112,7 @@ namespace reaver
             return ret;
         }
 
-        class cpu_register
+        class cpu_register : public operand_base
         {
         public:
             cpu_register(std::string str) : name{ str }

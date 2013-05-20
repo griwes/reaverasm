@@ -29,12 +29,19 @@
 
 #include <boost/optional.hpp>
 
+#include <parser/helpers.h>
+
 namespace reaver
 {
     namespace assembler
     {
-        struct size_overriden_identifier
+        struct size_overriden_identifier : public operand_base
         {
+            size_overriden_identifier(const boost::optional<std::string> & size, std::string name) : size_override{ size },
+                name{ name }
+            {
+            }
+
             boost::optional<std::string> size_override;
             std::string name;
         };

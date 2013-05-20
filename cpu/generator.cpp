@@ -42,7 +42,7 @@ namespace
                 {
                     for (uint64_t c = 0; c < i.operands().size(); ++c)
                     {
-                        if (!current->second.operands()[c]->match(i.operands()[c]))
+                        if (!current->second.operands()[c].match(i.operands()[c]))
                         {
                             break;
                         }
@@ -71,19 +71,6 @@ std::vector<uint8_t> reaver::assembler::pmode_generator::generate(const reaver::
     if (opcode.mode().find(_bits32 ? mode16 : mode32) != opcode.mode().end())
     {
         ret.push_back(0x66);
-    }
-
-    if (opcode.rm_index() == -1 && opcode.reg_index() == -1)
-    {
-        std::copy(opcode.code().begin(), opcode.code().end(), ret.end());
-
-        for (auto & operand : i.operands())
-        {
-            auto encoded_imm = operand.encode();
-            std::copy(encoded_imm.begin(), encoded_imm.end(), ret.end());
-        }
-
-        return ret;
     }
 
     uint8_t modrm = 0;
@@ -125,7 +112,7 @@ std::vector<uint8_t> reaver::assembler::pmode_generator::generate(const reaver::
     {
         if (opcode.rm_index() != c || (!opcode.special_reg() && opcode.reg_index() != c))
         {
-            auto encoded_imm = i.operands()[c].encode(opcode.operands()[c]->size());
+            auto encoded_imm = i.operands()[c].encode(opcode.operands()[c].size());
             std::copy(encoded_imm.begin(), encoded_imm.end(), ret.end());
         }
     }
@@ -154,24 +141,6 @@ std::vector<uint8_t> reaver::assembler::lmode_generator::generate(const reaver::
     else if (opcode.mode().find(rexw) != opcode.mode().end())
     {
         enc_rex = 0x48;
-    }
-
-    if (opcode.rm_index() == -1 && opcode.reg_index() == -1)
-    {
-        if (enc_rex)
-        {
-            ret.push_back(enc_rex);
-        }
-
-        std::copy(opcode.code().begin(), opcode.code().end(), ret.end());
-
-        for (auto & operand : i.operands())
-        {
-            auto encoded_imm = operand.encode();
-            std::copy(encoded_imm.begin(), encoded_imm.end(), ret.end());
-        }
-
-        return ret;
     }
 
     uint8_t modrm = 0;
@@ -218,7 +187,7 @@ std::vector<uint8_t> reaver::assembler::lmode_generator::generate(const reaver::
     {
         if (opcode.rm_index() != c || (!opcode.special_reg() && opcode.reg_index() != c))
         {
-            auto encoded_imm = i.operands()[c].encode(opcode.operands()[c]->size());
+            auto encoded_imm = i.operands()[c].encode(opcode.operands()[c].size());
             std::copy(encoded_imm.begin(), encoded_imm.end(), ret.end());
         }
     }
