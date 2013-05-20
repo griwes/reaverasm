@@ -55,6 +55,137 @@ namespace
 
         throw "unknown mnemonic";
     }
+
+    uint8_t _encode_reg(const reaver::assembler::operand & op)
+    {
+        static std::map<std::string, uint8_t> reg;
+
+        if (reg.empty())
+        {
+            reg["al"] = 0;
+            reg["ah"] = 4;
+            reg["ax"] = 0;
+            reg["eax"] = 0;
+            reg["rax"] = 0;
+
+            reg["cl"] = 1;
+            reg["ch"] = 5;
+            reg["cx"] = 1;
+            reg["ecx"] = 1;
+            reg["rcx"] = 1;
+
+            reg["dl"] = 2;
+            reg["dh"] = 6;
+            reg["dx"] = 2;
+            reg["edx"] = 2;
+            reg["rdx"] = 2;
+
+            reg["bl"] = 3;
+            reg["bh"] = 7;
+            reg["bx"] = 3;
+            reg["ebx"] = 3;
+            reg["rbx"] = 3;
+
+            reg["spl"] = 4;
+            reg["sp"] = 4;
+            reg["esp"] = 4;
+            reg["rsp"] = 4;
+
+            reg["bpl"] = 5;
+            reg["bp"] = 5;
+            reg["ebp"] = 5;
+            reg["rbp"] = 5;
+
+            reg["sil"] = 6;
+            reg["si"] = 6;
+            reg["esi"] = 6;
+            reg["rsi"] = 6;
+
+            reg["dil"] = 7;
+            reg["di"] = 7;
+            reg["edi"] = 7;
+            reg["rdi"] = 7;
+
+            reg["r8b"] = 0;
+            reg["r8w"] = 0;
+            reg["r8d"] = 0;
+            reg["r8"] = 0;
+
+            reg["r9b"] = 1;
+            reg["r9w"] = 1;
+            reg["r9d"] = 1;
+            reg["r9"] = 1;
+
+            reg["r10b"] = 2;
+            reg["r10w"] = 2;
+            reg["r10d"] = 2;
+            reg["r10"] = 2;
+
+            reg["r11b"] = 3;
+            reg["r11w"] = 3;
+            reg["r11d"] = 3;
+            reg["r11"] = 3;
+
+            reg["r12b"] = 4;
+            reg["r12w"] = 4;
+            reg["r12d"] = 4;
+            reg["r12"] = 4;
+
+            reg["r13b"] = 5;
+            reg["r13w"] = 5;
+            reg["r13d"] = 5;
+            reg["r13"] = 5;
+
+            reg["r14b"] = 6;
+            reg["r14w"] = 6;
+            reg["r14d"] = 6;
+            reg["r14"] = 6;
+
+            reg["r15b"] = 7;
+            reg["r15w"] = 7;
+            reg["r15d"] = 7;
+            reg["r15"] = 7;
+
+            reg["cs"] = 1;
+            reg["ds"] = 3;
+            reg["es"] = 0;
+            reg["fs"] = 4;
+            reg["gs"] = 5;
+            reg["ss"] = 2;
+
+            reg["cr0"] = 0;
+            reg["cr2"] = 2;
+            reg["cr3"] = 3;
+            reg["cr4"] = 4;
+            reg["cr8"] = 0;
+
+            reg["dr0"] = 0;
+            reg["dr1"] = 1;
+            reg["dr2"] = 2;
+            reg["dr3"] = 3;
+            reg["dr4"] = 4;
+            reg["dr5"] = 5;
+            reg["dr6"] = 6;
+            reg["dr7"] = 7;
+        }
+
+        if (!op.is_register())
+        {
+            throw "invalid operand type for `reg` field";
+        }
+
+        return reg[op.get_register().name];
+    }
+
+    std::pair<uint8_t, uint8_t> _encode_rm(const reaver::assembler::operand & op)
+    {
+        if (!op.is_register() && !op.is_address())
+        {
+            throw "invalid operand type for `rm` field";
+        }
+
+        return {};
+    }
 }
 
 std::vector<uint8_t> reaver::assembler::pmode_generator::generate(const reaver::assembler::instruction & i)
@@ -72,7 +203,7 @@ std::vector<uint8_t> reaver::assembler::pmode_generator::generate(const reaver::
     {
         if (x.has_segment_override())
         {
-            auto name = x.get_segment_override().name;
+            const auto & name = x.get_segment_override().name;
 
             if (name == "cs")
             {

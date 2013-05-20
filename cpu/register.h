@@ -46,14 +46,14 @@ namespace reaver
 
         inline const std::vector<std::string> & rex_enforce_registers()
         {
-            static std::vector<std::string> ret = { "spl", "bpl", "sil", "dil" };
+            static std::vector<std::string> ret = { "spl", "bpl", "sil", "dil", "cr8" };
 
             return ret;
         }
 
         inline const std::vector<std::string> & rex_disable_registers()
         {
-            static std::vector<std::string> ret = { "ah", "bh", "ch", "dh" };
+            static std::vector<std::string> ret = { "ah", "bh", "ch", "dh", "cr0" };
 
             return ret;
         }
@@ -93,7 +93,7 @@ namespace reaver
 
         inline const std::vector<std::string> & control_registers()
         {
-            static std::vector<std::string> ret = { "cr0", "", "cr2", "cr3", "cr4", "cr8" };
+            static std::vector<std::string> ret = { "cr0", "cr2", "cr3", "cr4", "cr8" };
 
             return ret;
         }
