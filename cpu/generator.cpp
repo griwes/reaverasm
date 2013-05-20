@@ -48,7 +48,7 @@ namespace
                         }
                     }
 
-                    return *current;
+                    return current->second;
                 }
             }
         }
@@ -97,9 +97,7 @@ std::vector<uint8_t> reaver::assembler::pmode_generator::generate(const reaver::
 
     else if (opcode.reg_index() != -1)
     {
-        if (i.operands()[opcode.reg()]);
-
-        modrm |= _encode_reg(i.operands()[opcode.reg()]);
+        modrm |= _encode_reg(i.operands()[opcode.reg_index()]);
     }
 
     if (opcode.rm_index() != -1)
@@ -123,7 +121,7 @@ std::vector<uint8_t> reaver::assembler::pmode_generator::generate(const reaver::
         ret.push_back(sib);
     }
 
-    for (int8_t c = 0; c < i.operands().size(); ++c)
+    for (int8_t c = 0; static_cast<uint8_t>(c) < i.operands().size(); ++c)
     {
         if (opcode.rm_index() != c || (!opcode.special_reg() && opcode.reg_index() != c))
         {
@@ -187,9 +185,7 @@ std::vector<uint8_t> reaver::assembler::lmode_generator::generate(const reaver::
 
     else if (opcode.reg_index() != -1)
     {
-        if (i.operands()[opcode.reg()]);
-
-        modrm |= _encode_reg(i.operands()[opcode.reg()]);
+        modrm |= _encode_reg(i.operands()[opcode.reg_index()]);
     }
 
     if (opcode.rm_index() != -1)
@@ -218,7 +214,7 @@ std::vector<uint8_t> reaver::assembler::lmode_generator::generate(const reaver::
         ret.push_back(sib);
     }
 
-    for (int8_t c = 0; c < i.operands().size(); ++c)
+    for (int8_t c = 0; static_cast<uint8_t>(c) < i.operands().size(); ++c)
     {
         if (opcode.rm_index() != c || (!opcode.special_reg() && opcode.reg_index() != c))
         {

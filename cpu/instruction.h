@@ -26,6 +26,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 namespace reaver
 {
@@ -34,21 +35,37 @@ namespace reaver
         class operand
         {
         public:
-            template<typename... Ts>
-            operand(const Ts &...)
+            operand()
             {
+            }
 
+            std::vector<uint8_t> encode() const
+            {
+                return {};
             }
         };
 
         class instruction
         {
         public:
-            template<typename... Ts>
-            instruction(const Ts &...)
+            instruction(std::string mnemonic, const std::vector<operand> & operands) : _mnemonic{ mnemonic }, _operands{
+                operands }
             {
-
             }
+
+            std::string mnemonic() const
+            {
+                return _mnemonic;
+            }
+
+            const std::vector<operand> & operands() const
+            {
+                return _operands;
+            }
+
+        private:
+            std::string _mnemonic;
+            std::vector<operand> _operands;
         };
     }
 }
