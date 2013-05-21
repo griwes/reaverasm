@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
 

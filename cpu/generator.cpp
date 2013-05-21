@@ -238,41 +238,41 @@ namespace
         {
             rm["rax"] = 0;
             rm["eax"] = 0;
-            rm["r8"] = 8;
-            rm["r8d"] = 8;
+            rm["r8"] = 16;
+            rm["r8d"] = 16;
 
             rm["rcx"] = 1;
             rm["ecx"] = 1;
-            rm["r9"] = 9;
-            rm["r9d"] = 9;
+            rm["r9"] = 17;
+            rm["r9d"] = 17;
 
             rm["rdx"] = 2;
             rm["edx"] = 2;
-            rm["r10"] = 10;
-            rm["r10d"] = 10;
+            rm["r10"] = 18;
+            rm["r10d"] = 18;
 
             rm["rbx"] = 3;
             rm["ebx"] = 3;
-            rm["r11"] = 11;
-            rm["r11d"] = 11;
+            rm["r11"] = 19;
+            rm["r11d"] = 19;
 
             rm["rip"] = 5;
             rm["eip"] = 5;
-            rm["rbp"] = 13;
-            rm["rbp"] = 13;
+            rm["rbp"] = 21;
+            rm["rbp"] = 21;
 
-            rm["r13"] = 13;
-            rm["r13d"] = 13;
+            rm["r13"] = 21;
+            rm["r13d"] = 21;
 
             rm["rsi"] = 6;
             rm["esi"] = 6;
-            rm["r14"] = 14;
-            rm["r14d"] = 14;
+            rm["r14"] = 22;
+            rm["r14d"] = 22;
 
             rm["rdi"] = 7;
             rm["edi"] = 7;
-            rm["r15"] = 15;
-            rm["r15d"] = 15;
+            rm["r15"] = 23;
+            rm["r15d"] = 23;
         }
 
         if (address.scale() == 0)
@@ -283,30 +283,63 @@ namespace
             {
                 if (long_mode)
                 {
-                    if (address.has_disp())
-                    {
-                        // I take that "no SIB" back
+                    // I take that "no SIB" back
 
-                        const auto & encoded = address.disp().encode(32);
-                        uint8_t sib; // TODO
-                    }
+                    auto encoded = address.disp().encode(32);
+                    uint8_t sib = 0x25;
+                    encoded.insert(encoded.begin(), sib);
+
+                    return { 0x4, encoded };
                 }
 
                 else
                 {
-
+                    return { 0x5, address.disp().encode(32) };
                 }
             }
 
-            else if (address.base().name == "rbp" || address.base().name == "ebp")
+            else if (address.base().name == "rbp" || address.base().name == "ebp" || address.base().name == "r13"
+                || address.base().name == "r13d")
             {
+                if (!address.has_disp())
+                {
+                    return { (1 << 6) | rm[address.base().name], { 0 } };
+                }
 
+                return { ((address.disp().size() == 8 ? 1 : 2) << 6) | rm[address.base().name], address.disp()
+                    .encode(address.disp().size() == 8 ? 8 : 32) };
+            }
+
+            else
+            {
+                if (!address.has_disp())
+                {
+                    return { rm[address.base().name], {} };
+                }
+
+                return { ((address.base().long_mode_only << 4) | (address.disp().size() == 8 ? 1 : 2) << 6)
+                    | rm[address.base().name], address.disp().encode(address.disp().size() == 8 ? 8 : 32) };
             }
         }
 
         else
         {
-            // SIB
+            bool b = false, x = false;
+            uint8_t sib = address.scale() << 6;
+            sib |= (rm[address.index().name] & 7) << 3;
+            sib |= rm[address.base().name] & 7;
+            b = long_mode && (rm[address.base().name] & 8);
+            x = long_mode && (rm[address.index().name] & 8);
+
+            if (!address.has_disp())
+            {
+                return { 0x4 | (b << 2) | (x << 3), { sib } };
+            }
+
+            auto encoded_imm = address.disp().encode(address.disp().size() == 8 ? 8 : 32);
+            encoded_imm.insert(encoded_imm.begin(), sib);
+
+            return { ((address.disp().size() == 8 ? 1 : 2) << 6) | 0x4 | (b << 2) | (x << 3), encoded_imm };
         }
     }
 }
@@ -530,7 +563,7 @@ std::vector<uint8_t> reaver::assembler::lmode_generator::generate(const reaver::
 
         if (enc >= 8)
         {
-            enc_rex |= 2;
+            enc_rex |= 4;
         }
     }
 
@@ -541,7 +574,7 @@ std::vector<uint8_t> reaver::assembler::lmode_generator::generate(const reaver::
 
         sibdisp = enc.second;
 
-        if (enc.first & 24)
+        if (enc.first & 56)
         {
             enc_rex |= (enc.first >> 3) & 3;
         }
