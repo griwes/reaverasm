@@ -67,6 +67,11 @@ namespace reaver
             {
                 return false;
             }
+
+            virtual const effective_address & get_address() const
+            {
+                throw "get_address() on non-address operand, consider this internal error";
+            }
         };
 
         struct integer : public operand_base

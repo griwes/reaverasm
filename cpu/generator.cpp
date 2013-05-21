@@ -51,6 +51,8 @@ namespace
                     return current->second;
                 }
             }
+
+            throw "invalid combination of opcode and operands";
         }
 
         throw "unknown mnemonic";
@@ -177,14 +179,43 @@ namespace
         return reg[op.get_register().name];
     }
 
-    std::pair<uint8_t, uint8_t> _encode_rm(const reaver::assembler::operand & op)
+    std::pair<uint8_t, uint8_t> _encode_rm(const reaver::assembler::operand & op, bool long_mode = false)
     {
         if (!op.is_register() && !op.is_address())
         {
             throw "invalid operand type for `rm` field";
         }
 
-        return {};
+        if (op.is_register())
+        {
+            return { 0xC0 | _encode_reg(op), 0 };
+        }
+
+        const auto & address = op.get_address();
+
+        if (address.has_base() && address.base().size() == reaver::assembler::cpu_register::byte)
+        {
+            throw "invalid effective address";
+        }
+
+        if (address.has_base() && address.base().size() == reaver::assembler::cpu_register::word)
+        {
+            if (long_mode)
+            {
+                throw "16 bit addressing is not available in long mode";
+            }
+
+            if ((address.has_index() && address.index().size != reaver::assembler::cpu_register::word) ||
+                address.scale() != 1)
+            {
+                throw "invalid effective address";
+            }
+
+            switch (address.operands().size())
+            {
+
+            }
+        }
     }
 }
 
@@ -263,9 +294,9 @@ std::vector<uint8_t> reaver::assembler::pmode_generator::generate(const reaver::
     if (opcode.rm_index() != -1)
     {
         auto enc = _encode_rm(i.operands()[opcode.rm_index()]);
-        modrm |= enc.first & ~0x80;
+        modrm |= enc.first & ~0x8;
 
-        sib_applies = enc.first & 0x80;
+        sib_applies = enc.first & 0x8;
         sib = enc.second;
     }
 
@@ -376,10 +407,10 @@ std::vector<uint8_t> reaver::assembler::lmode_generator::generate(const reaver::
 
     if (opcode.rm_index() != -1)
     {
-        auto enc = _encode_rm(i.operands()[opcode.rm_index()]);
-        modrm |= enc.first & ~0x80;
+        auto enc = _encode_rm(i.operands()[opcode.rm_index()], true);
+        modrm |= enc.first & ~0x8;
 
-        sib_applies = enc.first & 0x80;
+        sib_applies = enc.first & 0x8;
         sib = enc.second;
     }
 

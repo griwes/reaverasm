@@ -29,7 +29,7 @@
 
 #include <cpu/overrides.h>
 #include <cpu/register.h>
-
+#include <cpu/operand.h>
 #include <parser/helpers.h>
 
 #include <utils.h>
@@ -49,22 +49,52 @@ namespace reaver
                     throw "too many address operands for effective address";
                 }
 
-                operands = v;
-                segment = seg;
-            }
+                struct constructor : public boost::static_visitor<operand>
+                {
+                    template<typename T>
+                    operand operator()(const T & t) const
+                    {
+                        return { t };
+                    }
+                };
 
-            boost::optional<cpu_register> segment;
-            std::vector<boost::variant<cpu_register, integer, size_overriden_identifier>> operands;
+                _operands.reserve(v.size());
+                for (const auto & x : v)
+                {
+                    _operands.push_back(boost::apply_visitor(constructor{}, x));
+                }
+
+                _segment = seg;
+            }
 
             virtual bool has_segment_override() const
             {
-                return segment;
+                return _segment;
             }
 
             virtual const cpu_register & get_segment_override() const
             {
-                return *segment;
+                return *_segment;
             }
+
+            virtual const effective_address & get_address() const
+            {
+                return *this;
+            }
+
+            const std::vector<operand> & operands() const
+            {
+                return _operands;
+            }
+
+        private:
+            boost::optional<cpu_register> _segment;
+            std::vector<operand> _operands;
+
+            boost::optional<operand> _base;
+            boost::optional<operand> _index;
+            uint64_t _scale;
+            boost::optional<operand> _disp;
         };
     }
 }

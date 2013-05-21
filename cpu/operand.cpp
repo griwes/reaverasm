@@ -23,42 +23,24 @@
  *
  **/
 
-#pragma once
-
-#include <string>
-#include <vector>
-
+#include <cpu/operand.h>
 #include <parser/helpers.h>
 #include <cpu/register.h>
 #include <cpu/overrides.h>
 #include <cpu/address.h>
-#include <cpu/operand.h>
 
-namespace reaver
+reaver::assembler::operand::operand(const integer & i) : _type{ _integer }, _ptr{ std::make_shared<integer>(i) }
 {
-    namespace assembler
-    {
-        class instruction
-        {
-        public:
-            instruction(std::string mnemonic, const std::vector<operand> & operands) : _mnemonic{ mnemonic }, _operands{
-                operands }
-            {
-            }
+}
 
-            std::string mnemonic() const
-            {
-                return _mnemonic;
-            }
+reaver::assembler::operand::operand(const cpu_register & reg) : _type{ _register }, _ptr{ std::make_shared<cpu_register>(reg) }
+{
+}
 
-            const std::vector<operand> & operands() const
-            {
-                return _operands;
-            }
+reaver::assembler::operand::operand(const size_overriden_identifier & l) : _type{ _label }, _ptr{ std::make_shared<size_overriden_identifier>(l) }
+{
+}
 
-        private:
-            std::string _mnemonic;
-            std::vector<operand> _operands;
-        };
-    }
+reaver::assembler::operand::operand(const effective_address & addr) : _type{ _address }, _ptr{ std::make_shared<effective_address>(addr) }
+{
 }
