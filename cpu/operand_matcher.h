@@ -48,7 +48,7 @@ namespace reaver
         class register_matcher : public operand_matcher
         {
         public:
-            register_matcher(std::string name) : _name{ name }
+            register_matcher(std::string name) : _name{ name }, _size{ cpu_register::implicit }
             {
             }
 
@@ -179,6 +179,24 @@ namespace reaver
 
         private:
             cpu_register::types _type;
+        };
+
+        class far_pointer_matcher : public operand_matcher
+        {
+        public:
+            far_pointer_matcher()
+            {
+            }
+
+            virtual bool operator()(const operand & op) const
+            {
+                if (op.is_address())
+                {
+                    return op.has_segment_override();
+                }
+
+                return false;
+            }
         };
 
         class operand_type
