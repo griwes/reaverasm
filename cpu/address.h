@@ -86,12 +86,47 @@ namespace reaver
                 return *this;
             }
 
+            bool has_base() const
+            {
+                return _base;
+            }
+
+            const cpu_register & base() const
+            {
+                return *_base;
+            }
+
+            bool has_index() const
+            {
+                return _index;
+            }
+
+            const cpu_register & index() const
+            {
+                return *_index;
+            }
+
+            uint64_t scale() const
+            {
+                return _scale;
+            }
+
+            bool has_disp() const
+            {
+                return _disp;
+            }
+
+            const operand & disp() const
+            {
+                return *_disp;
+            }
+
         private:
             boost::optional<cpu_register> _segment;
 
-            boost::optional<operand> _base;
-            boost::optional<operand> _index;
-            uint64_t _scale;
+            boost::optional<cpu_register> _base;
+            boost::optional<cpu_register> _index;
+            uint64_t _scale = 1;
             boost::optional<operand> _disp;
         };
     }

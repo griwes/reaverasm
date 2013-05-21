@@ -108,45 +108,45 @@ namespace
             reg["edi"] = 7;
             reg["rdi"] = 7;
 
-            reg["r8b"] = 0;
-            reg["r8w"] = 0;
-            reg["r8d"] = 0;
-            reg["r8"] = 0;
+            reg["r8b"] = 8;
+            reg["r8w"] = 8;
+            reg["r8d"] = 8;
+            reg["r8"] = 8;
 
-            reg["r9b"] = 1;
-            reg["r9w"] = 1;
-            reg["r9d"] = 1;
-            reg["r9"] = 1;
+            reg["r9b"] = 9;
+            reg["r9w"] = 9;
+            reg["r9d"] = 9;
+            reg["r9"] = 9;
 
-            reg["r10b"] = 2;
-            reg["r10w"] = 2;
-            reg["r10d"] = 2;
-            reg["r10"] = 2;
+            reg["r10b"] = 10;
+            reg["r10w"] = 10;
+            reg["r10d"] = 10;
+            reg["r10"] = 10;
 
-            reg["r11b"] = 3;
-            reg["r11w"] = 3;
-            reg["r11d"] = 3;
-            reg["r11"] = 3;
+            reg["r11b"] = 11;
+            reg["r11w"] = 11;
+            reg["r11d"] = 11;
+            reg["r11"] = 11;
 
-            reg["r12b"] = 4;
-            reg["r12w"] = 4;
-            reg["r12d"] = 4;
-            reg["r12"] = 4;
+            reg["r12b"] = 12;
+            reg["r12w"] = 12;
+            reg["r12d"] = 12;
+            reg["r12"] = 12;
 
-            reg["r13b"] = 5;
-            reg["r13w"] = 5;
-            reg["r13d"] = 5;
-            reg["r13"] = 5;
+            reg["r13b"] = 13;
+            reg["r13w"] = 13;
+            reg["r13d"] = 13;
+            reg["r13"] = 13;
 
-            reg["r14b"] = 6;
-            reg["r14w"] = 6;
-            reg["r14d"] = 6;
-            reg["r14"] = 6;
+            reg["r14b"] = 14;
+            reg["r14w"] = 14;
+            reg["r14d"] = 14;
+            reg["r14"] = 14;
 
-            reg["r15b"] = 7;
-            reg["r15w"] = 7;
-            reg["r15d"] = 7;
-            reg["r15"] = 7;
+            reg["r15b"] = 15;
+            reg["r15w"] = 15;
+            reg["r15d"] = 15;
+            reg["r15"] = 15;
 
             reg["cs"] = 1;
             reg["ds"] = 3;
@@ -193,7 +193,7 @@ namespace
 
         const auto & address = op.get_address();
 
-        if (address.has_base() && address.base().size == reaver::assembler::cpu_register::word)
+        if ((address.has_base() && address.base().size == reaver::assembler::cpu_register::word) || address.disp().size() <= 16)
         {
             if (long_mode)
             {
@@ -220,11 +220,93 @@ namespace
                 return { rm[""][""], address.disp().encode(16) };
             }
 
-            uint64_t disp_size = address.has_disp() ? (address.disp().size == reaver::assembler::cpu_register::byte
+            uint64_t disp_size = address.has_disp() ? (address.disp().size() == reaver::assembler::cpu_register::byte
                 ? 8 : 16) : 0;
 
             return { ((disp_size / 8) << 6) | rm[address.base().name][address.has_index() ? address.index().name : ""],
                 address.has_disp() ? address.disp().encode(disp_size) : std::vector<uint8_t>{} };
+        }
+
+        if (address.has_base() && address.base().size == reaver::assembler::cpu_register::qword && !long_mode)
+        {
+            throw "64 bit addressing is only available in long mode";
+        }
+
+        static std::map<std::string, uint8_t> rm;
+
+        if (rm.empty())
+        {
+            rm["rax"] = 0;
+            rm["eax"] = 0;
+            rm["r8"] = 8;
+            rm["r8d"] = 8;
+
+            rm["rcx"] = 1;
+            rm["ecx"] = 1;
+            rm["r9"] = 9;
+            rm["r9d"] = 9;
+
+            rm["rdx"] = 2;
+            rm["edx"] = 2;
+            rm["r10"] = 10;
+            rm["r10d"] = 10;
+
+            rm["rbx"] = 3;
+            rm["ebx"] = 3;
+            rm["r11"] = 11;
+            rm["r11d"] = 11;
+
+            rm["rip"] = 5;
+            rm["eip"] = 5;
+            rm["rbp"] = 13;
+            rm["rbp"] = 13;
+
+            rm["r13"] = 13;
+            rm["r13d"] = 13;
+
+            rm["rsi"] = 6;
+            rm["esi"] = 6;
+            rm["r14"] = 14;
+            rm["r14d"] = 14;
+
+            rm["rdi"] = 7;
+            rm["edi"] = 7;
+            rm["r15"] = 15;
+            rm["r15d"] = 15;
+        }
+
+        if (address.scale() == 0)
+        {
+            // no SIB
+
+            if (!address.has_base())
+            {
+                if (long_mode)
+                {
+                    if (address.has_disp())
+                    {
+                        // I take that "no SIB" back
+
+                        const auto & encoded = address.disp().encode(32);
+                        uint8_t sib; // TODO
+                    }
+                }
+
+                else
+                {
+
+                }
+            }
+
+            else if (address.base().name == "rbp" || address.base().name == "ebp")
+            {
+
+            }
+        }
+
+        else
+        {
+            // SIB
         }
     }
 }
@@ -280,7 +362,24 @@ std::vector<uint8_t> reaver::assembler::pmode_generator::generate(const reaver::
         }
     }
 
-    // TODO: address size override prefix, 0x67
+    for (auto & x : i.operands())
+    {
+        if (x.is_address())
+        {
+            if (x.get_address().has_base())
+            {
+                if (x.get_address().base().size == cpu_register::word)
+                {
+                    ret.push_back(0x67);
+                }
+            }
+
+            else if (x.get_address().disp().size() == cpu_register::word)
+            {
+                ret.push_back(0x67);
+            }
+        }
+    }
 
     if (opcode.mode().find(_bits32 ? mode16 : mode32) != opcode.mode().end())
     {
@@ -380,7 +479,24 @@ std::vector<uint8_t> reaver::assembler::lmode_generator::generate(const reaver::
         }
     }
 
-    // TODO: address size override prefix, 0x67
+    for (auto & x : i.operands())
+    {
+        if (x.is_address())
+        {
+            if (x.get_address().has_base())
+            {
+                if (x.get_address().base().size == cpu_register::dword)
+                {
+                    ret.push_back(0x67);
+                }
+            }
+
+            else if (x.get_address().disp().size() == cpu_register::dword)
+            {
+                ret.push_back(0x67);
+            }
+        }
+    }
 
     if (opcode.mode().find(mode16) != opcode.mode().end())
     {
@@ -409,15 +525,26 @@ std::vector<uint8_t> reaver::assembler::lmode_generator::generate(const reaver::
 
     else if (opcode.reg_index() != -1)
     {
-        modrm |= _encode_reg(i.operands()[opcode.reg_index()]);
+        uint8_t enc = _encode_reg(i.operands()[opcode.reg_index()]);
+        modrm |= (enc & 7) << 3;
+
+        if (enc >= 8)
+        {
+            enc_rex |= 2;
+        }
     }
 
     if (opcode.rm_index() != -1)
     {
         auto enc = _encode_rm(i.operands()[opcode.rm_index()], true);
-        modrm |= enc.first;
+        modrm |= (enc.first & ~8);
 
         sibdisp = enc.second;
+
+        if (enc.first & 24)
+        {
+            enc_rex |= (enc.first >> 3) & 3;
+        }
     }
 
     if (enc_rex)
