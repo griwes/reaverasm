@@ -58,11 +58,15 @@ namespace reaver
                     }
                 };
 
-                _operands.reserve(v.size());
+                std::vector<operand> operands;
+
+                operands.reserve(v.size());
                 for (const auto & x : v)
                 {
-                    _operands.push_back(boost::apply_visitor(constructor{}, x));
+                    operands.push_back(boost::apply_visitor(constructor{}, x));
                 }
+
+                // TODO: parse operands
 
                 _segment = seg;
             }
@@ -82,14 +86,8 @@ namespace reaver
                 return *this;
             }
 
-            const std::vector<operand> & operands() const
-            {
-                return _operands;
-            }
-
         private:
             boost::optional<cpu_register> _segment;
-            std::vector<operand> _operands;
 
             boost::optional<operand> _base;
             boost::optional<operand> _index;

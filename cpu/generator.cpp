@@ -179,7 +179,7 @@ namespace
         return reg[op.get_register().name];
     }
 
-    std::pair<uint8_t, uint8_t> _encode_rm(const reaver::assembler::operand & op, bool long_mode = false)
+    std::pair<uint8_t, std::vector<uint8_t>> _encode_rm(const reaver::assembler::operand & op, bool long_mode = false)
     {
         if (!op.is_register() && !op.is_address())
         {
@@ -188,33 +188,43 @@ namespace
 
         if (op.is_register())
         {
-            return { 0xC0 | _encode_reg(op), 0 };
+            return { 3 << 6 | _encode_reg(op), {} };
         }
 
         const auto & address = op.get_address();
 
-        if (address.has_base() && address.base().size() == reaver::assembler::cpu_register::byte)
-        {
-            throw "invalid effective address";
-        }
-
-        if (address.has_base() && address.base().size() == reaver::assembler::cpu_register::word)
+        if (address.has_base() && address.base().size == reaver::assembler::cpu_register::word)
         {
             if (long_mode)
             {
                 throw "16 bit addressing is not available in long mode";
             }
 
-            if ((address.has_index() && address.index().size != reaver::assembler::cpu_register::word) ||
-                address.scale() != 1)
+            static std::map<std::string, std::map<std::string, uint8_t>> rm;
+
+            if (rm.empty())
             {
-                throw "invalid effective address";
+                rm["bx"]["si"] = 0;
+                rm["bx"]["di"] = 1;
+                rm["bp"]["si"] = 2;
+                rm["bp"]["di"] = 3;
+                rm["si"][""] = 4;
+                rm["di"][""] = 5;
+                rm["bp"][""] = 6;
+                rm["bx"][""] = 7;
+                rm[""][""] = 6;
             }
 
-            switch (address.operands().size())
+            if (!address.has_base())
             {
-
+                return { rm[""][""], address.disp().encode(16) };
             }
+
+            uint64_t disp_size = address.has_disp() ? (address.disp().size == reaver::assembler::cpu_register::byte
+                ? 8 : 16) : 0;
+
+            return { ((disp_size / 8) << 6) | rm[address.base().name][address.has_index() ? address.index().name : ""],
+                address.has_disp() ? address.disp().encode(disp_size) : std::vector<uint8_t>{} };
         }
     }
 }
@@ -278,8 +288,7 @@ std::vector<uint8_t> reaver::assembler::pmode_generator::generate(const reaver::
     }
 
     uint8_t modrm = 0;
-    uint8_t sib = 0;
-    bool sib_applies = false;
+    std::vector<uint8_t> sibdisp;
 
     if (opcode.special_reg())
     {
@@ -294,10 +303,9 @@ std::vector<uint8_t> reaver::assembler::pmode_generator::generate(const reaver::
     if (opcode.rm_index() != -1)
     {
         auto enc = _encode_rm(i.operands()[opcode.rm_index()]);
-        modrm |= enc.first & ~0x8;
+        modrm |= enc.first;
 
-        sib_applies = enc.first & 0x8;
-        sib = enc.second;
+        sibdisp = enc.second;
     }
 
     std::copy(opcode.code().begin(), opcode.code().end(), ret.end());
@@ -307,9 +315,9 @@ std::vector<uint8_t> reaver::assembler::pmode_generator::generate(const reaver::
         ret.push_back(modrm);
     }
 
-    if (sib_applies)
+    if (sibdisp.size())
     {
-        ret.push_back(sib);
+        std::copy(sibdisp.begin(), sibdisp.end(), ret.end());
     }
 
     for (int8_t c = 0; static_cast<uint8_t>(c) < i.operands().size(); ++c)
@@ -392,8 +400,7 @@ std::vector<uint8_t> reaver::assembler::lmode_generator::generate(const reaver::
     }
 
     uint8_t modrm = 0;
-    uint8_t sib = 0;
-    bool sib_applies = false;
+    std::vector<uint8_t> sibdisp;
 
     if (opcode.special_reg())
     {
@@ -408,10 +415,9 @@ std::vector<uint8_t> reaver::assembler::lmode_generator::generate(const reaver::
     if (opcode.rm_index() != -1)
     {
         auto enc = _encode_rm(i.operands()[opcode.rm_index()], true);
-        modrm |= enc.first & ~0x8;
+        modrm |= enc.first;
 
-        sib_applies = enc.first & 0x8;
-        sib = enc.second;
+        sibdisp = enc.second;
     }
 
     if (enc_rex)
@@ -426,9 +432,9 @@ std::vector<uint8_t> reaver::assembler::lmode_generator::generate(const reaver::
         ret.push_back(modrm);
     }
 
-    if (sib_applies)
+    if (sibdisp.size())
     {
-        ret.push_back(sib);
+        std::copy(sibdisp.begin(), sibdisp.end(), ret.end());
     }
 
     for (int8_t c = 0; static_cast<uint8_t>(c) < i.operands().size(); ++c)
