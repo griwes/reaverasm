@@ -37,20 +37,8 @@ namespace reaver
         class ast
         {
         public:
-            ast(uint64_t bitness = 32) : _bitness{ 32 }
-            {
-            }
-
-            ast(std::string section, uint64_t bitness = 32) : _section{ section }, _bitness{ bitness }
-            {
-            }
-
-            // TODO: ORG based constructor
 
         private:
-            std::string _section = ".text";
-            uint64_t _bitness = 32;
-
             std::vector<boost::variant<instruction, data>> _line;
             std::map<std::string, uint64_t> _labels; // label name -> instruction index
             std::vector<std::string> _globals;
