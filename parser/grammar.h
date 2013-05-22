@@ -32,6 +32,8 @@
 #include <cpu/register.h>
 #include <cpu/instruction.h>
 #include <cpu/cpu.h>
+#include <parser/ast.h>
+#include <preprocessor/line.h>
 
 #include <parser/helpers.h>
 
@@ -141,6 +143,8 @@ namespace reaver
 
                 skip = reaver::parser::token(lex.whitespace);
             }
+
+            ast parse(const std::vector<line> &) const;
 
             reaver::parser::rule<std::string> identifier;
             reaver::parser::rule<reaver::assembler::integer> integer;

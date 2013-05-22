@@ -37,6 +37,13 @@ namespace reaver
         class ast
         {
         public:
+            void add_label(std::string);
+            void add_global(std::string);
+            void add_extern(std::string);
+            void start_section(std::string);
+            void set_bitness(uint64_t);
+            void add_instruction(const instruction &);
+            void add_data(const data &);
 
         private:
             std::vector<boost::variant<instruction, data>> _line;

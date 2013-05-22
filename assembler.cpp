@@ -44,14 +44,14 @@ reaver::assembler::assembler::assembler(int argc, char ** argv) : _frontend(argc
         }
     }
 
-/*    else
+    else
     {
         reaver::assembler::parser parser{ _frontend };
         _ast = parser.parse(_lines);
-
+/*
         reaver::assembler::generator generator(_frontend);
         _frontend.output().write(generator.generate());
-    }*/
+*/    }
 }
 
 reaver::assembler::assembler::~assembler()

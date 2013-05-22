@@ -24,3 +24,10 @@
  **/
 
 #include <parser/grammar.h>
+
+reaver::assembler::ast reaver::assembler::parser::parse(const std::vector<reaver::assembler::line> & lines) const
+{
+    // here be logic, but it's 12:30am already
+
+    return {};
+}
