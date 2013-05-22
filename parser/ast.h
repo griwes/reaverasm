@@ -26,6 +26,7 @@
 #pragma once
 
 #include <vector>
+#include <map>
 
 #include <cpu/instruction.h>
 
