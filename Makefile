@@ -5,8 +5,9 @@ CFLAGS=-c -Os -Wall -Wextra -pedantic -Werror -std=c++11 -stdlib=libc++ -Wno-unu
 LDFLAGS=-stdlib=libc++ -lc++abi -lc++ -lboost_system -lboost_program_options -lboost_filesystem
 SOURCES=$(shell find . -type f -name "*.cpp" ! -path "*-old*")
 OBJECTS=$(SOURCES:.cpp=.o)
-TESTS=$(shell find . -name "*.asm")
-TESTRESULTS=$(TESTS:.asm=.bin)
+TESTS=$(shell find . -name "*.asm" ! -name "*.elf.asm")
+ELFTESTS=$(shell find . -name "*.elf.asm")
+TESTRESULTS=$(TESTS:.asm=.bin) $(ELFTESTS:.elf.asm=.elf)
 EXECUTABLE=rasm
 
 all: $(SOURCES) $(EXECUTABLE)
@@ -21,14 +22,26 @@ clean: clean-test
 	@rm -rfv *.o
 	@rm -rfv */*.o
 
-test: $(EXECUTABLE) $(TESTS) $(TESTRESULTS)
+test: $(EXECUTABLE) $(TESTS) $(ELFTESTS) $(TESTRESULTS)
 
 clean-test:
 	@rm -rfv tests/*.bin
+	@rm -rfv tests/*.elf
 
 %.bin: %.asm $(EXECUTABLE) clean-test
 	@./rasm $< -o $@
 	@yasm $< -o $@.ref
+	@cmp -s $@ $@.ref; \
+	RETVAL=$$?; \
+	if [ $$RETVAL -eq 0 ]; then \
+		echo $<": SAME"; \
+	else \
+		echo $<": NOT SAME"; \
+	fi
+
+%.elf: %.elf.asm $(EXECUTABLE) clean-test
+	@./rasm $< -o $@ -f elf64
+	@yasm $< -o $@.ref -f elf64
 	@cmp -s $@ $@.ref; \
 	RETVAL=$$?; \
 	if [ $$RETVAL -eq 0 ]; then \

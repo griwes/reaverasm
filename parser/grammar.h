@@ -133,7 +133,8 @@ namespace reaver
                 bits_directive = ~identifier({ "bits" }) > reaver::parser::token(lex.integer_literal);
                 extern_directive = ~identifier({ "extern" }) > not_a_register;
                 global_directive = ~identifier({ "global" }) > not_a_register;
-                org_directive = ~identifier({ "org" }) > reaver::parser::token(lex.integer_literal);
+                // org_directive = ~identifier({ "org" }) > reaver::parser::token(lex.integer_literal);
+                // org will only be made available when raw binary output is in place
                 section_directive = ~identifier({ "section" }) > reaver::parser::token(lex.string);
 
                 data = identifier({ "db", "dw", "dd", "dq" }) > ((character | string | integer) % symbol({ ","}));

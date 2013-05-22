@@ -25,47 +25,37 @@
 
 #pragma once
 
-#include <string>
-#include <map>
-#include <memory>
+#include <vector>
 
-#include <frontend.h>
-#include <preprocessor/line.h>
-#include <parser/ast.h>
+#include <cpu/instruction.h>
 
 namespace reaver
 {
     namespace assembler
     {
-        enum class format
-        {
-            binary
-        };
-
-        class assembler
+        class ast
         {
         public:
-            assembler(int, char **);
-            ~assembler();
-
-            std::string buffer()
+            ast(uint64_t bitness = 32) : _bitness{ 32 }
             {
-                return _buffer;
             }
 
-            const std::vector<line> & lines() const
+            ast(std::string section, uint64_t bitness = 32) : _section{ section }, _bitness{ bitness }
             {
-                return _lines;
             }
+
+            // TODO: ORG based constructor
 
         private:
-            frontend _frontend;
+            std::string _section = ".text";
+            uint64_t _bitness = 32;
 
-            std::string _name;
-            std::string _buffer;
-            std::vector<line> _lines;
-
-            ast _ast;
+            std::vector<boost::variant<instruction, data>> _line;
+            std::map<std::string, uint64_t> _labels; // label name -> instruction index
+            std::vector<std::string> _globals;
+            std::vector<std::string> _externs;
+            std::map<uint64_t, std::string> _sections;
+            std::map<uint64_t, uint64_t> _bitness_changes;
         };
     }
 }

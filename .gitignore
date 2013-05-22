@@ -5,3 +5,6 @@ rasm
 *.bin
 *.bin.ref
 *.kate-swp
+*.out
+*.ref
+*.elf
