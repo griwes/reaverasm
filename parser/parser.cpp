@@ -48,6 +48,11 @@ reaver::assembler::ast reaver::assembler::parser::parse(const std::vector<reaver
                 ret.add_label(*label_match);
             }
 
+            else
+            {
+                begin = t.cbegin();
+            }
+
             {
                 std::cout << "data" << std::endl;
 
@@ -130,6 +135,8 @@ reaver::assembler::ast reaver::assembler::parser::parse(const std::vector<reaver
                 auto b = begin;
                 auto instruction_match = reaver::parser::parse(assembly_instruction, b, t.cend(), skip);
 
+                std::cout << "after instruction" << std::endl;
+
                 if (instruction_match)
                 {
                     if (b != t.cend())
@@ -149,6 +156,11 @@ reaver::assembler::ast reaver::assembler::parser::parse(const std::vector<reaver
         catch (const char * e)
         {
             throw exception{ error, x.chain() } << e;
+        }
+
+        catch (const reaver::parser::expectation_failure & e)
+        {
+            throw exception{ error, x.chain() } << "unexpected token: " << e.iter->as<std::string>();
         }
     }
 
