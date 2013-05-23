@@ -103,12 +103,12 @@ namespace reaver
         {
             parser(const reaver::assembler::lexer & lex)
             {
+                symbol = reaver::parser::token(lex.symbol);
                 identifier = reaver::parser::token(lex.identifier);
                 integer = -size >> -symbol({ "+", "-" }) >> reaver::parser::token(lex.integer_literal);
                 fp = reaver::parser::token(lex.fp_literal);
                 character = reaver::parser::token(lex.character);
                 string = reaver::parser::token(lex.string);
-                symbol = reaver::parser::token(lex.symbol);
 
                 not_a_register = identifier - (cpureg | segment_register | size | identifier({ "bits", "extern",
                     "global", "org", "section" }));
