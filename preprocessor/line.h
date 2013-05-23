@@ -66,12 +66,12 @@ namespace reaver
                 return _original;
             }
 
-            uint64_t include_count()
+            uint64_t include_count() const
             {
                 return _include_chain.size();
             }
 
-            include operator[](uint64_t i)
+            include operator[](uint64_t i) const
             {
                 if (i >= _include_chain.size())
                 {
@@ -79,6 +79,11 @@ namespace reaver
                 }
 
                 return _include_chain[i];
+            }
+
+            const include_chain & chain() const
+            {
+                return _include_chain;
             }
 
         private:

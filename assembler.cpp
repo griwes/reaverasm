@@ -46,7 +46,8 @@ reaver::assembler::assembler::assembler(int argc, char ** argv) : _frontend(argc
 
     else
     {
-        reaver::assembler::parser parser{ _frontend };
+        reaver::assembler::lexer lex;
+        reaver::assembler::parser parser{ lex };
         _ast = parser.parse(_lines);
 /*
         reaver::assembler::generator generator(_frontend);
