@@ -37,16 +37,43 @@ namespace reaver
         class ast
         {
         public:
-            void add_label(std::string);
-            void add_global(std::string);
-            void add_extern(std::string);
-            void start_section(std::string);
-            void set_bitness(uint64_t);
-            void add_instruction(const instruction &);
-            void add_data(const data &);
+            void add_label(std::string name)
+            {
+                _labels.insert(std::make_pair(name, _lines.size()));
+            }
+
+            void add_global(std::string name)
+            {
+                _globals.push_back(name);
+            }
+
+            void add_extern(std::string name)
+            {
+                _externs.push_back(name);
+            }
+
+            void start_section(std::string name)
+            {
+                _sections.insert(std::make_pair(_lines.size(), name));
+            }
+
+            void set_bitness(uint64_t bitness)
+            {
+                _bitness_changes.insert(std::make_pair(_lines.size(), bitness));
+            }
+
+            void add_instruction(const instruction & instr)
+            {
+                _lines.push_back({ instr });
+            }
+
+            void add_data(const data & d)
+            {
+                _lines.push_back({ d });
+            }
 
         private:
-            std::vector<boost::variant<instruction, data>> _line;
+            std::vector<boost::variant<instruction, data>> _lines;
             std::map<std::string, uint64_t> _labels; // label name -> instruction index
             std::vector<std::string> _globals;
             std::vector<std::string> _externs;

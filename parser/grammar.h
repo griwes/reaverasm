@@ -104,7 +104,7 @@ namespace reaver
             parser(const reaver::assembler::lexer & lex)
             {
                 identifier = reaver::parser::token(lex.identifier);
-                integer = -override_size >> -symbol({ "+", "-" }) >> reaver::parser::token(lex.integer_literal);
+                integer = -size >> -symbol({ "+", "-" }) >> reaver::parser::token(lex.integer_literal);
                 fp = reaver::parser::token(lex.fp_literal);
                 character = reaver::parser::token(lex.character);
                 string = reaver::parser::token(lex.string);
@@ -120,24 +120,23 @@ namespace reaver
                 segment_register = identifier(segment_registers());
 
                 override_segment = segment_register >> ~symbol({ ":" });
-                override_size = size;
 
-                override_symbol_size = -override_size >> not_a_register;
+                override_symbol_size = -size >> not_a_register;
                 address_operand = cpureg | integer | override_symbol_size;
 
                 // TODO for addresses: allow additional math operators for assemble-time constants
                 address = ~symbol({ "[" }) >> -override_segment > address_operand % symbol({ "+", "-", "*", "/" }) >> ~symbol({ "]" });
 
-                instruction_operand = override_symbol_size | address | cpureg | integer;
+                instruction_operand = cpureg | override_symbol_size | address | integer;
 
-                assembly_instruction = identifier >> instruction_operand % symbol({ "," });
+                assembly_instruction = not_a_register >> instruction_operand % symbol({ "," });
 
                 bits_directive = ~identifier({ "bits" }) > reaver::parser::token(lex.integer_literal);
                 extern_directive = ~identifier({ "extern" }) > not_a_register;
                 global_directive = ~identifier({ "global" }) > not_a_register;
                 // org_directive = ~identifier({ "org" }) > reaver::parser::token(lex.integer_literal);
                 // org will only be made available when raw binary output is in place
-                section_directive = ~identifier({ "section" }) > reaver::parser::token(lex.string);
+                section_directive = ~identifier({ "section" }) > identifier;
 
                 data = identifier({ "db", "dw", "dd", "dq" }) > ((character | string | integer) % symbol({ ","}));
 
@@ -166,7 +165,6 @@ namespace reaver
             reaver::parser::rule< boost::variant<cpu_register, reaver::assembler::integer, size_overriden_identifier>> address_operand;
 
             reaver::parser::rule<cpu_register> override_segment;
-            reaver::parser::rule<std::string> override_size;
             reaver::parser::rule<effective_address> address;
 
             reaver::parser::rule<operand> instruction_operand;

@@ -30,17 +30,18 @@ reaver::assembler::ast reaver::assembler::parser::parse(const std::vector<reaver
     ast ret;
 
     lexer lex{};
-    parser par{ lex };
 
     for (const auto & x : lines)
     {
         try
         {
+            std::cout << "line: " << *x << std::endl;
+
             auto t = reaver::lexer::tokenize(*x, lex.desc);
 
             auto begin = t.cbegin();
 
-            auto label_match = reaver::parser::parse(par.label_definition, begin, t.cend(), par.skip);
+            auto label_match = reaver::parser::parse(label_definition, begin, t.cend(), skip);
 
             if (label_match)
             {
@@ -48,14 +49,16 @@ reaver::assembler::ast reaver::assembler::parser::parse(const std::vector<reaver
             }
 
             {
+                std::cout << "data" << std::endl;
+
                 auto b = begin;
-                auto data_match = reaver::parser::parse(par.data, b, t.cend(), par.skip);
+                auto data_match = reaver::parser::parse(data, b, t.cend(), skip);
 
                 if (data_match)
                 {
                     if (b != t.cend())
                     {
-                        throw "garbage at the end of a line";
+                        throw "garbage at the end of a line.";
                     }
 
                     ret.add_data(*data_match);
@@ -65,14 +68,16 @@ reaver::assembler::ast reaver::assembler::parser::parse(const std::vector<reaver
             }
 
             {
+                std::cout << "bits" << std::endl;
+
                 auto b = begin;
-                auto bits_match = reaver::parser::parse(par.bits_directive, b, t.cend(), par.skip);
+                auto bits_match = reaver::parser::parse(bits_directive, b, t.cend(), skip);
 
                 if (bits_match)
                 {
                     if (b != t.cend())
                     {
-                        throw "garbage at the end of a line";
+                        throw "garbage at the end of a line.";
                     }
 
                     ret.set_bitness(*bits_match);
@@ -82,14 +87,16 @@ reaver::assembler::ast reaver::assembler::parser::parse(const std::vector<reaver
             }
 
             {
+                std::cout << "extern" << std::endl;
+
                 auto b = begin;
-                auto extern_match = reaver::parser::parse(par.extern_directive, b, t.cend(), par.skip);
+                auto extern_match = reaver::parser::parse(extern_directive, b, t.cend(), skip);
 
                 if (extern_match)
                 {
                     if (b != t.cend())
                     {
-                        throw "garbage at the end of a line";
+                        throw "garbage at the end of a line.";
                     }
 
                     ret.add_extern(*extern_match);
@@ -99,14 +106,16 @@ reaver::assembler::ast reaver::assembler::parser::parse(const std::vector<reaver
             }
 
             {
+                std::cout << "global" << std::endl;
+
                 auto b = begin;
-                auto global_match = reaver::parser::parse(par.global_directive, b, t.cend(), par.skip);
+                auto global_match = reaver::parser::parse(global_directive, b, t.cend(), skip);
 
                 if (global_match)
                 {
                     if (b != t.cend())
                     {
-                        throw "garbage at the end of a line";
+                        throw "garbage at the end of a line.";
                     }
 
                     ret.add_global(*global_match);
@@ -116,14 +125,16 @@ reaver::assembler::ast reaver::assembler::parser::parse(const std::vector<reaver
             }
 
             {
+                std::cout << "instruction" << std::endl;
+
                 auto b = begin;
-                auto instruction_match = reaver::parser::parse(par.assembly_instruction, b, t.cend(), par.skip);
+                auto instruction_match = reaver::parser::parse(assembly_instruction, b, t.cend(), skip);
 
                 if (instruction_match)
                 {
                     if (b != t.cend())
                     {
-                        throw "garbage at the end of a line";
+                        throw "garbage at the end of a line.";
                     }
 
                     ret.add_instruction(*instruction_match);
@@ -131,7 +142,7 @@ reaver::assembler::ast reaver::assembler::parser::parse(const std::vector<reaver
                     continue;
                 }
 
-                throw "invalid line";
+                throw "invalid line.";
             }
         }
 
