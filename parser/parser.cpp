@@ -46,6 +46,11 @@ reaver::assembler::ast reaver::assembler::parser::parse(const std::vector<reaver
             if (label_match)
             {
                 ret.add_label(*label_match);
+
+                if (begin == t.cend())
+                {
+                    continue;
+                }
             }
 
             else
@@ -135,12 +140,15 @@ reaver::assembler::ast reaver::assembler::parser::parse(const std::vector<reaver
                 auto b = begin;
                 auto instruction_match = reaver::parser::parse(assembly_instruction, b, t.cend(), skip);
 
-                std::cout << "after instruction" << std::endl;
-
                 if (instruction_match)
                 {
                     if (b != t.cend())
                     {
+                        if (b->as<std::string>() == ",")
+                        {
+                            throw "invalid operand.";
+                        }
+
                         throw "garbage at the end of a line.";
                     }
 

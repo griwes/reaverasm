@@ -56,7 +56,7 @@ namespace reaver
 
         struct lexer
         {
-            lexer() : identifier{ reaver::assembler::identifier, "\\.?[a-zA-Z_][0-9a-zA-Z_]*" },
+            lexer() : identifier{ reaver::assembler::identifier, "[a-zA-Z_\\.][0-9a-zA-Z_\\.]*" },
                 integer_literal{ reaver::assembler::integer_literal, "(0x[0-9a-fA-F]+)|([0-9a-fA-F]+[hH])|(0b[01]+)|([0-9]+)",
                     [](const std::string & str) -> uint64_t
                     {
@@ -110,7 +110,7 @@ namespace reaver
                 character = reaver::parser::token(lex.character);
                 string = reaver::parser::token(lex.string);
 
-                not_a_register = identifier - (cpureg | segment_register | size | identifier({ "bits", "extern",
+                not_a_register = identifier - (cpureg | segment_register | special_register | size | identifier({ "bits", "extern",
                     "global", "org", "section" }));
                 label_definition = not_a_register >> ~symbol({ ":" });
 
@@ -118,6 +118,7 @@ namespace reaver
                 cpureg = identifier(byte_registers()) | identifier(word_registers()) | identifier(dword_registers())
                     | identifier(qword_registers());
                 segment_register = identifier(segment_registers());
+                special_register = identifier(debug_registers()) | identifier(control_registers());
 
                 override_segment = segment_register >> ~symbol({ ":" });
 
@@ -125,9 +126,10 @@ namespace reaver
                 address_operand = cpureg | integer | override_symbol_size;
 
                 // TODO for addresses: allow additional math operators for assemble-time constants
-                address = ~symbol({ "[" }) >> -override_segment > address_operand % symbol({ "+", "-", "*", "/" }) >> ~symbol({ "]" });
+                address = ~symbol({ "[" }) >> -override_segment >> address_operand % symbol({ "+", "-", "*" }) >> ~symbol({ "]" });
 
-                instruction_operand = cpureg | override_symbol_size | address | integer;
+                // also debug and control register v
+                instruction_operand = cpureg | segment_register | special_register | override_symbol_size | address | integer;
 
                 assembly_instruction = not_a_register >> instruction_operand % symbol({ "," });
 
@@ -158,6 +160,7 @@ namespace reaver
             reaver::parser::rule<std::string> size;
             reaver::parser::rule<cpu_register> cpureg;
             reaver::parser::rule<cpu_register> segment_register;
+            reaver::parser::rule<cpu_register> special_register;
 
             // TODO: FP, SSE, AVX and other shenaniganish registers
 

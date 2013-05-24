@@ -10,10 +10,10 @@ mov     ss, cx
 mov     ah, 1
 
 ; mov     ss, 1   ; fail test
-mov     eax, dword [0]
+mov     eax, [0]
 mov     ax, 0xb800
 mov     es, ax
-mov     ecx, dword [es:0]
+mov     ecx, [es:0 + 1]
 
 bits    32
 
@@ -26,4 +26,4 @@ bits    64
 
 mov     rsp, 0
 mov     eax, 0
-mov     qword foo(0, 0), rax
+mov     foo(0, 0), rax
