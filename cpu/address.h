@@ -41,29 +41,12 @@ namespace reaver
         class effective_address : public operand_base
         {
         public:
-            effective_address(boost::optional<cpu_register> seg, const std::vector<boost::variant<cpu_register,
-                integer, size_overriden_identifier>> & v) : _segment{ std::move(seg) }
+            effective_address(boost::optional<cpu_register> seg, operand first, const std::vector<std::tuple<std::string,
+                operand>> & v) : _segment{ std::move(seg) }
             {
                 if (v.size() > 4)
                 {
                     throw "too many address operands for effective address";
-                }
-
-                struct constructor : public boost::static_visitor<operand>
-                {
-                    template<typename T>
-                    operand operator()(const T & t) const
-                    {
-                        return { t };
-                    }
-                };
-
-                std::vector<operand> operands;
-
-                operands.reserve(v.size());
-                for (const auto & x : v)
-                {
-                    operands.push_back(boost::apply_visitor(constructor{}, x));
                 }
 
                 // TODO: parse operands

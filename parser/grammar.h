@@ -126,7 +126,8 @@ namespace reaver
                 address_operand = cpureg | integer | override_symbol_size;
 
                 // TODO for addresses: allow additional math operators for assemble-time constants
-                address = ~symbol({ "[" }) >> -override_segment >> address_operand % symbol({ "+", "-", "*" }) >> ~symbol({ "]" });
+                address = ~symbol({ "[" }) >> -override_segment >> address_operand >> *(symbol({ "+", "-", "*" })
+                    >> address_operand) >> ~symbol({ "]" });
 
                 // also debug and control register v
                 instruction_operand = cpureg | segment_register | special_register | override_symbol_size | address | integer;
@@ -165,7 +166,7 @@ namespace reaver
             // TODO: FP, SSE, AVX and other shenaniganish registers
 
             reaver::parser::rule<size_overriden_identifier> override_symbol_size;
-            reaver::parser::rule<boost::variant<cpu_register, reaver::assembler::integer, size_overriden_identifier>> address_operand;
+            reaver::parser::rule<operand> address_operand;
 
             reaver::parser::rule<cpu_register> override_segment;
             reaver::parser::rule<effective_address> address;
