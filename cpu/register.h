@@ -27,6 +27,7 @@
 
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include <parser/helpers.h>
 
@@ -117,58 +118,64 @@ namespace reaver
         public:
             cpu_register(std::string str) : name{ std::move(str) }
             {
-                if (std::find(debug_registers().begin(), debug_registers().end(), str) != debug_registers().end())
+                if (std::find(debug_registers().begin(), debug_registers().end(), name) != debug_registers().end())
                 {
                     type = debug;
                     return;
                 }
 
-                if (std::find(control_registers().begin(), control_registers().end(), str) != control_registers().end())
+                if (std::find(control_registers().begin(), control_registers().end(), name) != control_registers().end())
                 {
                     type = control;
                     return;
                 }
 
-                if (std::find(segment_registers().begin(), segment_registers().end(), str) != segment_registers().end())
+                if (std::find(segment_registers().begin(), segment_registers().end(), name) != segment_registers().end())
                 {
                     type = segment;
                     return;
                 }
 
-                if (std::find(long_mode_registers().begin(), long_mode_registers().end(), str) != long_mode_registers().end())
+                if (std::find(long_mode_registers().begin(), long_mode_registers().end(), name) != long_mode_registers().end())
                 {
                     long_mode_only = true;
                 }
 
-                if (std::find(byte_registers().begin(), byte_registers().end(), str) != byte_registers().end())
+                if (std::find(byte_registers().begin(), byte_registers().end(), name) != byte_registers().end())
                 {
-                    size = byte;
+                    size_enum = byte;
                 }
 
-                else if (std::find(word_registers().begin(), word_registers().end(), str) != word_registers().end())
+                else if (std::find(word_registers().begin(), word_registers().end(), name) != word_registers().end())
                 {
-                    size = word;
+                    size_enum = word;
                 }
 
-                else if (std::find(dword_registers().begin(), dword_registers().end(), str) != dword_registers().end())
+                else if (std::find(dword_registers().begin(), dword_registers().end(), name) != dword_registers().end())
                 {
-                    size = dword;
+                    size_enum = dword;
                 }
 
-                else if (std::find(qword_registers().begin(), qword_registers().end(), str) != qword_registers().end())
+                else if (std::find(qword_registers().begin(), qword_registers().end(), name) != qword_registers().end())
                 {
-                    size = qword;
+                    long_mode_only = true;
+                    size_enum = qword;
                 }
 
-                if (std::find(rex_enforce_registers().begin(), rex_enforce_registers().end(), str) != rex_enforce_registers().end())
+                if (std::find(rex_enforce_registers().begin(), rex_enforce_registers().end(), name) != rex_enforce_registers().end())
                 {
                     rex = enforce;
                 }
 
-                else if (std::find(rex_disable_registers().begin(), rex_disable_registers().end(), str) != rex_disable_registers().end())
+                else if (std::find(rex_disable_registers().begin(), rex_disable_registers().end(), name) != rex_disable_registers().end())
                 {
                     rex = disable;
                 }
+            }
+
+            virtual uint64_t size() const
+            {
+                return size_enum;
             }
 
             bool long_mode_only = false;
@@ -184,11 +191,11 @@ namespace reaver
             enum sizes
             {
                 implicit,
-                byte,
-                word,
-                dword,
-                qword
-            } size = implicit;
+                byte = 8,
+                word = 16,
+                dword = 32,
+                qword = 64
+            } size_enum = implicit;
 
             enum
             {

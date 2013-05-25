@@ -194,7 +194,7 @@ namespace
 
         const auto & address = op.get_address();
 
-        if ((address.has_base() && address.base().size == reaver::assembler::cpu_register::word) || address.disp().size() <= 16)
+        if ((address.has_base() && address.base().size() == reaver::assembler::cpu_register::word) || address.disp().size() <= 16)
         {
             if (long_mode)
             {
@@ -228,7 +228,7 @@ namespace
                 address.has_disp() ? address.disp().encode(disp_size) : std::vector<reaver::assembler::codepoint>{} };
         }
 
-        if (address.has_base() && address.base().size == reaver::assembler::cpu_register::qword && !long_mode)
+        if (address.has_base() && address.base().size() == reaver::assembler::cpu_register::qword && !long_mode)
         {
             throw "64 bit addressing is only available in long mode";
         }
@@ -402,7 +402,7 @@ std::vector<reaver::assembler::codepoint> reaver::assembler::pmode_generator::ge
         {
             if (x.get_address().has_base())
             {
-                if (x.get_address().base().size == cpu_register::word)
+                if (x.get_address().base().size() == cpu_register::word)
                 {
                     ret.push_back(0x67);
                 }
@@ -519,7 +519,7 @@ std::vector<reaver::assembler::codepoint> reaver::assembler::lmode_generator::ge
         {
             if (x.get_address().has_base())
             {
-                if (x.get_address().base().size == cpu_register::dword)
+                if (x.get_address().base().size() == cpu_register::dword)
                 {
                     ret.push_back(0x67);
                 }

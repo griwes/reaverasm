@@ -35,8 +35,6 @@ reaver::assembler::ast reaver::assembler::parser::parse(const std::vector<reaver
     {
         try
         {
-            std::cout << "line: " << *x << std::endl;
-
             auto t = reaver::lexer::tokenize(*x, lex.desc);
 
             auto begin = t.cbegin();
@@ -59,8 +57,6 @@ reaver::assembler::ast reaver::assembler::parser::parse(const std::vector<reaver
             }
 
             {
-                std::cout << "data" << std::endl;
-
                 auto b = begin;
                 auto data_match = reaver::parser::parse(data, b, t.cend(), skip);
 
@@ -78,8 +74,6 @@ reaver::assembler::ast reaver::assembler::parser::parse(const std::vector<reaver
             }
 
             {
-                std::cout << "bits" << std::endl;
-
                 auto b = begin;
                 auto bits_match = reaver::parser::parse(bits_directive, b, t.cend(), skip);
 
@@ -97,8 +91,6 @@ reaver::assembler::ast reaver::assembler::parser::parse(const std::vector<reaver
             }
 
             {
-                std::cout << "extern" << std::endl;
-
                 auto b = begin;
                 auto extern_match = reaver::parser::parse(extern_directive, b, t.cend(), skip);
 
@@ -116,8 +108,6 @@ reaver::assembler::ast reaver::assembler::parser::parse(const std::vector<reaver
             }
 
             {
-                std::cout << "global" << std::endl;
-
                 auto b = begin;
                 auto global_match = reaver::parser::parse(global_directive, b, t.cend(), skip);
 
@@ -135,8 +125,6 @@ reaver::assembler::ast reaver::assembler::parser::parse(const std::vector<reaver
             }
 
             {
-                std::cout << "instruction" << std::endl;
-
                 auto b = begin;
                 auto instruction_match = reaver::parser::parse(assembly_instruction, b, t.cend(), skip);
 

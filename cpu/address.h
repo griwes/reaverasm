@@ -49,7 +49,26 @@ namespace reaver
                     throw "too many address operands for effective address";
                 }
 
-                // TODO: parse operands
+                uint64_t size = first.is_register() ? first.size() : 0;
+
+                for (const auto & x : v)
+                {
+                    if (std::get<1>(x).is_register())
+                    {
+                        if (!size)
+                        {
+                            size = std::get<1>(x).size();
+                        }
+
+                        else
+                        {
+                            if (size != std::get<1>(x).size())
+                            {
+                                throw "registers of different sizes used in a single effective address.";
+                            }
+                        }
+                    }
+                }
             }
 
             virtual bool has_segment_override() const

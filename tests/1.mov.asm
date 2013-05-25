@@ -15,6 +15,8 @@ mov     ax, 0xb800
 mov     es, ax
 mov     ecx, [es:0 + 1]
 
+mov     ax, [eax]
+
 bits    32
 
 mov     eax, cr0
