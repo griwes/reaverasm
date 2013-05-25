@@ -28,6 +28,7 @@
 #include <memory>
 
 #include <parser/helpers.h>
+#include <cpu/codepoint.h>
 
 namespace reaver
 {
@@ -41,7 +42,7 @@ namespace reaver
             operand(const size_overriden_identifier &);
             operand(const effective_address &);
 
-            std::vector<uint8_t> encode(uint64_t) const
+            std::vector<codepoint> encode(uint64_t) const
             {
                 throw "NIY";
             }

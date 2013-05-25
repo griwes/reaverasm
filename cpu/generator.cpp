@@ -26,6 +26,7 @@
 #include <cpu/generator.h>
 #include <cpu/opcode.h>
 #include <cpu/cpu.h>
+#include <cpu/codepoint.h>
 
 namespace
 {
@@ -179,7 +180,7 @@ namespace
         return reg[op.get_register().name];
     }
 
-    std::pair<uint8_t, std::vector<uint8_t>> _encode_rm(const reaver::assembler::operand & op, bool long_mode = false)
+    std::pair<uint8_t, std::vector<reaver::assembler::codepoint>> _encode_rm(const reaver::assembler::operand & op, bool long_mode = false)
     {
         if (!op.is_register() && !op.is_address())
         {
@@ -224,7 +225,7 @@ namespace
                 ? 8 : 16) : 0;
 
             return { ((disp_size / 8) << 6) | rm[address.base().name][address.has_index() ? address.index().name : ""],
-                address.has_disp() ? address.disp().encode(disp_size) : std::vector<uint8_t>{} };
+                address.has_disp() ? address.disp().encode(disp_size) : std::vector<reaver::assembler::codepoint>{} };
         }
 
         if (address.has_base() && address.base().size == reaver::assembler::cpu_register::qword && !long_mode)
@@ -344,7 +345,7 @@ namespace
     }
 }
 
-std::vector<uint8_t> reaver::assembler::pmode_generator::generate(const reaver::assembler::instruction & i)
+std::vector<reaver::assembler::codepoint> reaver::assembler::pmode_generator::generate(const reaver::assembler::instruction & i)
 {
     auto opcode = _find(i, _bits32 ? bits32 : bits16);
 
@@ -353,7 +354,7 @@ std::vector<uint8_t> reaver::assembler::pmode_generator::generate(const reaver::
         return opcode.code();
     }
 
-    std::vector<uint8_t> ret;
+    std::vector<codepoint> ret;
 
     for (auto & x : i.operands())
     {
@@ -420,7 +421,7 @@ std::vector<uint8_t> reaver::assembler::pmode_generator::generate(const reaver::
     }
 
     uint8_t modrm = 0;
-    std::vector<uint8_t> sibdisp;
+    std::vector<codepoint> sibdisp;
 
     if (opcode.special_reg())
     {
@@ -464,11 +465,11 @@ std::vector<uint8_t> reaver::assembler::pmode_generator::generate(const reaver::
     return ret;
 }
 
-std::vector<uint8_t> reaver::assembler::lmode_generator::generate(const reaver::assembler::instruction & i)
+std::vector<reaver::assembler::codepoint> reaver::assembler::lmode_generator::generate(const reaver::assembler::instruction & i)
 {
     auto opcode = _find(i, bits64);
 
-    std::vector<uint8_t> ret;
+    std::vector<codepoint> ret;
 
     for (auto & x : i.operands())
     {
@@ -549,7 +550,7 @@ std::vector<uint8_t> reaver::assembler::lmode_generator::generate(const reaver::
     }
 
     uint8_t modrm = 0;
-    std::vector<uint8_t> sibdisp;
+    std::vector<codepoint> sibdisp;
 
     if (opcode.special_reg())
     {

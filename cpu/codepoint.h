@@ -25,39 +25,51 @@
 
 #pragma once
 
-#include <vector>
-
-#include <cpu/instruction.h>
+#include <string>
 
 namespace reaver
 {
     namespace assembler
     {
-        class generator
+        class codepoint
         {
         public:
-            virtual ~generator() {}
-
-            virtual std::vector<codepoint> generate(const instruction &) = 0;
-        };
-
-        class pmode_generator : public generator
-        {
-        public:
-            pmode_generator(bool bits32) : _bits32{ bits32 }
+            codepoint(uint8_t code) : _code{ code }
             {
             }
 
-            virtual std::vector<codepoint> generate(const instruction &);
+            codepoint(std::string name, uint64_t size) : _code{ size }, _name{ std::move(name) }
+            {
+            }
+
+            bool is_resolved() const
+            {
+                return _name.empty();
+            }
+
+            uint64_t size() const
+            {
+                return _name.empty() ? 1 : _code;
+            }
+
+            std::string name() const
+            {
+                return _name;
+            }
+
+            uint8_t code() const
+            {
+                if (_code > 255)
+                {
+                    throw "called code() on unresolved codepoint, consider this internal error.";
+                }
+
+                return static_cast<uint8_t>(_code);
+            }
 
         private:
-            bool _bits32;
-        };
-
-        class lmode_generator : public generator
-        {
-        public:
-            virtual std::vector<codepoint> generate(const instruction &);
+            uint64_t _code;
+            std::string _name;
         };
     }
 }

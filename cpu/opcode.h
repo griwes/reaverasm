@@ -30,6 +30,7 @@
 #include <vector>
 
 #include <cpu/operand_matcher.h>
+#include <cpu/codepoint.h>
 
 namespace reaver
 {
@@ -102,7 +103,7 @@ namespace reaver
         class opcode
         {
         public:
-            opcode(std::string mnemonic, std::vector<operand_type> && operands, std::set<mode> && mode, std::vector<uint8_t> && code,
+            opcode(std::string mnemonic, std::vector<operand_type> && operands, std::set<mode> && mode, std::vector<codepoint> && code,
                 int8_t rm_index, int8_t reg_index, bool special_reg) : _mnemonic{ mnemonic }, _operands{ std::move(operands) },
                 _mode{ std::move(mode) }, _code{ std::move(code) }, _rm_index{ rm_index }, _reg_index{ reg_index },
                 _special_reg{ special_reg}
@@ -124,7 +125,7 @@ namespace reaver
                 return _mode;
             }
 
-            const std::vector<uint8_t> & code() const
+            const std::vector<codepoint> & code() const
             {
                 return _code;
             }
@@ -148,7 +149,7 @@ namespace reaver
             std::string _mnemonic;
             std::vector<operand_type> _operands;
             std::set<reaver::assembler::mode> _mode;
-            std::vector<uint8_t> _code;
+            std::vector<codepoint> _code;
             int8_t _rm_index;
             int8_t _reg_index;
             bool _special_reg;
