@@ -122,7 +122,7 @@ namespace reaver
 
                 override_segment = segment_register >> ~symbol({ ":" });
 
-                override_symbol_size = -size >> not_a_register;
+                override_symbol_size = not_a_register | (size >> not_a_register);
                 address_operand = cpureg | integer | override_symbol_size;
 
                 // TODO for addresses: allow additional math operators for assemble-time constants
@@ -140,7 +140,7 @@ namespace reaver
                 // org will only be made available when raw binary output is in place
                 section_directive = ~identifier({ "section" }) > identifier;
 
-                data = identifier({ "db", "dw", "dd", "dq" }) > ((character | string | integer) % symbol({ ","}));
+                data = identifier({ "db", "dw", "dd", "dq" }) > ((character | string | integer) % symbol({ "," }));
 
                 skip = reaver::parser::token(lex.whitespace);
             }
@@ -165,7 +165,7 @@ namespace reaver
             // TODO: FP, SSE, AVX and other shenaniganish registers
 
             reaver::parser::rule<size_overriden_identifier> override_symbol_size;
-            reaver::parser::rule< boost::variant<cpu_register, reaver::assembler::integer, size_overriden_identifier>> address_operand;
+            reaver::parser::rule<boost::variant<cpu_register, reaver::assembler::integer, size_overriden_identifier>> address_operand;
 
             reaver::parser::rule<cpu_register> override_segment;
             reaver::parser::rule<effective_address> address;
