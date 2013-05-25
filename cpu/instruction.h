@@ -38,12 +38,18 @@ namespace reaver
 {
     namespace assembler
     {
+        const std::vector<std::string> & get_known_mnemonics();
+
         class instruction
         {
         public:
-            instruction(std::string mnemonic, const std::vector<operand> & operands) : _mnemonic{ mnemonic }, _operands{
-                operands }
+            instruction(std::string mnemonic, std::vector<operand> operands) : _mnemonic{ std::move(mnemonic) },
+                _operands{ std::move(operands) }
             {
+                if (std::find(get_known_mnemonics().begin(), get_known_mnemonics().end(), _mnemonic) == get_known_mnemonics().end())
+                {
+                    throw "invalid instruction mnemonic.";
+                }
             }
 
             std::string mnemonic() const

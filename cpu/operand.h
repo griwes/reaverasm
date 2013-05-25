@@ -37,10 +37,10 @@ namespace reaver
         class operand
         {
         public:
-            operand(const integer &);
-            operand(const cpu_register &);
-            operand(const size_overriden_identifier &);
-            operand(const effective_address &);
+            operand(integer);
+            operand(cpu_register);
+            operand(size_overriden_identifier);
+            operand(effective_address);
 
             std::vector<codepoint> encode(uint64_t) const
             {

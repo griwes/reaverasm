@@ -115,7 +115,7 @@ namespace reaver
         class cpu_register : public operand_base
         {
         public:
-            cpu_register(std::string str) : name{ str }
+            cpu_register(std::string str) : name{ std::move(str) }
             {
                 if (std::find(debug_registers().begin(), debug_registers().end(), str) != debug_registers().end())
                 {

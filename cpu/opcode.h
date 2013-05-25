@@ -106,7 +106,7 @@ namespace reaver
             opcode(std::string mnemonic, std::vector<operand_type> && operands, std::set<mode> && mode, std::vector<codepoint> && code,
                 int8_t rm_index, int8_t reg_index, bool special_reg) : _mnemonic{ mnemonic }, _operands{ std::move(operands) },
                 _mode{ std::move(mode) }, _code{ std::move(code) }, _rm_index{ rm_index }, _reg_index{ reg_index },
-                _special_reg{ special_reg}
+                _special_reg{ special_reg }
             {
             }
 

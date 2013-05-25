@@ -79,7 +79,7 @@ namespace reaver
         class exception : public std::exception, public reaver::logger::logger_friend
         {
         public:
-            exception(level l = always, include_chain inc = include_chain{}) : _inc{ inc }
+            exception(level l = always, include_chain inc = include_chain{}) : _inc{ std::move(inc) }
             {
                 using reaver::style::style;
                 using reaver::style::colors;
@@ -113,7 +113,7 @@ namespace reaver
                 }
             }
 
-            exception(include_chain inc) : exception{ always, inc }
+            exception(include_chain inc) : exception{ always, std::move(inc) }
             {
             }
 
@@ -191,7 +191,7 @@ namespace reaver
         class exception_note : public exception
         {
         public:
-            exception_note(const exception & exc, const exception & note) : exception{ exc }, _note{ note }
+            exception_note(exception exc, exception note) : exception{ std::move(exc) }, _note{ std::move(note) }
             {
             }
 

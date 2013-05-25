@@ -43,12 +43,13 @@ namespace reaver
             }
 
             define(std::string name, std::string definition, include_chain include_chain)
-                : _name{ name }, _body{ definition }, _inc_chain{ std::move(include_chain) }
+                : _name{ std::move(name) }, _body{ std::move(definition) }, _inc_chain{ std::move(include_chain) }
             {
             }
 
             define(std::string name, std::vector<std::string> params, std::string definition, include_chain include_chain)
-                : _name{ name }, _body{ definition }, _inc_chain{ std::move(include_chain) }, _params{ std::move(params) }
+                : _name{ std::move(name) }, _body{ std::move(definition) }, _inc_chain{ std::move(include_chain) },
+                _params{ std::move(params) }
             {
             }
 

@@ -575,7 +575,7 @@ const std::vector<std::string> & reaver::assembler::get_known_mnemonics()
 {
     if (_mnemonics.empty())
     {
-        for (auto & op : _opcodes)
+        for (auto & op : get_opcodes())
         {
             _mnemonics.push_back(op.first);
         }

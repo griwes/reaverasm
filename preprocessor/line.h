@@ -41,8 +41,8 @@ namespace reaver
         class line
         {
         public:
-            line(std::string line, include_chain chain, std::vector<std::string> original) : _line{ line }, _original{ original },
-                _include_chain{ chain }
+            line(std::string line, include_chain chain, std::vector<std::string> original) : _line{ std::move(line) },
+                _original{ std::move(original) }, _include_chain{ std::move(chain) }
             {
             }
 

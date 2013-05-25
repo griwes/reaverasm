@@ -37,12 +37,12 @@ namespace reaver
     {
         struct size_overriden_identifier : public operand_base
         {
-            size_overriden_identifier(std::string name) : name{ name }
+            size_overriden_identifier(std::string name) : name{ std::move(name) }
             {
             }
 
-            size_overriden_identifier(const boost::optional<std::string> & size, std::string name) : size_override{ size },
-                name{ name }
+            size_overriden_identifier(boost::optional<std::string> size, std::string name) : size_override{ std::move(size) },
+                name{ std::move(name) }
             {
             }
 

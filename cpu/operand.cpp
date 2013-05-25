@@ -29,18 +29,21 @@
 #include <cpu/overrides.h>
 #include <cpu/address.h>
 
-reaver::assembler::operand::operand(const integer & i) : _type{ _integer }, _ptr{ std::make_shared<integer>(i) }
+reaver::assembler::operand::operand(integer i) : _type{ _integer }, _ptr{ std::make_shared<integer>(std::move(i)) }
 {
 }
 
-reaver::assembler::operand::operand(const cpu_register & reg) : _type{ _register }, _ptr{ std::make_shared<cpu_register>(reg) }
+reaver::assembler::operand::operand(cpu_register reg) : _type{ _register }, _ptr{ std::make_shared<cpu_register>
+    (std::move(reg)) }
 {
 }
 
-reaver::assembler::operand::operand(const size_overriden_identifier & l) : _type{ _label }, _ptr{ std::make_shared<size_overriden_identifier>(l) }
+reaver::assembler::operand::operand(size_overriden_identifier l) : _type{ _label }, _ptr{ std::make_shared
+    <size_overriden_identifier>(std::move(l)) }
 {
 }
 
-reaver::assembler::operand::operand(const effective_address & addr) : _type{ _address }, _ptr{ std::make_shared<effective_address>(addr) }
+reaver::assembler::operand::operand(effective_address addr) : _type{ _address }, _ptr{ std::make_shared<effective_address>
+    (std::move(addr)) }
 {
 }

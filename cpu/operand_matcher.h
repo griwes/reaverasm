@@ -203,7 +203,7 @@ namespace reaver
         {
         public:
             template<typename T, typename = typename std::enable_if<std::is_base_of<operand_matcher, T>::value>::type>
-            operand_type(T && t) : _ptr{ std::make_shared<T>(std::move(t)) }
+            operand_type(T && t) : _ptr{ std::make_shared<T>(std::forward<T>(t)) }
             {
             }
 

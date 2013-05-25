@@ -41,8 +41,8 @@ namespace reaver
         class effective_address : public operand_base
         {
         public:
-            effective_address(const boost::optional<cpu_register> seg, const std::vector<boost::variant<cpu_register,
-                integer, size_overriden_identifier>> & v)
+            effective_address(boost::optional<cpu_register> seg, const std::vector<boost::variant<cpu_register,
+                integer, size_overriden_identifier>> & v) : _segment{ std::move(seg) }
             {
                 if (v.size() > 4)
                 {
@@ -67,8 +67,6 @@ namespace reaver
                 }
 
                 // TODO: parse operands
-
-                _segment = seg;
             }
 
             virtual bool has_segment_override() const
