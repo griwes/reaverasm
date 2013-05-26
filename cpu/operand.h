@@ -97,6 +97,11 @@ namespace reaver
                 return _ptr->name();
             }
 
+            const integer & get_integer() const
+            {
+                return _ptr->get_integer();
+            }
+
         private:
             enum
             {

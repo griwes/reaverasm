@@ -47,22 +47,22 @@ namespace reaver
 
             virtual const cpu_register & get_register() const
             {
-                throw "get_register() on non-register operand, consider this internal error";
+                throw "get_register() on non-register operand, consider this internal error.";
             }
 
             virtual std::string name() const
             {
-                throw "name() on unnamed operand, consider this internal error";
+                throw "name() on unnamed operand, consider this internal error.";
             }
 
             virtual uint64_t size() const
             {
-                throw "size() on not-sized operand, consider this internal error";
+                throw "size() on not-sized operand, consider this internal error.";
             }
 
             virtual const cpu_register & get_segment_override() const
             {
-                throw "get_segment_override() called on not-address, consider this internal error";
+                throw "get_segment_override() called on not-address, consider this internal error.";
             }
 
             virtual bool has_segment_override() const
@@ -72,7 +72,12 @@ namespace reaver
 
             virtual const effective_address & get_address() const
             {
-                throw "get_address() on non-address operand, consider this internal error";
+                throw "get_address() on non-address operand, consider this internal error.";
+            }
+
+            virtual const integer & get_integer() const
+            {
+                throw "get_integer() on non-int, consider this internal error.";
             }
         };
 
@@ -126,6 +131,11 @@ namespace reaver
                     case implicit:
                         throw "TODO: implement implicit size() of an integer";
                 }
+            }
+
+            virtual const integer & get_integer() const
+            {
+                return *this;
             }
 
             bool positive;

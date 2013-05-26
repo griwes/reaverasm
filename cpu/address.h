@@ -44,11 +44,6 @@ namespace reaver
             effective_address(boost::optional<cpu_register> seg, operand first, const std::vector<std::tuple<std::string,
                 operand>> & v) : _segment{ std::move(seg) }
             {
-                if (v.size() > 4)
-                {
-                    throw "too many address operands for effective address";
-                }
-
                 uint64_t size = first.is_register() ? first.size() : 0;
 
                 for (const auto & x : v)
@@ -68,6 +63,77 @@ namespace reaver
                             }
                         }
                     }
+                }
+
+                if (std::count_if(v.begin(), v.end(), [](const std::tuple<std::string, operand> & op)
+                    {
+                        return std::get<1>(op).is_register();
+                    }) + first.is_register() > 2)
+                {
+                    throw "invalid effective address.";
+                }
+
+                if (size == 16)
+                {
+                    for (const auto & x : v)
+                    {
+                        if (std::get<0>(x) == "*")
+                        {
+                            throw "invalid effective address.";
+                        }
+                    }
+
+                    for (const auto & x : v)
+                    {
+                        if (std::get<1>(x).is_integer() || std::get<1>(x).is_label())
+                        {
+                            if (!_disp)
+                            {
+                                _disp = std::get<1>(x);
+                            }
+
+                            else
+                            {
+                                throw "address too complex (or you've just hit a current implementation barrier for address complexity).";
+                            }
+                        }
+
+                        else if (std::get<1>(x).is_register())
+                        {
+                            if (_base)
+                            {
+                                if (std::get<1>(x).name() == "si" || std::get<1>(x).name() == "di")
+                                {
+                                    _index = std::get<1>(x).get_register();
+                                    _scale = 1;
+                                }
+
+                                else if ((std::get<1>(x).name() == "bx" || std::get<1>(x).name() == "bp") && (_base->name == "si"
+                                    || _base->name == "di"))
+                                {
+                                    _index = std::get<1>(x).get_register();
+                                    std::swap(_index, _base);
+                                    _scale = 1;
+                                }
+
+                                else
+                                {
+                                    throw "invalid index register.";
+                                }
+                            }
+
+                            else if (std::get<1>(x).name() == "si" || std::get<1>(x).name() == "di" || std::get<1>(x).name()
+                                == "bp" || std::get<1>(x).name() == "bx")
+                            {
+                                _base = std::get<1>(x).get_register();
+                            }
+                        }
+                    }
+                }
+
+                else
+                {
+
                 }
             }
 
@@ -126,7 +192,7 @@ namespace reaver
 
             boost::optional<cpu_register> _base;
             boost::optional<cpu_register> _index;
-            uint64_t _scale = 1;
+            uint64_t _scale = 0;
             boost::optional<operand> _disp;
         };
     }
