@@ -178,6 +178,11 @@ namespace reaver
                 return size_enum;
             }
 
+            virtual const cpu_register & get_register() const
+            {
+                return *this;
+            }
+
             bool long_mode_only = false;
 
             enum types

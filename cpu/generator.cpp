@@ -525,7 +525,7 @@ std::vector<reaver::assembler::codepoint> reaver::assembler::lmode_generator::ge
                 }
             }
 
-            else if (x.get_address().disp().size() == cpu_register::dword)
+            else if (x.get_address().disp().size() == cpu_register::word)
             {
                 ret.push_back(0x67);
             }

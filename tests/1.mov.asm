@@ -13,7 +13,7 @@ mov     ah, 1
 mov     eax, [0]
 mov     ax, 0xb800
 mov     es, ax
-mov     ecx, [es:0 + 1]
+mov     ecx, [es:0]
 
 mov     ax, [eax]
 
@@ -28,4 +28,4 @@ bits    64
 
 mov     rsp, 0
 mov     eax, 0
-mov     foo(0, 0), rax
+mov     foo(0, eax), rax

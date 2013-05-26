@@ -41,23 +41,23 @@ namespace reaver
         class effective_address : public operand_base
         {
         public:
-            effective_address(boost::optional<cpu_register> seg, operand first, const std::vector<std::tuple<std::string,
-                operand>> & v) : _segment{ std::move(seg) }
+            effective_address(boost::optional<cpu_register> seg, operand first, std::vector<std::tuple<std::string,
+                operand>> v) : _segment{ std::move(seg) }
             {
-                uint64_t size = first.is_register() ? first.size() : 0;
+                _size = first.is_register() ? first.size() : 0;
 
                 for (const auto & x : v)
                 {
                     if (std::get<1>(x).is_register())
                     {
-                        if (!size)
+                        if (!_size)
                         {
-                            size = std::get<1>(x).size();
+                            _size = std::get<1>(x).size();
                         }
 
                         else
                         {
-                            if (size != std::get<1>(x).size())
+                            if (_size != std::get<1>(x).size())
                             {
                                 throw "registers of different sizes used in a single effective address.";
                             }
@@ -66,21 +66,31 @@ namespace reaver
                 }
 
                 if (std::count_if(v.begin(), v.end(), [](const std::tuple<std::string, operand> & op)
-                    {
-                        return std::get<1>(op).is_register();
-                    }) + first.is_register() > 2)
+                {
+                    return std::get<1>(op).is_register();
+                }) + first.is_register() > 2)
                 {
                     throw "invalid effective address.";
                 }
 
-                if (size == 16)
+                if (first.is_integer() || first.is_label())
                 {
-                    for (const auto & x : v)
-                    {
-                        if (std::get<0>(x) == "*")
+                    _disp = first;
+                }
+
+                else
+                {
+                    v.push_back(std::make_tuple("+", first.get_register()));
+                }
+
+                if (_size == 16)
+                {
+                    if (std::find_if(v.begin(), v.end(), [](const std::tuple<std::string, operand> & op)
                         {
-                            throw "invalid effective address.";
-                        }
+                            return std::get<0>(op) == "*";
+                        }) != v.end())
+                    {
+                        throw "invalid effective address.";
                     }
 
                     for (const auto & x : v)
@@ -98,7 +108,7 @@ namespace reaver
                             }
                         }
 
-                        else if (std::get<1>(x).is_register())
+                        else
                         {
                             if (_base)
                             {
@@ -133,7 +143,44 @@ namespace reaver
 
                 else
                 {
+                    if (std::find_if(v.begin(), v.end(), [](const std::tuple<std::string, operand> & op)
+                        {
+                            return std::get<0>(op) == "*";
+                        }) != v.end())
+                    {
+                        // TODO:
+                        throw "index register scale not yet implemented.";
+                    }
 
+                    for (const auto & x : v)
+                    {
+                        if (std::get<1>(x).is_integer() || std::get<1>(x).is_label())
+                        {
+                            if (!_disp)
+                            {
+                                _disp = std::get<1>(x);
+                            }
+
+                            else
+                            {
+                                throw "address too complex (or you've just hit a current implementation barrier for address complexity).";
+                            }
+                        }
+
+                        else
+                        {
+                            if (!_base)
+                            {
+                                _base = std::get<1>(x).get_register();
+                            }
+
+                            else
+                            {
+                                _index = std::get<1>(x).get_register();
+                                _scale = 1;
+                            }
+                        }
+                    }
                 }
             }
 
@@ -187,6 +234,11 @@ namespace reaver
                 return *_disp;
             }
 
+            uint64_t size() const
+            {
+                return _size;
+            }
+
         private:
             boost::optional<cpu_register> _segment;
 
@@ -194,6 +246,8 @@ namespace reaver
             boost::optional<cpu_register> _index;
             uint64_t _scale = 0;
             boost::optional<operand> _disp;
+
+            uint64_t _size = 0;
         };
     }
 }
