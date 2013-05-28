@@ -34,6 +34,8 @@ namespace reaver
 {
     namespace assembler
     {
+        class section;
+
         class ast
         {
         public:
@@ -71,6 +73,23 @@ namespace reaver
             {
                 _lines.emplace_back(std::move(d));
             }
+
+            bool is_local(const std::string & name) const
+            {
+                if (_labels.find(name) != _labels.end())
+                {
+                    return true;
+                }
+
+                else if (std::find(_externs.begin(), _externs.end(), name) != _externs.end())
+                {
+                    return false;
+                }
+
+                throw "unknown symbol used.";
+            }
+
+            std::map<std::string, section> assemble() const;
 
         private:
             std::vector<boost::variant<instruction, data>> _lines;

@@ -28,59 +28,61 @@
 #include <string>
 #include <vector>
 
+#include <cpu/codepoint.h>
+#include <output/relocation.h>
+#include <parser/ast.h>
+
 namespace reaver
 {
     namespace assembler
     {
-        class codepoint
+        class section
         {
         public:
-            codepoint(uint8_t code) : _code{ code }
+            section(const ast & a) : _ast{ a }
             {
             }
 
-            codepoint(std::string name, uint64_t size) : _code{ size }, _name{ std::move(name) }
+            void push(codepoint c)
             {
+                _blob.emplace_back(std::move(c));
             }
 
-            bool is_resolved() const
+            std::vector<uint8_t> blob() const
             {
-                return _name.empty();
-            }
+                std::vector<uint8_t> ret;
 
-            uint64_t size() const
-            {
-                return _name.empty() ? 1 : _code;
-            }
-
-            std::string name() const
-            {
-                return _name;
-            }
-
-            uint8_t code() const
-            {
-                if (_code > 255)
+                for (const auto & x : _blob)
                 {
-                    throw "called code() on unresolved codepoint, consider this internal error.";
+                    auto v = x.encode();
+                    std::copy(v.begin(), v.end(), ret.end());
                 }
 
-                return static_cast<uint8_t>(_code);
+                return ret;
             }
 
-            std::vector<uint8_t> encode() const
+            std::vector<relocation> relocations() const
             {
-                if (_name.empty())
+                uint64_t offset = 0;
+                std::vector<relocation> ret;
+
+                for (const auto & x : _blob)
                 {
-                    return { code() };
+                    if (!x.is_resolved())
+                    {
+                        ret.emplace_back(x.name(), _name, offset, _ast.is_local(x.name()));
+                    }
+
+                    offset += x.size();
                 }
 
-                return std::vector<uint8_t>(_code);
+                return ret;
             }
 
         private:
-            uint64_t _code;
             std::string _name;
+            std::vector<codepoint> _blob;
+            const ast & _ast;
         };
     }
 }
