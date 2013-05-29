@@ -116,58 +116,60 @@ namespace reaver
         class cpu_register : public operand_base
         {
         public:
-            cpu_register(std::string str) : name{ std::move(str) }
+            cpu_register(std::string str) : register_name{ std::move(str) }
             {
-                if (std::find(debug_registers().begin(), debug_registers().end(), name) != debug_registers().end())
+                if (std::find(debug_registers().begin(), debug_registers().end(), register_name) != debug_registers().end())
                 {
                     type = debug;
                     return;
                 }
 
-                if (std::find(control_registers().begin(), control_registers().end(), name) != control_registers().end())
+                if (std::find(control_registers().begin(), control_registers().end(), register_name) != control_registers().end())
                 {
                     type = control;
                     return;
                 }
 
-                if (std::find(segment_registers().begin(), segment_registers().end(), name) != segment_registers().end())
+                if (std::find(segment_registers().begin(), segment_registers().end(), register_name) != segment_registers().end())
                 {
                     type = segment;
                     return;
                 }
 
-                if (std::find(long_mode_registers().begin(), long_mode_registers().end(), name) != long_mode_registers().end())
+                if (std::find(long_mode_registers().begin(), long_mode_registers().end(), register_name) != long_mode_registers().end())
                 {
                     long_mode_only = true;
                 }
 
-                if (std::find(byte_registers().begin(), byte_registers().end(), name) != byte_registers().end())
+                if (std::find(byte_registers().begin(), byte_registers().end(), register_name) != byte_registers().end())
                 {
                     size_enum = byte;
                 }
 
-                else if (std::find(word_registers().begin(), word_registers().end(), name) != word_registers().end())
+                else if (std::find(word_registers().begin(), word_registers().end(), register_name) != word_registers().end())
                 {
                     size_enum = word;
                 }
 
-                else if (std::find(dword_registers().begin(), dword_registers().end(), name) != dword_registers().end())
+                else if (std::find(dword_registers().begin(), dword_registers().end(), register_name) != dword_registers().end())
                 {
                     size_enum = dword;
                 }
 
-                else if (std::find(qword_registers().begin(), qword_registers().end(), name) != qword_registers().end())
+                else if (std::find(qword_registers().begin(), qword_registers().end(), register_name) != qword_registers().end())
                 {
                     long_mode_only = true;
                     size_enum = qword;
                 }
 
-                if (std::find(rex_enforce_registers().begin(), rex_enforce_registers().end(), name) != rex_enforce_registers().end())
+                if (std::find(rex_enforce_registers().begin(), rex_enforce_registers().end(), register_name)
+                    != rex_enforce_registers().end())
                 {
                     rex = enforce;
                 }
 
-                else if (std::find(rex_disable_registers().begin(), rex_disable_registers().end(), name) != rex_disable_registers().end())
+                else if (std::find(rex_disable_registers().begin(), rex_disable_registers().end(), register_name)
+                    != rex_disable_registers().end())
                 {
                     rex = disable;
                 }
@@ -181,6 +183,11 @@ namespace reaver
             virtual const cpu_register & get_register() const
             {
                 return *this;
+            }
+
+            virtual std::string name() const
+            {
+                return register_name;
             }
 
             bool long_mode_only = false;
@@ -209,7 +216,7 @@ namespace reaver
                 disable
             } rex = na;
 
-            std::string name;
+            std::string register_name;
         };
     }
 }

@@ -41,15 +41,21 @@ namespace
             {
                 if (current->second.operands().size() == i.operands().size())
                 {
+                    bool non_matched = false;
+
                     for (uint64_t c = 0; c < i.operands().size(); ++c)
                     {
                         if (!current->second.operands()[c].match(i.operands()[c]))
                         {
+                            non_matched = true;
                             break;
                         }
                     }
 
-                    return current->second;
+                    if (!non_matched)
+                    {
+                        return current->second;
+                    }
                 }
             }
 
@@ -177,7 +183,7 @@ namespace
             throw "invalid operand type for `reg` field";
         }
 
-        return reg[op.get_register().name];
+        return reg[op.get_register().register_name];
     }
 
     std::pair<uint8_t, std::vector<reaver::assembler::codepoint>> _encode_rm(const reaver::assembler::operand & op, bool long_mode = false)
@@ -224,7 +230,7 @@ namespace
             uint64_t disp_size = address.has_disp() ? (address.disp().size() == reaver::assembler::cpu_register::byte
                 ? 8 : 16) : 0;
 
-            return { ((disp_size / 8) << 6) | rm[address.base().name][address.has_index() ? address.index().name : ""],
+            return { ((disp_size / 8) << 6) | rm[address.base().register_name][address.has_index() ? address.index().register_name : ""],
                 address.has_disp() ? address.disp().encode(disp_size) : std::vector<reaver::assembler::codepoint>{} };
         }
 
@@ -299,15 +305,15 @@ namespace
                 }
             }
 
-            else if (address.base().name == "rbp" || address.base().name == "ebp" || address.base().name == "r13"
-                || address.base().name == "r13d")
+            else if (address.base().register_name == "rbp" || address.base().register_name == "ebp" || address.base().register_name == "r13"
+                || address.base().register_name == "r13d")
             {
                 if (!address.has_disp())
                 {
-                    return { (1 << 6) | rm[address.base().name], { 0 } };
+                    return { (1 << 6) | rm[address.base().register_name], { 0 } };
                 }
 
-                return { ((address.disp().size() == 8 ? 1 : 2) << 6) | rm[address.base().name], address.disp()
+                return { ((address.disp().size() == 8 ? 1 : 2) << 6) | rm[address.base().register_name], address.disp()
                     .encode(address.disp().size() == 8 ? 8 : 32) };
             }
 
@@ -315,11 +321,11 @@ namespace
             {
                 if (!address.has_disp())
                 {
-                    return { rm[address.base().name], {} };
+                    return { rm[address.base().register_name], {} };
                 }
 
                 return { ((address.base().long_mode_only << 4) | (address.disp().size() == 8 ? 1 : 2) << 6)
-                    | rm[address.base().name], address.disp().encode(address.disp().size() == 8 ? 8 : 32) };
+                    | rm[address.base().register_name], address.disp().encode(address.disp().size() == 8 ? 8 : 32) };
             }
         }
 
@@ -327,10 +333,10 @@ namespace
         {
             bool b = false, x = false;
             uint8_t sib = address.scale() << 6;
-            sib |= (rm[address.index().name] & 7) << 3;
-            sib |= rm[address.base().name] & 7;
-            b = long_mode && (rm[address.base().name] & 8);
-            x = long_mode && (rm[address.index().name] & 8);
+            sib |= (rm[address.index().register_name] & 7) << 3;
+            sib |= rm[address.base().register_name] & 7;
+            b = long_mode && (rm[address.base().register_name] & 8);
+            x = long_mode && (rm[address.index().register_name] & 8);
 
             if (!address.has_disp())
             {
@@ -360,7 +366,7 @@ std::vector<reaver::assembler::codepoint> reaver::assembler::pmode_generator::ge
     {
         if (x.has_segment_override())
         {
-            const auto & name = x.get_segment_override().name;
+            const auto & name = x.get_segment_override().register_name;
 
             if (name == "cs")
             {
@@ -477,7 +483,7 @@ std::vector<reaver::assembler::codepoint> reaver::assembler::lmode_generator::ge
         {
             // TODO: ignored segment warnings
 
-            auto name = x.get_segment_override().name;
+            auto name = x.get_segment_override().register_name;
 
             if (name == "cs")
             {

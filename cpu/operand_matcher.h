@@ -41,7 +41,7 @@ namespace reaver
 
             virtual uint64_t size() const
             {
-                throw "called size() on not-sized operand matcher; consider this an internal error";
+                throw "called size() on not-sized operand matcher; consider this an internal error.";
             }
         };
 
@@ -60,7 +60,7 @@ namespace reaver
             {
                 if (op.is_register())
                 {
-                    if (_size && op.size() == _size)
+                    if (_name.empty() && op.size() == _size)
                     {
                         return true;
                     }

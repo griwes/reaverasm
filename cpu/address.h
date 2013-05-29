@@ -118,8 +118,8 @@ namespace reaver
                                     _scale = 1;
                                 }
 
-                                else if ((std::get<1>(x).name() == "bx" || std::get<1>(x).name() == "bp") && (_base->name == "si"
-                                    || _base->name == "di"))
+                                else if ((std::get<1>(x).name() == "bx" || std::get<1>(x).name() == "bp") && (_base->register_name == "si"
+                                    || _base->register_name == "di"))
                                 {
                                     _index = std::get<1>(x).get_register();
                                     std::swap(_index, _base);
