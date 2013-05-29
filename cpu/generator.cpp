@@ -447,7 +447,7 @@ std::vector<reaver::assembler::codepoint> reaver::assembler::pmode_generator::ge
         sibdisp = enc.second;
     }
 
-    std::copy(opcode.code().begin(), opcode.code().end(), ret.end());
+    std::copy(opcode.code().begin(), opcode.code().end(), std::back_inserter(ret));
 
     if (opcode.reg_index() != -1 || opcode.rm_index() != -1)
     {
@@ -592,7 +592,7 @@ std::vector<reaver::assembler::codepoint> reaver::assembler::lmode_generator::ge
         ret.push_back(enc_rex);
     }
 
-    std::copy(opcode.code().begin(), opcode.code().end(), ret.end());
+    std::copy(opcode.code().begin(), opcode.code().end(), std::back_inserter(ret));
 
     if (opcode.reg_index() != -1 || opcode.rm_index() != -1)
     {

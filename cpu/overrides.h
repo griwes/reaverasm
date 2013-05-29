@@ -46,9 +46,14 @@ namespace reaver
             {
             }
 
-            virtual std::string name() const override
+            virtual std::string name() const
             {
                 return symbol_name;
+            }
+
+            virtual std::vector<codepoint> encode(uint64_t size) const
+            {
+                return { { symbol_name, size } };
             }
 
             boost::optional<std::string> size_override;

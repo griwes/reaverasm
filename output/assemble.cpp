@@ -41,7 +41,7 @@ std::map<std::string, reaver::assembler::section> reaver::assembler::ast::assemb
     lmode_generator gen64{};
 
     std::array<std::reference_wrapper<reaver::assembler::generator>, 3> generators = {{ gen16, gen32, gen64 }};
-    std::reference_wrapper<reaver::assembler::generator> & generator = generators[1];
+    std::reference_wrapper<reaver::assembler::generator> & generator = generators[2];
 
     for (uint64_t i = 0; i < _lines.size(); ++i)
     {

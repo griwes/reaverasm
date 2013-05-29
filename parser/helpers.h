@@ -30,6 +30,8 @@
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
 
+#include <cpu/codepoint.h>
+
 namespace reaver
 {
     namespace assembler
@@ -47,22 +49,22 @@ namespace reaver
 
             virtual const cpu_register & get_register() const
             {
-                throw "get_register() on non-register operand, consider this internal error.";
+                throw "get_register() on non-register operand, consider this an internal error.";
             }
 
             virtual std::string name() const
             {
-                throw "name() on unnamed operand, consider this internal error.";
+                throw "name() on unnamed operand, consider this an internal error.";
             }
 
             virtual uint64_t size() const
             {
-                throw "size() on not-sized operand, consider this internal error.";
+                throw "size() on not-sized operand, consider this an internal error.";
             }
 
             virtual const cpu_register & get_segment_override() const
             {
-                throw "get_segment_override() called on not-address, consider this internal error.";
+                throw "get_segment_override() called on not-address, consider this an internal error.";
             }
 
             virtual bool has_segment_override() const
@@ -72,12 +74,17 @@ namespace reaver
 
             virtual const effective_address & get_address() const
             {
-                throw "get_address() on non-address operand, consider this internal error.";
+                throw "get_address() on non-address operand, consider this an internal error.";
             }
 
             virtual const integer & get_integer() const
             {
-                throw "get_integer() on non-int, consider this internal error.";
+                throw "get_integer() on non-int, consider this an internal error.";
+            }
+
+            virtual std::vector<codepoint> encode(uint64_t size) const
+            {
+                throw "encode() on operand not encodable directly, consider this an internal error.";
             }
         };
 
@@ -129,13 +136,81 @@ namespace reaver
                     case qword:
                         return 64;
                     case implicit:
-                        throw "TODO: implement implicit size() of an integer";
+                        if (positive)
+                        {
+                            if (value <= std::numeric_limits<uint8_t>::max())
+                            {
+                                return 8;
+                            }
+
+                            if (value <= std::numeric_limits<uint16_t>::max())
+                            {
+                                return 16;
+                            }
+
+                            if (value <= std::numeric_limits<uint32_t>::max())
+                            {
+                                return 32;
+                            }
+
+                            if (value <= std::numeric_limits<uint64_t>::max())
+                            {
+                                return 64;
+                            }
+
+                            throw "bigints not implemented yet.";
+                        }
+
+                        else
+                        {
+                            if (-static_cast<int64_t>(value) >= std::numeric_limits<int8_t>::min())
+                            {
+                                return 8;
+                            }
+
+                            if (-static_cast<int64_t>(value) >= std::numeric_limits<int16_t>::min())
+                            {
+                                return 16;
+                            }
+
+                            if (-static_cast<int64_t>(value) >= std::numeric_limits<int32_t>::min())
+                            {
+                                return 32;
+                            }
+
+                            if (-static_cast<int64_t>(value) >= std::numeric_limits<int64_t>::min())
+                            {
+                                return 64;
+                            }
+
+                            throw "bigints not implemented yet.";
+                        }
                 }
             }
 
             virtual const integer & get_integer() const
             {
                 return *this;
+            }
+
+            virtual std::vector<codepoint> encode(uint64_t size) const
+            {
+                std::vector<codepoint> ret;
+                ret.reserve(size / 8);
+
+                uint64_t v = value;
+
+                if (!positive)
+                {
+                    v = -static_cast<int64_t>(value);
+                }
+
+                for (uint64_t i = 0; i < size; i += 8)
+                {
+                    ret.push_back((v >> i) & 0xFF);
+                }
+
+                return ret;
             }
 
             bool positive;

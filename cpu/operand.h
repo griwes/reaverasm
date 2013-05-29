@@ -42,9 +42,9 @@ namespace reaver
             operand(size_overriden_identifier);
             operand(effective_address);
 
-            std::vector<codepoint> encode(uint64_t) const
+            std::vector<codepoint> encode(uint64_t size) const
             {
-                throw "NIY";
+                return _ptr->encode(size);
             }
 
             bool is_register() const
