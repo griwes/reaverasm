@@ -78,7 +78,7 @@ namespace reaver
 
         inline const std::vector<std::string> & dword_registers()
         {
-            static std::vector<std::string> ret = { "eax", "ebx", "ecx", "edx", "esp", "ebp", "esi", "ebi", "r8d", "r9d",
+            static std::vector<std::string> ret = { "eax", "ebx", "ecx", "edx", "esp", "ebp", "esi", "edi", "r8d", "r9d",
                 "r10d", "r11d", "r12d", "r13d", "r14d", "r15d" };
 
             return ret;

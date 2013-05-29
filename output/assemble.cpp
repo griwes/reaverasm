@@ -76,7 +76,7 @@ std::map<std::string, reaver::assembler::section> reaver::assembler::ast::assemb
 
         catch (const char * e)
         {
-            std::cout << "in (ast's) line " << i << ": " << e << std::endl;
+            std::cout << "in (ast's) line " << i + 1 << ": " << e << std::endl;
             throw std::runtime_error{"foo"};
         }
     }

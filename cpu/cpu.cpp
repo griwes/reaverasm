@@ -119,8 +119,8 @@ const std::multimap<std::string, reaver::assembler::opcode> & reaver::assembler:
         _add("bts", { rm32, imm8 }, { all, mode32 }, { 0x0F, 0xBA }, 0, 5, true);
         _add("bts", { rm64, imm8 }, { bits64, rexw }, { 0x0F, 0xBA }, 0, 5, true);
 
-        _add("call", { rel16 }, { bits16, bits32, mode16 }, { 0xE8 }, 0);
-        _add("call", { rel32 }, { all, mode32 }, { 0xE8 }, 0);
+        _add("call", { rel16 }, { bits16, bits32, mode16 }, { 0xE8 });
+        _add("call", { rel32 }, { all, mode32 }, { 0xE8 });
         _add("call", { rm16 }, { bits16, bits32, mode16 }, { 0xFF }, 0, 2, true);
         _add("call", { rm32 }, { bits16, bits32, mode32 }, { 0xFF }, 0, 2, true);
         _add("call", { rm64 }, { bits64 }, { 0xFF }, 0, 2, true);
