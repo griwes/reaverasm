@@ -58,20 +58,7 @@ namespace reaver
 
             virtual bool operator()(const operand & op) const
             {
-                if (op.is_register())
-                {
-                    if (_name.empty() && op.size() == _size)
-                    {
-                        return true;
-                    }
-
-                    if (op.name() == _name)
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
+                return op.is_register() && ((_name.empty() && op.size() == _size) || op.name() == _name);
             }
 
             virtual uint64_t size() const
@@ -93,15 +80,7 @@ namespace reaver
 
             virtual bool operator()(const operand & op) const
             {
-                if (op.is_integer() || op.is_label())
-                {
-                    if (op.size() <= _size)
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
+                return op.is_label() || (op.is_integer() && op.size() <= _size);
             }
 
             virtual uint64_t size() const
@@ -135,17 +114,7 @@ namespace reaver
 
             virtual bool operator()(const operand & op) const
             {
-                if (op.is_address())
-                {
-                    return true;
-                }
-
-                if (op.is_register() && op.size() <= _size)
-                {
-                    return true;
-                }
-
-                return false;
+                return op.is_address() || (op.is_register() && op.size() <= _size);
             }
 
             virtual uint64_t size() const
@@ -166,15 +135,7 @@ namespace reaver
 
             virtual bool operator()(const operand & op) const
             {
-                if (op.is_register())
-                {
-                    if (op.get_register().type == _type)
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
+                return op.is_register() && op.get_register().type == _type;
             }
 
         private:
@@ -190,12 +151,7 @@ namespace reaver
 
             virtual bool operator()(const operand & op) const
             {
-                if (op.is_address())
-                {
-                    return op.has_segment_override();
-                }
-
-                return false;
+                return op.is_address() && op.has_segment_override();
             }
         };
 
