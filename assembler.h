@@ -64,6 +64,7 @@ namespace reaver
             std::string _name;
             std::string _buffer;
             std::vector<line> _lines;
+            std::map<std::string, section> _sections;
 
             ast _ast;
         };

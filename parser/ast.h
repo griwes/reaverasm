@@ -28,6 +28,7 @@
 #include <vector>
 #include <map>
 
+#include <frontend.h>
 #include <cpu/instruction.h>
 
 namespace reaver
@@ -89,9 +90,10 @@ namespace reaver
                 throw "unknown symbol used.";
             }
 
-            std::map<std::string, section> assemble() const;
+            std::map<std::string, section> assemble(const frontend &) const;
 
         private:
+            // TODO: include_chain!!!
             std::vector<boost::variant<instruction, data>> _lines;
             std::map<std::string, uint64_t> _labels; // label name -> instruction index
             std::vector<std::string> _globals;

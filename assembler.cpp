@@ -28,6 +28,7 @@
 #include <assembler.h>
 #include <preprocessor/preprocessor.h>
 #include <parser/grammar.h>
+#include <output/section.h>
 
 reaver::assembler::assembler::assembler(int argc, char ** argv) : _frontend(argc, argv)
 {
@@ -49,10 +50,12 @@ reaver::assembler::assembler::assembler(int argc, char ** argv) : _frontend(argc
         reaver::assembler::lexer lex;
         reaver::assembler::parser parser{ lex };
         _ast = parser.parse(_lines);
-/*
-        reaver::assembler::generator generator(_frontend);
-        _frontend.output().write(generator.generate());
-*/    }
+
+        _sections = _ast.assemble(_frontend);
+
+        // elf_output output; // temporarily here, until proper output mode switching is in place
+        // output.output(_sections, _frontend.output());
+    }
 }
 
 reaver::assembler::assembler::~assembler()

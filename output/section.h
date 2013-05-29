@@ -39,7 +39,7 @@ namespace reaver
         class section
         {
         public:
-            section(const ast & a) : _ast{ a }
+            section(std::string name, const ast & a) : _name{ std::move(name) }, _ast{ a }
             {
             }
 
@@ -70,7 +70,7 @@ namespace reaver
                 {
                     if (!x.is_resolved())
                     {
-                        ret.emplace_back(x.name(), _name, offset, _ast.is_local(x.name()));
+                        ret.emplace_back(x.name(), offset, _name, _ast.is_local(x.name()) ? 0 : -4);
                     }
 
                     offset += x.size();
@@ -82,6 +82,7 @@ namespace reaver
         private:
             std::string _name;
             std::vector<codepoint> _blob;
+            std::map<std::string, uint64_t> _symbols;
             const ast & _ast;
         };
     }

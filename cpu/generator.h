@@ -44,7 +44,7 @@ namespace reaver
         class pmode_generator : public generator
         {
         public:
-            pmode_generator(bool bits32) : _bits32{ bits32 }
+            pmode_generator(bool bits32 = true) : _bits32{ bits32 }
             {
             }
 

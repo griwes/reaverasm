@@ -23,12 +23,63 @@
  *
  **/
 
+#include <array>
+
 #include <parser/ast.h>
 #include <output/section.h>
+#include <cpu/generator.h>
 
-std::map<std::string, reaver::assembler::section> reaver::assembler::ast::assemble() const
+std::map<std::string, reaver::assembler::section> reaver::assembler::ast::assemble(const reaver::assembler::frontend &) const
 {
-    std::map<std::string, reaver::assembler::section> ret;
+    std::map<std::string, section> ret;
+
+    ret.emplace(std::make_pair(".text", section{ ".text", *this }));
+    std::string section = ".text";
+
+    pmode_generator gen16{ false };
+    pmode_generator gen32{};
+    lmode_generator gen64{};
+
+    std::array<std::reference_wrapper<reaver::assembler::generator>, 3> generators = {{ gen16, gen32, gen64 }};
+    std::reference_wrapper<reaver::assembler::generator> & generator = generators[1];
+
+    for (uint64_t i = 0; i < _lines.size(); ++i)
+    {
+        try
+        {
+            if (_bitness_changes.find(i) != _bitness_changes.end())
+            {
+                generator = generators[_bitness_changes.at(i) >> 5];
+            }
+
+            else if (_sections.find(i) != _sections.end())
+            {
+                section = _sections.at(i);
+
+                if (ret.find(section) == ret.end())
+                {
+                    ret.emplace(std::make_pair(section, reaver::assembler::section{ section, *this }));
+                }
+            }
+
+            else
+            {
+                if (_lines.at(i).which() == 0)
+                {
+                    for (auto && x : generator.get().generate(boost::get<instruction>(_lines.at(i))))
+                    {
+                        ret.at(".text").push(std::move(x));
+                    }
+                }
+            }
+        }
+
+        catch (const char * e)
+        {
+            std::cout << "in (ast's) line " << i << ": " << e << std::endl;
+            throw std::runtime_error{"foo"};
+        }
+    }
 
     return ret;
 }
