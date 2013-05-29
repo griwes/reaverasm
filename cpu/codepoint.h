@@ -75,7 +75,7 @@ namespace reaver
                     return { code() };
                 }
 
-                return std::vector<uint8_t>(_code);
+                return std::vector<uint8_t>(_code / 8);
             }
 
         private:

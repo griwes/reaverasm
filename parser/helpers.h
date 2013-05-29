@@ -195,6 +195,11 @@ namespace reaver
 
             virtual std::vector<codepoint> encode(uint64_t size) const
             {
+                if (size > 64)
+                {
+                    std::abort();
+                }
+
                 std::vector<codepoint> ret;
                 ret.reserve(size / 8);
 
@@ -207,7 +212,7 @@ namespace reaver
 
                 for (uint64_t i = 0; i < size; i += 8)
                 {
-                    ret.push_back((v >> i) & 0xFF);
+                    ret.emplace_back<>(i < 64 ? (v >> i) & 0xFF : 0);
                 }
 
                 return ret;

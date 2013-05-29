@@ -55,7 +55,7 @@ namespace reaver
                 for (const auto & x : _blob)
                 {
                     auto v = x.encode();
-                    std::copy(v.begin(), v.end(), ret.end());
+                    std::copy(v.begin(), v.end(), std::back_inserter(ret));
                 }
 
                 return ret;

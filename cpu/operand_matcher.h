@@ -63,7 +63,7 @@ namespace reaver
 
             virtual uint64_t size() const
             {
-                return _size * 8;
+                return _size;
             }
 
         private:
@@ -85,7 +85,7 @@ namespace reaver
 
             virtual uint64_t size() const
             {
-                return _size * 8;
+                return _size;
             }
 
         private:
@@ -119,7 +119,7 @@ namespace reaver
 
             virtual uint64_t size() const
             {
-                return _size * 8;
+                return _size;
             }
 
         private:

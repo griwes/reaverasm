@@ -24,6 +24,7 @@
  **/
 
 #include <array>
+#include <iomanip>
 
 #include <parser/ast.h>
 #include <output/section.h>
@@ -80,6 +81,13 @@ std::map<std::string, reaver::assembler::section> reaver::assembler::ast::assemb
             throw std::runtime_error{"foo"};
         }
     }
+
+    std::cout << std::hex;
+    for (const auto & x : ret.at(".text").blob())
+    {
+        std::cout << std::setfill('0') << std::setw(2) << (uint64_t)x << " ";
+    }
+    std::cout << std::endl;
 
     return ret;
 }
