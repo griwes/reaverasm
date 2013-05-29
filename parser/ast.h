@@ -57,22 +57,22 @@ namespace reaver
 
             void start_section(std::string name)
             {
-                _sections.emplace(std::make_pair(_lines.size(), std::move(name)));
+                _sections[_lines.size()] = std::move(name);
             }
 
             void set_bitness(uint64_t bitness)
             {
-                _bitness_changes.emplace(std::make_pair(_lines.size(), bitness));
+                _bitness_changes[_lines.size()] = bitness;
             }
 
             void add_instruction(const instruction & instr)
             {
-                _lines.emplace_back(std::move(instr));
+                _lines.emplace_back(instr);
             }
 
             void add_data(const data & d)
             {
-                _lines.emplace_back(std::move(d));
+                _lines.emplace_back(d);
             }
 
             bool is_local(const std::string & name) const

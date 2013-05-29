@@ -195,7 +195,7 @@ namespace
 
         if (op.is_register())
         {
-            return { 3 << 6 | _encode_reg(op), {} };
+            return { (3 << 6) | _encode_reg(op), {} };
         }
 
         const auto & address = op.get_address();
@@ -437,7 +437,7 @@ std::vector<reaver::assembler::codepoint> reaver::assembler::pmode_generator::ge
 
     else if (opcode.reg_index() != -1)
     {
-        modrm |= _encode_reg(i.operands()[opcode.reg_index()]);
+        modrm |= _encode_reg(i.operands()[opcode.reg_index()]) << 3;
     }
 
     if (opcode.rm_index() != -1)
@@ -472,7 +472,7 @@ std::vector<reaver::assembler::codepoint> reaver::assembler::pmode_generator::ge
 
     for (int8_t c = 0 + noreg; static_cast<uint8_t>(c) < i.operands().size(); ++c)
     {
-        if (opcode.rm_index() != c || (!opcode.special_reg() && opcode.reg_index() != c))
+        if (opcode.rm_index() != c && (!opcode.special_reg() && opcode.reg_index() != c))
         {
             if (i.operands()[c].is_register())
             {
@@ -641,7 +641,7 @@ std::vector<reaver::assembler::codepoint> reaver::assembler::lmode_generator::ge
 
     for (int8_t c = 0 + noreg; static_cast<uint8_t>(c) < i.operands().size(); ++c)
     {
-        if (opcode.rm_index() != c || (!opcode.special_reg() && opcode.reg_index() != c))
+        if (opcode.rm_index() != c && (!opcode.special_reg() && opcode.reg_index() != c))
         {
             if (i.operands()[c].is_register())
             {

@@ -58,7 +58,8 @@ namespace reaver
 
             virtual bool operator()(const operand & op) const
             {
-                return op.is_register() && ((_name.empty() && op.size() == _size) || op.name() == _name);
+                return op.is_register() && op.get_register().type == cpu_register::general_purpose && ((_name.empty()
+                    && op.size() == _size) || op.name() == _name);
             }
 
             virtual uint64_t size() const
@@ -114,7 +115,7 @@ namespace reaver
 
             virtual bool operator()(const operand & op) const
             {
-                return op.is_address() || (op.is_register() && op.size() <= _size);
+                return op.is_address() || (op.is_register() && op.get_register().type == cpu_register::general_purpose && op.size() <= _size);
             }
 
             virtual uint64_t size() const

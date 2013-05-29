@@ -126,6 +126,23 @@ reaver::assembler::ast reaver::assembler::parser::parse(const std::vector<reaver
 
             {
                 auto b = begin;
+                auto section_match = reaver::parser::parse(section_directive, b, t.cend(), skip);
+
+                if (section_match)
+                {
+                    if (b != t.cend())
+                    {
+                        throw "garbage at the end of a line.";
+                    }
+
+                    ret.start_section(*section_match);
+
+                    continue;
+                }
+            }
+
+            {
+                auto b = begin;
                 auto instruction_match = reaver::parser::parse(assembly_instruction, b, t.cend(), skip);
 
                 if (instruction_match)

@@ -53,7 +53,7 @@ std::map<std::string, reaver::assembler::section> reaver::assembler::ast::assemb
                 generator = generators[_bitness_changes.at(i) >> 5];
             }
 
-            else if (_sections.find(i) != _sections.end())
+            if (_sections.find(i) != _sections.end())
             {
                 section = _sections.at(i);
 
@@ -63,14 +63,11 @@ std::map<std::string, reaver::assembler::section> reaver::assembler::ast::assemb
                 }
             }
 
-            else
+            if (_lines.at(i).which() == 0)
             {
-                if (_lines.at(i).which() == 0)
+                for (auto && x : generator.get().generate(boost::get<instruction>(_lines.at(i))))
                 {
-                    for (auto && x : generator.get().generate(boost::get<instruction>(_lines.at(i))))
-                    {
-                        ret.at(".text").push(std::move(x));
-                    }
+                    ret.at(".text").push(std::move(x));
                 }
             }
         }
