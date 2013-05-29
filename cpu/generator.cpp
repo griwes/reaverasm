@@ -200,7 +200,7 @@ namespace
 
         const auto & address = op.get_address();
 
-        if ((address.has_base() && address.base().size() == reaver::assembler::cpu_register::word) || address.disp().size() <= 16)
+        if ((address.has_base() && address.base().size() == reaver::assembler::cpu_register::word) || (address.has_disp() && address.disp().size() <= 16))
         {
             if (long_mode)
             {
@@ -408,13 +408,13 @@ std::vector<reaver::assembler::codepoint> reaver::assembler::pmode_generator::ge
         {
             if (x.get_address().has_base())
             {
-                if (x.get_address().base().size() == cpu_register::word)
+                if (x.get_address().base().size() == _bits32 ? cpu_register::word : cpu_register::dword)
                 {
                     ret.push_back(0x67);
                 }
             }
 
-            else if (x.get_address().disp().size() == cpu_register::word)
+            else if (x.get_address().disp().size() == _bits32 ? cpu_register::word : cpu_register::dword)
             {
                 ret.push_back(0x67);
             }

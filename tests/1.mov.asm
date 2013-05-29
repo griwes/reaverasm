@@ -10,17 +10,17 @@ mov     ss, cx
 mov     ah, 1
 
 ; mov     ss, 1   ; fail test
-;mov     ax, [0] ; segfault
+;mov     ax, [0] ; magic assert failed: https://gist.github.com/griwes/5674449
 mov     ax, 0xb800
 mov     es, ax
-;mov     ecx, [es:0] ; segfault
+mov     ecx, [es:0] ; segfault
 
-;mov     ax, [eax] ; optional assert failed
+mov     ax, [eax]
 
 bits    32
 
 mov     eax, cr0
-;mov     [0xb8000], edx ; invalid free()
+mov     [0xb8000], edx ; segfault
 
 bits    64
 
