@@ -63,11 +63,11 @@ namespace reaver
         operand_type m16_16 = far_pointer_matcher{};
         operand_type m16_32 = far_pointer_matcher{};
         operand_type m16_64 = far_pointer_matcher{};
-        operand_type moffs8 = immediate_value_matcher{ byte };
-        operand_type moffs16 = immediate_value_matcher{ word };
-        operand_type moffs32 = immediate_value_matcher{ dword };
-        operand_type moffs64 = immediate_value_matcher{ qword };
-        operand_type sreg = special_register_matcher{ segment };
+/*        operand_type moffs8 = moffs_matcher{};
+        operand_type moffs16 = moffs_matcher{};
+        operand_type moffs32 = moffs_matcher{};
+        operand_type moffs64 = moffs_matcher{};
+*/        operand_type sreg = special_register_matcher{ segment };
         operand_type creg = special_register_matcher{ control };
         operand_type dreg = special_register_matcher{ debug };
         operand_type cr8 = register_matcher{ "cr8" };

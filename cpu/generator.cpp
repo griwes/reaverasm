@@ -428,6 +428,7 @@ std::vector<reaver::assembler::codepoint> reaver::assembler::pmode_generator::ge
 
     uint8_t modrm = 0;
     std::vector<codepoint> sibdisp;
+    bool noreg = false;
 
     if (opcode.special_reg())
     {
@@ -447,7 +448,17 @@ std::vector<reaver::assembler::codepoint> reaver::assembler::pmode_generator::ge
         sibdisp = enc.second;
     }
 
-    std::copy(opcode.code().begin(), opcode.code().end(), std::back_inserter(ret));
+    if (opcode.mode().find(rb) != opcode.mode().end() || opcode.mode().find(rw) != opcode.mode().end() ||
+        opcode.mode().find(rd) != opcode.mode().end())
+    {
+        ret.push_back(opcode.code()[0].code() + _encode_reg(i.operands()[0]));
+        noreg = true;
+    }
+
+    else
+    {
+        std::copy(opcode.code().begin(), opcode.code().end(), std::back_inserter(ret));
+    }
 
     if (opcode.reg_index() != -1 || opcode.rm_index() != -1)
     {
@@ -459,12 +470,20 @@ std::vector<reaver::assembler::codepoint> reaver::assembler::pmode_generator::ge
         std::copy(sibdisp.begin(), sibdisp.end(), ret.end());
     }
 
-    for (int8_t c = 0; static_cast<uint8_t>(c) < i.operands().size(); ++c)
+    for (int8_t c = 0 + noreg; static_cast<uint8_t>(c) < i.operands().size(); ++c)
     {
         if (opcode.rm_index() != c || (!opcode.special_reg() && opcode.reg_index() != c))
         {
-            auto encoded_imm = i.operands()[c].encode(opcode.operands()[c].size());
-            std::copy(encoded_imm.begin(), encoded_imm.end(), ret.end());
+            if (i.operands()[c].is_register())
+            {
+                throw "invalid register in operands; consider this internal error.";
+            }
+
+            else
+            {
+                auto encoded_imm = i.operands()[c].encode(opcode.operands()[c].size());
+                std::copy(encoded_imm.begin(), encoded_imm.end(), std::back_inserter(ret));
+            }
         }
     }
 
@@ -557,6 +576,7 @@ std::vector<reaver::assembler::codepoint> reaver::assembler::lmode_generator::ge
 
     uint8_t modrm = 0;
     std::vector<codepoint> sibdisp;
+    bool noreg = false;
 
     if (opcode.special_reg())
     {
@@ -592,7 +612,22 @@ std::vector<reaver::assembler::codepoint> reaver::assembler::lmode_generator::ge
         ret.push_back(enc_rex);
     }
 
-    std::copy(opcode.code().begin(), opcode.code().end(), std::back_inserter(ret));
+    if (opcode.mode().find(rb) != opcode.mode().end() || opcode.mode().find(rw) != opcode.mode().end() ||
+        opcode.mode().find(rd) != opcode.mode().end() || opcode.mode().find(ro) != opcode.mode().end())
+    {
+        ret.push_back(opcode.code()[0].code() + _encode_reg(i.operands()[0]) & 7);
+        noreg = true;
+
+        if (_encode_reg(i.operands()[0]) >= 8)
+        {
+            enc_rex |= 1;
+        }
+    }
+
+    else
+    {
+        std::copy(opcode.code().begin(), opcode.code().end(), std::back_inserter(ret));
+    }
 
     if (opcode.reg_index() != -1 || opcode.rm_index() != -1)
     {
@@ -604,12 +639,20 @@ std::vector<reaver::assembler::codepoint> reaver::assembler::lmode_generator::ge
         std::copy(sibdisp.begin(), sibdisp.end(), ret.end());
     }
 
-    for (int8_t c = 0; static_cast<uint8_t>(c) < i.operands().size(); ++c)
+    for (int8_t c = 0 + noreg; static_cast<uint8_t>(c) < i.operands().size(); ++c)
     {
         if (opcode.rm_index() != c || (!opcode.special_reg() && opcode.reg_index() != c))
         {
-            auto encoded_imm = i.operands()[c].encode(opcode.operands()[c].size());
-            std::copy(encoded_imm.begin(), encoded_imm.end(), ret.end());
+            if (i.operands()[c].is_register())
+            {
+                throw "invalid register in operands; consider this internal error.";
+            }
+
+            else
+            {
+                auto encoded_imm = i.operands()[c].encode(opcode.operands()[c].size());
+                std::copy(encoded_imm.begin(), encoded_imm.end(), std::back_inserter(ret));
+            }
         }
     }
 

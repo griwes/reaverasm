@@ -199,6 +199,19 @@ namespace reaver
             }
         };
 
+/*        class moffs_matcher : public operand_matcher
+        {
+        public:
+            moffs_matcher()
+            {
+            }
+
+            virtual bool operator()(const operand & op) const
+            {
+                return op.is_address() && op.has_segment_override() && !op.get_address().has_base() && !op.get_address().has_index();
+            }
+        };
+*/
         class operand_type
         {
         public:
