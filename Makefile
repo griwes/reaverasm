@@ -29,8 +29,8 @@ clean-test:
 	@rm -rfv tests/*.elf
 
 %.bin: %.asm $(EXECUTABLE) clean-test
-	./rasm $< -o $@
 	@yasm $< -o $@.ref
+	@./rasm $< -o $@
 	@cmp -s $@ $@.ref; \
 	RETVAL=$$?; \
 	if [ $$RETVAL -eq 0 ]; then \
@@ -40,8 +40,8 @@ clean-test:
 	fi
 
 %.elf: %.elf.asm $(EXECUTABLE) clean-test
-	@./rasm $< -o $@ -f elf64
 	@yasm $< -o $@.ref -f elf64
+	@./rasm $< -o $@ -f elf64
 	@cmp -s $@ $@.ref; \
 	RETVAL=$$?; \
 	if [ $$RETVAL -eq 0 ]; then \

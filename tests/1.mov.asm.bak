@@ -15,14 +15,14 @@ mov     ax, 0xb800
 mov     es, ax
 mov     ecx, [es:0]
 
-mov     ax, [eax + ebx + 5] ; SIB ain't generated
+mov     ax, [eax + ebx + 5]
 
 bits    32
 
-mov     eax, cr0
-mov     [0xb8000], edx
+;mov     eax, cr0
+;mov     [0xb8000], edx
 
 bits    64
 
-mov     rsp, 0
-mov     eax, 0
+;mov     rsp, 0
+;mov     eax, 0

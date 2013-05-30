@@ -94,7 +94,7 @@ namespace reaver
 
                 else
                 {
-                    v.push_back(std::make_tuple("+", first.get_register()));
+                    v.insert(v.begin(), std::make_tuple("", first.get_register()));
                 }
 
                 if (_size == 16)
@@ -113,7 +113,14 @@ namespace reaver
                         {
                             if (!_disp)
                             {
-                                _disp = std::get<1>(x);
+                                auto integer = std::get<1>(x).get_integer();
+
+                                if (std::get<0>(x) == "-")
+                                {
+                                    integer.positive = false;
+                                }
+
+                                _disp = integer;
                             }
 
                             else
@@ -172,7 +179,14 @@ namespace reaver
                         {
                             if (!_disp)
                             {
-                                _disp = std::get<1>(x);
+                                auto integer = std::get<1>(x).get_integer();
+
+                                if (std::get<0>(x) == "-")
+                                {
+                                    integer.positive = false;
+                                }
+
+                                _disp = integer;
                             }
 
                             else

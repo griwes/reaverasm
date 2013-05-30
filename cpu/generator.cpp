@@ -200,7 +200,7 @@ namespace
 
         const auto & address = op.get_address();
 
-        if ((address.has_base() && address.base().size() == reaver::assembler::cpu_register::word) || (address.has_disp() && address.disp().size() <= 16))
+        if ((address.has_base() && address.base().size() == reaver::assembler::cpu_register::word) || (!address.has_base() && address.has_disp() && address.disp().size() <= 16))
         {
             if (long_mode)
             {
@@ -332,7 +332,7 @@ namespace
         else
         {
             bool b = false, x = false;
-            uint8_t sib = address.scale() << 6;
+            uint8_t sib = (address.scale() - 1) << 6;
             sib |= (rm[address.index().register_name] & 7) << 3;
             sib |= rm[address.base().register_name] & 7;
             b = long_mode && (rm[address.base().register_name] & 8);
