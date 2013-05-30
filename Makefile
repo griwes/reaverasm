@@ -29,7 +29,7 @@ clean-test:
 	@rm -rfv tests/*.elf
 
 %.bin: %.asm $(EXECUTABLE) clean-test
-	@./rasm $< -o $@
+	./rasm $< -o $@
 	@yasm $< -o $@.ref
 	@cmp -s $@ $@.ref; \
 	RETVAL=$$?; \

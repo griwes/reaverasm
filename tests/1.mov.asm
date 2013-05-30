@@ -10,17 +10,17 @@ mov     ss, cx
 mov     ah, 1
 
 ; mov     ss, 1   ; fail test
-;mov     ax, [0] ; magic assert failed: https://gist.github.com/griwes/5674449
+mov     ax, [0]
 mov     ax, 0xb800
 mov     es, ax
-mov     ecx, [es:0] ; segfault
+mov     ecx, [es:0]
 
-mov     ax, [eax]
+mov     ax, [eax + ebx + 5] ; SIB ain't generated
 
 bits    32
 
 mov     eax, cr0
-mov     [0xb8000], edx ; segfault
+mov     [0xb8000], edx
 
 bits    64
 

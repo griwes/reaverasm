@@ -375,12 +375,12 @@ std::vector<reaver::assembler::codepoint> reaver::assembler::pmode_generator::ge
 
             else if (name == "ds")
             {
-                ret.push_back(0x36);
+                ret.push_back(0x3E);
             }
 
             else if (name == "es")
             {
-                ret.push_back(0x3E);
+                ret.push_back(0x26);
             }
 
             else if (name == "fs")
@@ -391,6 +391,11 @@ std::vector<reaver::assembler::codepoint> reaver::assembler::pmode_generator::ge
             else if (name == "gs")
             {
                 ret.push_back(0x65);
+            }
+
+            else if (name == "ss")
+            {
+                ret.push_back(0x36);
             }
 
             else
@@ -414,7 +419,20 @@ std::vector<reaver::assembler::codepoint> reaver::assembler::pmode_generator::ge
                 }
             }
 
-            else if (x.get_address().disp().size() == _bits32 ? cpu_register::word : cpu_register::dword)
+            else if (x.get_address().has_index())
+            {
+                if (x.get_address().index().size() == _bits32 ? cpu_register::word : cpu_register::dword)
+                {
+                    ret.push_back(0x67);
+                }
+            }
+
+            else if (!_bits32 && x.get_address().disp().size() > 16)
+            {
+                ret.push_back(0x67);
+            }
+
+            else if (_bits32 && x.get_address().disp().size() <= 16)
             {
                 ret.push_back(0x67);
             }
@@ -467,7 +485,7 @@ std::vector<reaver::assembler::codepoint> reaver::assembler::pmode_generator::ge
 
     if (sibdisp.size())
     {
-        std::copy(sibdisp.begin(), sibdisp.end(), ret.end());
+        std::copy(sibdisp.begin(), sibdisp.end(), std::back_inserter(ret));
     }
 
     for (int8_t c = 0 + noreg; static_cast<uint8_t>(c) < i.operands().size(); ++c)
@@ -511,12 +529,12 @@ std::vector<reaver::assembler::codepoint> reaver::assembler::lmode_generator::ge
 
             else if (name == "ds")
             {
-                ret.push_back(0x36);
+                ret.push_back(0x3E);
             }
 
             else if (name == "es")
             {
-                ret.push_back(0x3E);
+                ret.push_back(0x26);
             }
 
             else if (name == "fs")
@@ -527,6 +545,11 @@ std::vector<reaver::assembler::codepoint> reaver::assembler::lmode_generator::ge
             else if (name == "gs")
             {
                 ret.push_back(0x65);
+            }
+
+            else if (name == "ss")
+            {
+                ret.push_back(0x36);
             }
 
             else
@@ -550,9 +573,12 @@ std::vector<reaver::assembler::codepoint> reaver::assembler::lmode_generator::ge
                 }
             }
 
-            else if (x.get_address().disp().size() == cpu_register::word)
+            else if (x.get_address().has_index())
             {
-                ret.push_back(0x67);
+                if (x.get_address().index().size() == cpu_register::dword)
+                {
+                    ret.push_back(0x67);
+                }
             }
         }
     }
@@ -636,7 +662,7 @@ std::vector<reaver::assembler::codepoint> reaver::assembler::lmode_generator::ge
 
     if (sibdisp.size())
     {
-        std::copy(sibdisp.begin(), sibdisp.end(), ret.end());
+        std::copy(sibdisp.begin(), sibdisp.end(), std::back_inserter(ret));
     }
 
     for (int8_t c = 0 + noreg; static_cast<uint8_t>(c) < i.operands().size(); ++c)

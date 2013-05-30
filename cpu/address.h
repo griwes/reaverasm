@@ -45,6 +45,7 @@ namespace reaver
                 operand>> v) : _segment{ std::move(seg) }
             {
                 _size = first.is_register() ? first.size() : 0;
+                bool bits32 = false;
 
                 for (const auto & x : v)
                 {
@@ -63,6 +64,19 @@ namespace reaver
                             }
                         }
                     }
+
+                    else if (std::get<1>(x).is_label())
+                    {
+                        if (std::get<1>(x).size() == 32)
+                        {
+                            bits32 = true;
+                        }
+                    }
+                }
+
+                if (bits32 && _size == 16)
+                {
+                    throw "invaid effective address.";
                 }
 
                 if (std::count_if(v.begin(), v.end(), [](const std::tuple<std::string, operand> & op)
