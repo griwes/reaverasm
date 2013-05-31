@@ -45,7 +45,13 @@ namespace reaver
 
             void push(codepoint c)
             {
+                _offset += c.size();
                 _blob.emplace_back(std::move(c));
+            }
+
+            void push(const std::string & symbol)
+            {
+                _symbols[symbol] = _offset;
             }
 
             std::vector<uint8_t> blob() const
@@ -70,7 +76,8 @@ namespace reaver
                 {
                     if (!x.is_resolved())
                     {
-                        ret.emplace_back(x.name(), offset, _name, _ast.is_local(x.name()) ? 0 : -4);
+                        // this here is a silly hack that will have to go away one day...
+                        ret.emplace_back(x.name(), offset, _name, _ast.is_local(x.name()) ? 0 : -4, _ast.is_local(x.name()));
                     }
 
                     offset += x.size();
@@ -84,6 +91,7 @@ namespace reaver
             std::vector<codepoint> _blob;
             std::map<std::string, uint64_t> _symbols;
             const ast & _ast;
+            uint64_t _offset = 0;
         };
     }
 }

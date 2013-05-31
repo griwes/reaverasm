@@ -32,7 +32,7 @@
 
 std::map<std::string, reaver::assembler::section> reaver::assembler::ast::assemble(const reaver::assembler::frontend &) const
 {
-    std::map<std::string, section> ret;
+    std::map<std::string, reaver::assembler::section> ret;
 
     ret.emplace(std::make_pair(".text", section{ ".text", *this }));
     std::string section = ".text";
@@ -63,11 +63,16 @@ std::map<std::string, reaver::assembler::section> reaver::assembler::ast::assemb
                 }
             }
 
+            if (_labels.find(i) != _labels.end())
+            {
+                ret.at(section).push(_labels.at(i));
+            }
+
             if (_lines.at(i).which() == 0)
             {
                 for (auto && x : generator.get().generate(boost::get<instruction>(_lines.at(i))))
                 {
-                    ret.at(".text").push(std::move(x));
+                    ret.at(section).push(std::move(x));
                 }
             }
         }

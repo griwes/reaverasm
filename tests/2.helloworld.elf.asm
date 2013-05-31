@@ -1,7 +1,10 @@
 bits    32
 
+section .data
+
 text:   db "Hello world!", 0x0a
 
+section .text
 global _start
 
 _start:

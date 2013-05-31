@@ -29,6 +29,7 @@
 #include <preprocessor/preprocessor.h>
 #include <parser/grammar.h>
 #include <output/section.h>
+#include <output/elf.h>
 
 reaver::assembler::assembler::assembler(int argc, char ** argv) : _frontend(argc, argv)
 {
@@ -53,8 +54,8 @@ reaver::assembler::assembler::assembler(int argc, char ** argv) : _frontend(argc
 
         _sections = _ast.assemble(_frontend);
 
-        // elf_output output; // temporarily here, until proper output mode switching is in place
-        // output.output(_sections, _frontend.output());
+        elf_output output; // temporarily here, until proper output mode switching is in place
+        output.output(_sections, _frontend.output());
     }
 }
 

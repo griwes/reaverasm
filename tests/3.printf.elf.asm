@@ -4,7 +4,11 @@ extern exit
 
 bits    32
 
+section .data
+
 format:     db "%d", 0x0a, 0
+
+section .text
 
 _start:
     mov     esi, 10

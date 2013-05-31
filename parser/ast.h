@@ -42,7 +42,7 @@ namespace reaver
         public:
             void add_label(std::string name)
             {
-                _labels.emplace(std::make_pair(std::move(name), _lines.size()));
+                _labels[_lines.size()] = std::move(name);
             }
 
             void add_global(std::string name)
@@ -77,7 +77,10 @@ namespace reaver
 
             bool is_local(const std::string & name) const
             {
-                if (_labels.find(name) != _labels.end())
+                if (std::find_if(_labels.begin(), _labels.end(), [&](const std::pair<uint64_t, std::string> & v)
+                    {
+                        return v.second == name;
+                    }) != _labels.end())
                 {
                     return true;
                 }
@@ -95,7 +98,7 @@ namespace reaver
         private:
             // TODO: include_chain!!!
             std::vector<boost::variant<instruction, data>> _lines;
-            std::map<std::string, uint64_t> _labels; // label name -> instruction index
+            std::map<uint64_t, std::string> _labels;
             std::vector<std::string> _globals;
             std::vector<std::string> _externs;
             std::map<uint64_t, std::string> _sections;
