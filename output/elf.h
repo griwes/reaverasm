@@ -209,7 +209,7 @@ namespace reaver
 
                     const std::string name = section.name();
 
-                    elf64::section_header head;
+                    elf64::section_header head{};
 
                     head.name = section_name_offsets[name];
                     head.offset = offset;

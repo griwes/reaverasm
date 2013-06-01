@@ -50,7 +50,7 @@ namespace reaver
 
             uint64_t size() const
             {
-                return _name.empty() ? 1 : _code;
+                return _name.empty() ? 1 : _code / 8;
             }
 
             std::string name() const
