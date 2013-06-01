@@ -43,6 +43,10 @@ namespace reaver
             {
             }
 
+            section(std::string name)
+            {
+            }
+
             void push(codepoint c)
             {
                 _offset += c.size();
@@ -69,6 +73,11 @@ namespace reaver
 
             std::vector<relocation> relocations() const
             {
+                if (!_ast)
+                {
+                    throw "invalid relocations() call on section detached from ast, consider this an internal error.";
+                }
+
                 uint64_t offset = 0;
                 std::vector<relocation> ret;
 
@@ -77,7 +86,7 @@ namespace reaver
                     if (!x.is_resolved())
                     {
                         // this here is a silly hack that will have to go away one day...
-                        ret.emplace_back(x.name(), offset, _name, _ast.is_local(x.name()) ? 0 : -4, _ast.is_local(x.name()));
+                        ret.emplace_back(x.name(), offset, _name, _ast->is_local(x.name()) ? 0 : -4, _ast->is_local(x.name()));
                     }
 
                     offset += x.size();
@@ -90,7 +99,7 @@ namespace reaver
             std::string _name;
             std::vector<codepoint> _blob;
             std::map<std::string, uint64_t> _symbols;
-            const ast & _ast;
+            boost::optional<const ast &> _ast;
             uint64_t _offset = 0;
         };
     }

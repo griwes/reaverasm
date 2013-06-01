@@ -51,7 +51,7 @@ namespace reaver
                 uint16_t program_header_entry_size = 0;
                 uint16_t program_header_entry_count = 0;
                 uint16_t section_header_entry_size = 64;
-                uint16_t section_header_entry_count = 0;
+                uint16_t section_header_entry_count = 1;
                 uint16_t section_name_table_index = 1;
             } __attribute__((__packed__));
 
@@ -127,7 +127,13 @@ namespace reaver
             {
                 elf64::header header;
                 out.write(reinterpret_cast<char *>(&header), sizeof(header));
-                out.flush();
+
+                section shstrtab{ ".shstrtab" };
+                section strtab{ ".strtab" };
+                section symbtab{ ".symbtab" };
+
+                std::vector<elf64::section_header> section_headers;
+                section_headers.emplace_back();
             }
         };
     }
