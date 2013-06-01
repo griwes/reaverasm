@@ -123,7 +123,8 @@ namespace reaver
         class elf_output
         {
         public:
-            void output(const std::map<std::string, section> & sections, std::ostream & out)
+            void output(const std::map<std::string, section> & sections, std::set<std::string> externs, std::set<std::string>
+                globals, std::ostream & out)
             {
                 elf64::header header;
                 out.write(reinterpret_cast<char *>(&header), sizeof(header));
@@ -131,6 +132,66 @@ namespace reaver
                 section shstrtab{ ".shstrtab" };
                 section strtab{ ".strtab" };
                 section symbtab{ ".symbtab" };
+
+                std::map<std::string, uint64_t> section_name_offsets;
+                std::map<std::string, uint64_t> symbol_string_offset;
+
+                shstrtab.push(0);
+                strtab.push(0);
+
+                section_name_offsets[shstrtab.name()] = shstrtab.size();
+                for (const auto & x : shstrtab.name())
+                {
+                    shstrtab.push(x);
+                }
+                shstrtab.push(0);
+
+                section_name_offsets[strtab.name()] = shstrtab.size();
+                for (const auto & x : strtab.name())
+                {
+                    shstrtab.push(x);
+                }
+                shstrtab.push(0);
+
+                section_name_offsets[symbtab.name()] = shstrtab.size();
+                for (const auto & x : symbtab.name())
+                {
+                    shstrtab.push(x);
+                }
+                shstrtab.push(0);
+
+                for (const auto & section : sections)
+                {
+                    section_name_offsets[section.first] = shstrtab.size();
+                    for (const auto & x : section.first)
+                    {
+                        shstrtab.push(x);
+                    }
+                    shstrtab.push(0);
+
+                    for (const auto & symbol : section.second.symbols())
+                    {
+                        if (globals.find(symbol.first) != globals.end())
+                        {
+                            symbol_string_offset[symbol.first] = strtab.size();
+                            for (const auto & x : symbol.first)
+                            {
+                                strtab.push(x);
+                            }
+                            strtab.push(0);
+                        }
+                    }
+                }
+
+                for (const auto & ext : externs)
+                {
+                    symbol_string_offset[ext] = strtab.size();
+                    for (const auto & x : ext)
+                    {
+                        strtab.push(x);
+                    }
+                    strtab.push(0);
+                }
 
                 std::vector<elf64::section_header> section_headers;
                 section_headers.emplace_back();

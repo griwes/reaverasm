@@ -55,7 +55,7 @@ reaver::assembler::assembler::assembler(int argc, char ** argv) : _frontend(argc
         _sections = _ast.assemble(_frontend);
 
         elf_output output; // temporarily here, until proper output mode switching is in place
-        output.output(_sections, _frontend.output());
+        output.output(_sections, _ast.externs(), _ast.globals(), _frontend.output());
     }
 }
 

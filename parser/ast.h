@@ -47,12 +47,12 @@ namespace reaver
 
             void add_global(std::string name)
             {
-                _globals.emplace_back(std::move(name));
+                _globals.emplace(std::move(name));
             }
 
             void add_extern(std::string name)
             {
-                _externs.emplace_back(std::move(name));
+                _externs.emplace(std::move(name));
             }
 
             void start_section(std::string name)
@@ -93,14 +93,24 @@ namespace reaver
                 throw "unknown symbol used.";
             }
 
+            const std::set<std::string> & globals() const
+            {
+                return _globals;
+            }
+
+            const std::set<std::string> & externs() const
+            {
+                return _externs;
+            }
+
             std::map<std::string, section> assemble(const frontend &) const;
 
         private:
             // TODO: include_chain!!!
             std::vector<boost::variant<instruction, data>> _lines;
             std::map<uint64_t, std::string> _labels;
-            std::vector<std::string> _globals;
-            std::vector<std::string> _externs;
+            std::set<std::string> _globals;
+            std::set<std::string> _externs;
             std::map<uint64_t, std::string> _sections;
             std::map<uint64_t, uint64_t> _bitness_changes;
         };

@@ -35,29 +35,16 @@ namespace reaver
         {
         public:
             relocation(std::string section, uint64_t offset, std::string symbol_name, int64_t addend, bool relative) :
-                _section{ std::move(section) }, _offset{ offset }, _symbol{ std::move(symbol_name) }, _addend{ addend },
-                _pc_relative{ relative }
+                section{ std::move(section) }, offset{ offset }, symbol{ std::move(symbol_name) }, addend{ addend },
+                pc_relative{ relative }
             {
             }
 
-        private:
-            std::string _section;
-            uint64_t _offset;
-            std::string _symbol;
-            int64_t _addend;
-            bool _pc_relative;
-        };
-
-        class symbol
-        {
-        public:
-            symbol(std::string section, uint64_t offset) : _section{ std::move(section) }, _offset{ offset }
-            {
-            }
-
-        private:
-            std::string _section;
-            uint64_t _offset;
+            std::string section;
+            uint64_t offset;
+            std::string symbol;
+            int64_t addend;
+            bool pc_relative;
         };
     }
 }

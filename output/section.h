@@ -58,6 +58,11 @@ namespace reaver
                 _symbols[symbol] = _offset;
             }
 
+            void push(uint64_t c)
+            {
+                push(codepoint{ static_cast<uint8_t>(c) });
+            }
+
             std::vector<uint8_t> blob() const
             {
                 std::vector<uint8_t> ret;
@@ -93,6 +98,21 @@ namespace reaver
                 }
 
                 return ret;
+            }
+
+            uint64_t size() const
+            {
+                return _offset;
+            }
+
+            const std::map<std::string, uint64_t> & symbols() const
+            {
+                return _symbols;
+            }
+
+            const std::string & name() const
+            {
+                return _name;
             }
 
         private:
