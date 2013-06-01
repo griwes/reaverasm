@@ -39,7 +39,7 @@ namespace reaver
         {
             struct header
             {
-                uint8_t ident[16] = { '\x7f', 'E', 'L', 'F', 2, 1, 0, 0 };
+                uint8_t ident[16] = { '\x7f', 'E', 'L', 'F', 2, 1, 1, 0, 0 };
                 uint16_t type = 1;
                 uint16_t machine = 62;
                 uint32_t version = 1;
