@@ -1,7 +1,7 @@
 CC=clang++
 LD=clang++
 CFLAGS=-c -Os -Wall -Wextra -pedantic -Werror -std=c++11 -stdlib=libc++ -Wno-unused-parameter -I . -Wno-unused-variable \
-	-Wno-unused-private-field -g
+	-Wno-unused-private-field -g -MD
 LDFLAGS=-stdlib=libc++ -lc++abi -lc++ -lboost_system -lboost_program_options -lboost_filesystem
 SOURCES=$(shell find . -type f -name "*.cpp" ! -path "*-old*")
 OBJECTS=$(SOURCES:.cpp=.o)
@@ -49,3 +49,5 @@ clean-test:
 	else \
 		echo $<": NOT SAME"; \
 	fi
+
+-include $(SOURCES:.cpp=.d)
