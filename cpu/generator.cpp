@@ -39,6 +39,12 @@ namespace
             for (auto current = ops.lower_bound(i.mnemonic()), last = ops.upper_bound(i.mnemonic()); current != last;
                 ++current)
             {
+                if (current->second.mode().find(m) == current->second.mode().end() && current->second.mode().find(reaver::assembler::all)
+                    == current->second.mode().end())
+                {
+                    continue;
+                }
+
                 if (current->second.operands().size() == i.operands().size())
                 {
                     bool non_matched = false;
@@ -633,7 +639,7 @@ std::vector<reaver::assembler::codepoint> reaver::assembler::lmode_generator::ge
         }
     }
 
-    if (enc_rex)
+    if (enc_rex & 0x40)
     {
         ret.push_back(enc_rex);
     }
@@ -641,7 +647,7 @@ std::vector<reaver::assembler::codepoint> reaver::assembler::lmode_generator::ge
     if (opcode.mode().find(rb) != opcode.mode().end() || opcode.mode().find(rw) != opcode.mode().end() ||
         opcode.mode().find(rd) != opcode.mode().end() || opcode.mode().find(ro) != opcode.mode().end())
     {
-        ret.push_back(opcode.code()[0].code() + _encode_reg(i.operands()[0]) & 7);
+        ret.push_back(opcode.code()[0].code() + (_encode_reg(i.operands()[0]) & 7));
         noreg = true;
 
         if (_encode_reg(i.operands()[0]) >= 8)

@@ -2,7 +2,7 @@ global _start
 extern printf
 extern exit
 
-bits    32
+bits    64
 
 section .data
 
