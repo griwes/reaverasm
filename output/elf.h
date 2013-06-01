@@ -52,7 +52,7 @@ namespace reaver
                 uint16_t program_header_entry_count = 0;
                 uint16_t section_header_entry_size = 64;
                 uint16_t section_header_entry_count = 1;
-                uint16_t section_name_table_index = 1;
+                uint16_t section_name_table_index = 0;
             } __attribute__((__packed__));
 
             enum
@@ -80,7 +80,7 @@ namespace reaver
                 uint64_t size;
                 uint32_t link;
                 uint32_t info;
-                uint64_t address_alignment;
+                uint64_t alignment;
                 uint64_t entries_size;
             } __attribute__((__packed__));
 
@@ -127,11 +127,12 @@ namespace reaver
                 globals, std::ostream & out)
             {
                 elf64::header header;
-                out.write(reinterpret_cast<char *>(&header), sizeof(header));
 
                 section shstrtab{ ".shstrtab" };
                 section strtab{ ".strtab" };
-                section symbtab{ ".symbtab" };
+                section symtab{ ".symtab" };
+
+                uint64_t offset = sizeof(header);
 
                 std::map<std::string, uint64_t> section_name_offsets;
                 std::map<std::string, uint64_t> symbol_string_offset;
@@ -153,8 +154,8 @@ namespace reaver
                 }
                 shstrtab.push(0);
 
-                section_name_offsets[symbtab.name()] = shstrtab.size();
-                for (const auto & x : symbtab.name())
+                section_name_offsets[symtab.name()] = shstrtab.size();
+                for (const auto & x : symtab.name())
                 {
                     shstrtab.push(x);
                 }
@@ -185,16 +186,138 @@ namespace reaver
 
                 for (const auto & ext : externs)
                 {
-                    symbol_string_offset[ext] = strtab.size();
-                    for (const auto & x : ext)
+                    if (symbol_string_offset.find(ext) == symbol_string_offset.end())
                     {
-                        strtab.push(x);
+                        symbol_string_offset[ext] = strtab.size();
+                        for (const auto & x : ext)
+                        {
+                            strtab.push(x);
+                        }
+                        strtab.push(0);
                     }
-                    strtab.push(0);
                 }
 
                 std::vector<elf64::section_header> section_headers;
                 section_headers.emplace_back();
+
+                auto add_section = [&](const section & section)
+                {
+                    if (!section.size())
+                    {
+                        return;
+                    }
+
+                    const std::string name = section.name();
+
+                    elf64::section_header head;
+
+                    head.name = section_name_offsets[name];
+                    head.offset = offset;
+                    head.size = section.size();
+                    offset += section.size();
+
+                    head.link = 0;
+                    head.info = 0;
+
+                    if (name == ".bss")
+                    {
+                        head.type = 8;
+                        head.flags = 0x1 | 0x2;
+                    }
+
+                    else if (name == ".data")
+                    {
+                        head.type = 1;
+                        head.flags = 0x1 | 0x2;
+                    }
+
+                    else if (name == ".rodata")
+                    {
+                        head.type = 1;
+                        head.flags = 0x2;
+                    }
+
+                    else if (name == ".text")
+                    {
+                        head.type = 1;
+                        head.flags = 0x2 | 0x4;
+                    }
+
+                    else if (name == ".shstrtab" || name == ".strtab")
+                    {
+                        head.type = 3;
+                    }
+
+                    else if (name == ".symtab")
+                    {
+                        head.type = 2;
+                    }
+
+                    else
+                    {
+                        std::cout << "unsupported section type: " << name << std::endl;
+                        throw std::exception{};
+                    }
+
+                    head.alignment = 16;
+
+                    section_headers.emplace_back(std::move(head));
+
+                    ++header.section_header_entry_count;
+                };
+
+                for (const auto & x : sections)
+                {
+                    const auto & section = x.second;
+
+                    add_section(section);
+                }
+
+                header.section_name_table_index = section_headers.size();
+
+                add_section(shstrtab);
+                add_section(strtab);
+                add_section(symtab);
+
+                header.section_header_offset = offset + (8 - offset % 8);
+
+                out.write(reinterpret_cast<const char *>(&header), sizeof(header));
+
+                for (const auto & x : sections)
+                {
+                    if (x.second.size())
+                    {
+                        out.write(reinterpret_cast<const char *>(x.second.blob().data()), x.second.size());
+                    }
+                }
+
+                if (shstrtab.size())
+                {
+                    out.write(reinterpret_cast<const char *>(shstrtab.blob().data()), shstrtab.size());
+                }
+
+                if (strtab.size())
+                {
+                    out.write(reinterpret_cast<const char *>(strtab.blob().data()), strtab.size());
+                }
+
+                if (symtab.size())
+                {
+                    out.write(reinterpret_cast<const char *>(symtab.blob().data()), symtab.size());
+                }
+
+                while (offset % 8)
+                {
+                    ++offset;
+                    out.write("\0", 1);
+                }
+
+                for (const auto & x : section_headers)
+                {
+                    out.write(reinterpret_cast<const char *>(&x), sizeof(x));
+                }
+
+                out.flush();
             }
         };
     }
