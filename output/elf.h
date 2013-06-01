@@ -137,6 +137,8 @@ namespace reaver
                 std::map<std::string, uint64_t> section_name_offsets;
                 std::map<std::string, uint64_t> symbol_string_offset;
 
+                std::map<std::string, uint64_t> section_index;
+
                 shstrtab.push(0);
                 strtab.push(0);
 
@@ -197,6 +199,11 @@ namespace reaver
                     }
                 }
 
+                for (uint64_t i = 0; i < sizeof(elf64::symbol); ++i)
+                {
+                    symtab.push(0);
+                }
+
                 std::vector<elf64::section_header> section_headers;
                 section_headers.emplace_back();
 
@@ -253,6 +260,14 @@ namespace reaver
                         head.type = 2;
                     }
 
+                    else if (name.substr(0, 5) == ".rela")
+                    {
+                        head.type = 4;
+                        head.link = 3;
+                        head.info = section_index[name.substr(6)];
+                        head.size = sizeof(elf64::relocation_addend);
+                    }
+
                     else
                     {
                         std::cout << "unsupported section type: " << name << std::endl;
@@ -266,30 +281,122 @@ namespace reaver
                     ++header.section_header_entry_count;
                 };
 
+                std::map<std::string, std::pair<uint64_t, uint64_t>> symbols;
+
                 for (const auto & x : sections)
                 {
-                    const auto & section = x.second;
+                    for (const auto & y : x.second.symbols())
+                    {
+                        if (symbols.find(y.first) != symbols.end())
+                        {
+                            std::cout << "multiple definitions of a symbol." << std::endl;
+                            throw std::exception{};
+                        }
 
-                    add_section(section);
+                        elf64::symbol symb;
+                        symb.info = 0;
+
+                        if (externs.find(y.first) != externs.end() || globals.find(y.first) != globals.end())
+                        {
+                            symb.info |= 1 << 4;
+                        }
+
+                        symb.name = symbol_string_offset[y.first];
+                        symb.section_table_index = section_index[x.first];
+                        symb.value = y.second;
+
+                        for (uint64_t i = 0; i < sizeof(symb); ++i)
+                        {
+                            symtab.push(*(reinterpret_cast<const char *>(&symb) + i));
+                        }
+
+                        symbols[y.first] = std::make_pair(symbols.size(), y.second);
+                    }
                 }
 
-                header.section_name_table_index = section_headers.size();
+                for (const auto & x : externs)
+                {
+                    if (symbols.find(x) == symbols.end())
+                    {
+                        elf64::symbol symb{};
+                        symb.info = 1 << 4;
+                        symb.name = symbol_string_offset[x];
+
+                        for (uint64_t i = 0; i < sizeof(symb); ++i)
+                        {
+                            symtab.push(*(reinterpret_cast<const char *>(&symb) + i));
+                        }
+
+                        symbols[x] = std::make_pair(symbols.size(), 0);
+                    }
+                }
+
+                std::vector<section> relocation_sections;
+
+                for (const auto & x : sections)
+                {
+                    auto relocations = x.second.relocations();
+
+                    if (relocations.size())
+                    {
+                        section rela{ ".rela" + x.first };
+
+                        section_name_offsets[rela.name()] = shstrtab.size();
+                        for (const auto & x : rela.name())
+                        {
+                            shstrtab.push(x);
+                        }
+                        shstrtab.push(0);
+
+                        for (const auto & reloc : relocations)
+                        {
+                            // this here is ugly, TODO: refactor
+                            elf64::relocation_addend rel{};
+                            rel.offset = reloc.offset;
+
+                            if (symbols.find(reloc.symbol) != symbols.end())
+                            {
+                                rel.info = symbols[reloc.symbol].first << 32;
+                                rel.addend = symbols[reloc.symbol].second;
+                            }
+
+                            else
+                            {
+                                rel.info = symbols[reloc.symbol].first << 32;
+                                rel.addend = -4;
+                            }
+
+                            rel.info |= 1 + reloc.pc_relative;
+
+                            for (uint64_t i = 0; i < sizeof(rel); ++i)
+                            {
+                                rela.push(*(reinterpret_cast<const char *>(&rel) + i));
+                            }
+                        }
+
+                        relocation_sections.emplace_back(std::move(rela));
+                    }
+                }
 
                 add_section(shstrtab);
                 add_section(strtab);
                 add_section(symtab);
 
-                header.section_header_offset = offset + (8 - offset % 8);
-
-                out.write(reinterpret_cast<const char *>(&header), sizeof(header));
+                header.section_name_table_index = 1;
 
                 for (const auto & x : sections)
                 {
-                    if (x.second.size())
-                    {
-                        out.write(reinterpret_cast<const char *>(x.second.blob().data()), x.second.size());
-                    }
+                    add_section(x.second);
                 }
+
+                for (const auto & x : relocation_sections)
+                {
+                    add_section(x);
+                }
+
+                header.section_header_offset = offset + (8 - offset % 8);
+
+                out.write(reinterpret_cast<const char *>(&header), sizeof(header));
 
                 if (shstrtab.size())
                 {
@@ -304,6 +411,22 @@ namespace reaver
                 if (symtab.size())
                 {
                     out.write(reinterpret_cast<const char *>(symtab.blob().data()), symtab.size());
+                }
+
+                for (const auto & x : sections)
+                {
+                    if (x.second.size())
+                    {
+                        out.write(reinterpret_cast<const char *>(x.second.blob().data()), x.second.size());
+                    }
+                }
+
+                for (const auto & x : relocation_sections)
+                {
+                    if (x.size())
+                    {
+                        out.write(reinterpret_cast<const char *>(x.blob().data()), x.size());
+                    }
                 }
 
                 while (offset % 8)
