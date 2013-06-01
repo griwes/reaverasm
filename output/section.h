@@ -43,7 +43,7 @@ namespace reaver
             {
             }
 
-            section(std::string name)
+            section(std::string name) : _name{ std::move(name) }
             {
             }
 
