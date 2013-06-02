@@ -7,7 +7,7 @@ SOURCES=$(shell find . -type f -name "*.cpp" ! -path "*-old*")
 OBJECTS=$(SOURCES:.cpp=.o)
 TESTS=$(shell find . -name "*.asm" ! -name "*.elf.asm")
 ELFTESTS=$(shell find . -name "*.elf.asm")
-TESTRESULTS=$(TESTS:.asm=.bin) $(ELFTESTS:.elf.asm=.elf)
+TESTRESULTS=$(TESTS:.asm=.bin) $(ELFTESTS:.elf.asm=)
 EXECUTABLE=rasm
 
 all: $(SOURCES) $(EXECUTABLE)
@@ -29,25 +29,27 @@ clean-test:
 	@rm -rfv tests/*.elf
 
 %.bin: %.asm $(EXECUTABLE) clean-test
-	@yasm $< -o $@.ref
+#	@yasm $< -o $@.ref
 	@./rasm $< -o $@
-	@cmp -s $@ $@.ref; \
-	RETVAL=$$?; \
-	if [ $$RETVAL -eq 0 ]; then \
-		echo $<": SAME"; \
-	else \
-		echo $<": NOT SAME"; \
-	fi
+#	@cmp -s $@ $@.ref; \
+#	RETVAL=$$?; \
+#	if [ $$RETVAL -eq 0 ]; then \
+#		echo $<": SAME"; \
+#	else \
+#		echo $<": NOT SAME"; \
+#	fi
 
-%.elf: %.elf.asm $(EXECUTABLE) clean-test
-	@yasm $< -o $@.ref -f elf64
-	@./rasm $< -o $@ -f elf64
-	@cmp -s $@ $@.ref; \
-	RETVAL=$$?; \
-	if [ $$RETVAL -eq 0 ]; then \
-		echo $<": SAME"; \
-	else \
-		echo $<": NOT SAME"; \
-	fi
+%: %.elf.asm $(EXECUTABLE) clean-test
+#	@yasm $< -o $@.elf.ref -f elf64
+	@./rasm $< -o $@.elf -f elf64
+	@ld $@.elf -lc -o $@ -s -dynamic-linker /lib64/ld-linux-x86-64.so.2
+	./$@
+#	@cmp -s $@ $@.ref; \
+#	RETVAL=$$?; \
+#	if [ $$RETVAL -eq 0 ]; then \
+#		echo $<": SAME"; \
+#	else \
+#		echo $<": NOT SAME"; \
+#	fi
 
 -include $(SOURCES:.cpp=.d)
