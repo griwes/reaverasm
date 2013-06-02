@@ -337,9 +337,9 @@ const std::multimap<std::string, reaver::assembler::opcode> & reaver::assembler:
         _add("jmp", { m16_32 }, { all, mode32 }, { 0xFF }, -1, 5, true);
         _add("jmp", { m16_64 }, { bits64, rexw }, { 0xFF }, -1, 5, true);
 
-        _add("lea", { r16, m }, { all, mode16 }, { 0x8D }, 0, 1);
-        _add("lea", { r32, m }, { all, mode32 }, { 0x8D }, 0, 1);
-        _add("lea", { r64, m }, { bits64, rexw }, { 0x8D }, 0, 1);
+        _add("lea", { r16, m }, { all, mode16 }, { 0x8D }, 1, 0);
+        _add("lea", { r32, m }, { all, mode32 }, { 0x8D }, 1, 0);
+        _add("lea", { r64, m }, { bits64, rexw }, { 0x8D }, 1, 0);
 
         _add("leave", {}, { all }, { 0xC9 });
 
