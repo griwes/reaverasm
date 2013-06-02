@@ -258,6 +258,7 @@ namespace reaver
                     else if (name == ".symtab")
                     {
                         head.type = 2;
+                        head.link = 2;
                     }
 
                     else if (name.substr(0, 5) == ".rela")
@@ -283,8 +284,11 @@ namespace reaver
 
                 std::map<std::string, std::pair<uint64_t, uint64_t>> symbols;
 
+                uint64_t i = 0;
                 for (const auto & x : sections)
                 {
+                    ++i;
+
                     for (const auto & y : x.second.symbols())
                     {
                         if (symbols.find(y.first) != symbols.end())
@@ -293,7 +297,7 @@ namespace reaver
                             throw std::exception{};
                         }
 
-                        elf64::symbol symb;
+                        elf64::symbol symb{};
                         symb.info = 0;
 
                         if (externs.find(y.first) != externs.end() || globals.find(y.first) != globals.end())
@@ -302,7 +306,7 @@ namespace reaver
                         }
 
                         symb.name = symbol_string_offset[y.first];
-                        symb.section_table_index = section_index[x.first];
+                        symb.section_table_index = i;
                         symb.value = y.second;
 
                         for (uint64_t i = 0; i < sizeof(symb); ++i)
