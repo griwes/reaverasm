@@ -34,9 +34,9 @@ namespace reaver
         class relocation
         {
         public:
-            relocation(std::string symbol_name, uint64_t offset, std::string section, int64_t addend, bool relative) :
-                section{ std::move(section) }, offset{ offset }, symbol{ std::move(symbol_name) }, addend{ addend },
-                pc_relative{ relative }
+            relocation(std::string symbol_name, uint64_t offset, std::string section, uint64_t size, int64_t addend,
+                bool relative) : section{ std::move(section) }, offset{ offset }, symbol{ std::move(symbol_name) },
+                addend{ addend }, size{ size }, pc_relative{ relative }
             {
             }
 
@@ -44,6 +44,7 @@ namespace reaver
             uint64_t offset;
             std::string symbol;
             int64_t addend;
+            uint64_t size;
             bool pc_relative;
         };
     }

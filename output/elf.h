@@ -138,6 +138,7 @@ namespace reaver
                 std::map<std::string, uint64_t> symbol_string_offset;
 
                 std::map<std::string, uint64_t> section_index;
+                std::map<std::string, std::string> symbol_section;
 
                 shstrtab.push(0);
                 strtab.push(0);
@@ -209,11 +210,6 @@ namespace reaver
 
                 auto add_section = [&](const section & section)
                 {
-                    if (!section.size())
-                    {
-                        return;
-                    }
-
                     const std::string name = section.name();
 
                     elf64::section_header head{};
@@ -259,6 +255,7 @@ namespace reaver
                     {
                         head.type = 2;
                         head.link = 2;
+                        head.entries_size = sizeof(elf64::symbol);
                     }
 
                     else if (name.substr(0, 5) == ".rela")
@@ -266,7 +263,7 @@ namespace reaver
                         head.type = 4;
                         head.link = 3;
                         head.info = section_index[name.substr(6)];
-                        head.size = sizeof(elf64::relocation_addend);
+                        head.entries_size = sizeof(elf64::relocation_addend);
                     }
 
                     else
@@ -289,6 +286,25 @@ namespace reaver
                 {
                     ++i;
 
+                    elf64::symbol symb{};
+                    symb.section_table_index = i + 3;
+                    symb.info = 3;
+
+                    for (uint64_t i = 0; i < sizeof(symb); ++i)
+                    {
+                        symtab.push(*(reinterpret_cast<const char *>(&symb) + i));
+                    }
+
+                    symbols[x.first] = std::make_pair(symbols.size(), 0);
+
+                    section_index[x.first] = i;
+                }
+
+                i = 0;
+                for (const auto & x : sections)
+                {
+                    ++i;
+
                     for (const auto & y : x.second.symbols())
                     {
                         if (symbols.find(y.first) != symbols.end())
@@ -306,7 +322,7 @@ namespace reaver
                         }
 
                         symb.name = symbol_string_offset[y.first];
-                        symb.section_table_index = i;
+                        symb.section_table_index = i + 3;
                         symb.value = y.second;
 
                         for (uint64_t i = 0; i < sizeof(symb); ++i)
@@ -315,6 +331,7 @@ namespace reaver
                         }
 
                         symbols[y.first] = std::make_pair(symbols.size(), y.second);
+                        symbol_section[y.first] = x.first;
                     }
                 }
 
@@ -354,23 +371,22 @@ namespace reaver
 
                         for (const auto & reloc : relocations)
                         {
-                            // this here is ugly, TODO: refactor
                             elf64::relocation_addend rel{};
                             rel.offset = reloc.offset;
 
-                            if (symbols.find(reloc.symbol) != symbols.end())
+                            if (reloc.addend == -4)
                             {
                                 rel.info = symbols[reloc.symbol].first << 32;
-                                rel.addend = symbols[reloc.symbol].second;
+                                rel.addend = reloc.addend;
+                                rel.info |= reloc.size == 64 ? 24 : reloc.size == 32 ? 2 : reloc.size == 16 ? 13 : 15;
                             }
 
                             else
                             {
-                                rel.info = symbols[reloc.symbol].first << 32;
-                                rel.addend = -4;
+                                rel.info = (section_index[symbol_section[reloc.symbol]] - 3) << 32;
+                                rel.addend = reloc.addend + symbols[reloc.symbol].second;
+                                rel.info |= reloc.size == 64 ? 1 : reloc.size == 32 ? 10 : reloc.size == 16 ? 12 : 14;
                             }
-
-                            rel.info |= 1 + reloc.pc_relative;
 
                             for (uint64_t i = 0; i < sizeof(rel); ++i)
                             {

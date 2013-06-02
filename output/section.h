@@ -91,7 +91,7 @@ namespace reaver
                     if (!x.is_resolved())
                     {
                         // this here is a silly hack that will have to go away one day...
-                        ret.emplace_back(x.name(), offset, _name, _ast->is_local(x.name()) ? 0 : -4, _ast->is_local(x.name()));
+                        ret.emplace_back(x.name(), offset, _name, x.size() * 8, _ast->is_local(x.name()) ? 0 : -4, !_ast->is_local(x.name()));
                     }
 
                     offset += x.size();

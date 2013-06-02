@@ -75,6 +75,59 @@ std::map<std::string, reaver::assembler::section> reaver::assembler::ast::assemb
                     ret.at(section).push(std::move(x));
                 }
             }
+
+            else
+            {
+                auto size_str = boost::get<data>(_lines.at(i)).size;
+                uint64_t size = size_str == "db" ? 8 : size_str == "dw" ? 16 : size_str == "dd" ? 32 : 64;
+
+                struct visitor : public boost::static_visitor<>
+                {
+                    visitor(reaver::assembler::section & s, uint64_t size) : _section{ s }, _size{ size }
+                    {
+                    }
+
+                    void operator()(const integer & i) const
+                    {
+                        for (auto && x : i.encode(_size / 8))
+                        {
+                            _section.push(std::move(x));
+                        }
+                    }
+
+                    void operator()(const ch & c) const
+                    {
+                        push_char(c.character);
+                    }
+
+                    void operator()(const str & s) const
+                    {
+                        for (const auto & x : s.string)
+                        {
+                            push_char(x);
+                        }
+                    }
+
+                    void push_char(char c) const
+                    {
+                        _section.push(c);
+
+                        for (uint64_t i = 1; i < _size / 8; ++i)
+                        {
+                            _section.push(0);
+                        }
+                    }
+
+                private:
+                    reaver::assembler::section & _section;
+                    uint64_t _size;
+                };
+
+                for (const auto & x : boost::get<data>(_lines.at(i)).operands)
+                {
+                    boost::apply_visitor(visitor{ ret.at(section), size }, x);
+                }
+            }
         }
 
         catch (const char * e)
