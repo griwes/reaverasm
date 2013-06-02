@@ -123,8 +123,8 @@ namespace reaver
         class elf_output
         {
         public:
-            void output(const std::map<std::string, section> & sections, std::set<std::string> externs, std::set<std::string>
-                globals, std::ostream & out)
+            void output(const frontend & front, const std::map<std::string, section> & sections, std::set<std::string> externs,
+                std::set<std::string> globals, std::ostream & out)
             {
                 elf64::header header;
 
@@ -139,6 +139,8 @@ namespace reaver
 
                 std::map<std::string, uint64_t> section_index;
                 std::map<std::string, std::string> symbol_section;
+
+                uint64_t local_symbols = 1;
 
                 shstrtab.push(0);
                 strtab.push(0);
@@ -208,16 +210,16 @@ namespace reaver
                 std::vector<elf64::section_header> section_headers;
                 section_headers.emplace_back();
 
-                auto add_section = [&](const section & section)
+                auto add_section = [&](const section & s)
                 {
-                    const std::string name = section.name();
+                    const std::string name = s.name();
 
                     elf64::section_header head{};
 
                     head.name = section_name_offsets[name];
                     head.offset = offset;
-                    head.size = section.size();
-                    offset += section.size();
+                    head.size = s.size();
+                    offset += s.size();
 
                     head.link = 0;
                     head.info = 0;
@@ -256,13 +258,14 @@ namespace reaver
                         head.type = 2;
                         head.link = 2;
                         head.entries_size = sizeof(elf64::symbol);
+                        head.info = local_symbols + 1;
                     }
 
                     else if (name.substr(0, 5) == ".rela")
                     {
                         head.type = 4;
                         head.link = 3;
-                        head.info = section_index[name.substr(6)];
+                        head.info = section_index[name.substr(6)] + 5;
                         head.entries_size = sizeof(elf64::relocation_addend);
                     }
 
@@ -290,15 +293,61 @@ namespace reaver
                     symb.section_table_index = i + 3;
                     symb.info = 3;
 
+                    symbols[x.first] = std::make_pair(symbols.size(), 0);
+
                     for (uint64_t i = 0; i < sizeof(symb); ++i)
                     {
                         symtab.push(*(reinterpret_cast<const char *>(&symb) + i));
                     }
 
-                    symbols[x.first] = std::make_pair(symbols.size(), 0);
-
                     section_index[x.first] = i;
                 }
+
+                auto add_symbol = [&](const std::pair<std::string, section> & x, const std::pair<std::string, uint64_t> & y,
+                    bool global)
+                {
+                    if (globals.find(y.first) != globals.end() && !global)
+                    {
+                        return;
+                    }
+
+                    if (globals.find(y.first) == globals.end() && global)
+                    {
+                        return;
+                    }
+
+                    if (symbols.find(y.first) != symbols.end())
+                    {
+                        std::cout << "multiple definitions of a symbol." << std::endl;
+                        throw std::exception{};
+                    }
+
+                    elf64::symbol symb{};
+                    symb.info = 0;
+
+                    if (externs.find(y.first) != externs.end())
+                    {
+                        std::cout << "extern symbol defined." << std::endl;
+                        throw std::exception{};
+                    }
+
+                    if (globals.find(y.first) != globals.end())
+                    {
+                        symb.info |= 1 << 4;
+                    }
+
+                    symb.name = symbol_string_offset[y.first];
+                    symb.section_table_index = i + 3;
+                    symb.value = y.second;
+
+                    for (uint64_t i = 0; i < sizeof(symb); ++i)
+                    {
+                        symtab.push(*(reinterpret_cast<const char *>(&symb) + i));
+                    }
+
+                    symbols[y.first] = std::make_pair(symbols.size(), y.second);
+                    symbol_section[y.first] = x.first;
+                };
 
                 i = 0;
                 for (const auto & x : sections)
@@ -307,31 +356,20 @@ namespace reaver
 
                     for (const auto & y : x.second.symbols())
                     {
-                        if (symbols.find(y.first) != symbols.end())
-                        {
-                            std::cout << "multiple definitions of a symbol." << std::endl;
-                            throw std::exception{};
-                        }
+                        add_symbol(x, y, false);
+                    }
+                }
 
-                        elf64::symbol symb{};
-                        symb.info = 0;
+                local_symbols = symbols.size();
 
-                        if (externs.find(y.first) != externs.end() || globals.find(y.first) != globals.end())
-                        {
-                            symb.info |= 1 << 4;
-                        }
+                i = 0;
+                for (const auto & x : sections)
+                {
+                    ++i;
 
-                        symb.name = symbol_string_offset[y.first];
-                        symb.section_table_index = i + 3;
-                        symb.value = y.second;
-
-                        for (uint64_t i = 0; i < sizeof(symb); ++i)
-                        {
-                            symtab.push(*(reinterpret_cast<const char *>(&symb) + i));
-                        }
-
-                        symbols[y.first] = std::make_pair(symbols.size(), y.second);
-                        symbol_section[y.first] = x.first;
+                    for (const auto & y : x.second.symbols())
+                    {
+                        add_symbol(x, y, true);
                     }
                 }
 
@@ -383,7 +421,7 @@ namespace reaver
 
                             else
                             {
-                                rel.info = (section_index[symbol_section[reloc.symbol]] - 3) << 32;
+                                rel.info = section_index[symbol_section[reloc.symbol]] << 32;
                                 rel.addend = reloc.addend + symbols[reloc.symbol].second;
                                 rel.info |= reloc.size == 64 ? 1 : reloc.size == 32 ? 10 : reloc.size == 16 ? 12 : 14;
                             }
@@ -414,7 +452,7 @@ namespace reaver
                     add_section(x);
                 }
 
-                header.section_header_offset = offset + (8 - offset % 8);
+                header.section_header_offset = offset + ((offset % 8) ? (8 - offset % 8) : 0);
 
                 out.write(reinterpret_cast<const char *>(&header), sizeof(header));
 

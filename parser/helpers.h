@@ -277,8 +277,6 @@ namespace reaver
         {
             str(std::string str)
             {
-                std::cout << str << std::endl;
-
                 for (uint64_t i = 1; i < str.size() - 1; ++i)
                 {
                     if (str[i] != '\\')
