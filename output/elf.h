@@ -123,7 +123,7 @@ namespace reaver
         class elf_output
         {
         public:
-            void output(const frontend & front, const std::map<std::string, section> & sections, std::set<std::string> externs,
+            virtual void output(const frontend &, const std::map<std::string, section> & sections, std::set<std::string> externs,
                 std::set<std::string> globals, std::ostream & out)
             {
                 elf64::header header;
@@ -500,6 +500,8 @@ namespace reaver
 
                 out.flush();
             }
+
+            virtual ~elf_output() {}
         };
     }
 }

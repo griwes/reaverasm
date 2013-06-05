@@ -82,7 +82,7 @@ namespace reaver
                 throw "get_integer() on non-int, consider this an internal error.";
             }
 
-            virtual std::vector<codepoint> encode(uint64_t size) const
+            virtual std::vector<codepoint> encode(uint64_t) const
             {
                 throw "encode() on operand not encodable directly, consider this an internal error.";
             }
