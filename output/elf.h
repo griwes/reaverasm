@@ -224,25 +224,25 @@ namespace reaver
                     head.link = 0;
                     head.info = 0;
 
-                    if (name == ".bss")
+                    if (name.substr(0, 4) == ".bss")
                     {
                         head.type = 8;
                         head.flags = 0x1 | 0x2;
                     }
 
-                    else if (name == ".data")
+                    else if (name.substr(0, 5) == ".data")
                     {
                         head.type = 1;
                         head.flags = 0x1 | 0x2;
                     }
 
-                    else if (name == ".rodata")
+                    else if (name.substr(0, 7) == ".rodata")
                     {
                         head.type = 1;
                         head.flags = 0x2;
                     }
 
-                    else if (name == ".text")
+                    else if (name.substr(0, 5) == ".text")
                     {
                         head.type = 1;
                         head.flags = 0x2 | 0x4;

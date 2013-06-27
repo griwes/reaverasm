@@ -12,7 +12,7 @@ EXECUTABLE=rasm
 all: $(SOURCES) $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS)
-	$(LD) $(LDFLAGS) -o $@ $(OBJECTS) -lreaver
+	$(LD) $(LDFLAGS) -o $@ $(OBJECTS) -lreaver -pthread
 
 %.o: %.cpp
 	$(CC) $(CFLAGS) $< -o $@
@@ -20,6 +20,8 @@ $(EXECUTABLE): $(OBJECTS)
 clean: clean-test
 	@rm -rfv *.o
 	@rm -rfv */*.o
+	@rm -rfv *.d
+	@rm -rfv */*.d
 
 test: $(EXECUTABLE) $(TESTS) $(ELFTESTS) $(TESTRESULTS)
 
@@ -40,8 +42,8 @@ clean-test:
 
 %: %.elf.asm $(EXECUTABLE) clean-test
 #	@yasm $< -o $@.elf.ref -f elf64
-	@./rasm $< -o $@.elf -f elf64
-	@ld $@.elf -lc -o $@ -s -dynamic-linker /lib64/ld-linux-x86-64.so.2
+	./rasm $< -o $@.elf -f elf64
+	ld $@.elf -lc -o $@ -s -dynamic-linker /lib64/ld-linux-x86-64.so.2
 	./$@
 #	@cmp -s $@ $@.ref; \
 #	RETVAL=$$?; \
