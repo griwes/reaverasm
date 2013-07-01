@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <reaver/parser/parser.h>
+#include <reaver/parser.h>
 
 namespace reaver
 {

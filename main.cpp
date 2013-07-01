@@ -26,12 +26,22 @@
 #include <string>
 #include <memory>
 
-#include <reaver/parser/lexer.h>
+#include <reaver/lexer.h>
 
 #include <assembler.h>
 #include <frontend.h>
 #include <preprocessor/macro.h>
 #include <utils.h>
+
+/*int main(int argc, char ** argv)
+{
+    reaver::assembler::console_frontend frontend{ argc, argv };
+    reaver::assembler::preprocessor preprocessor{ frontend };
+    reaver::assembler::generator generator{ frontend };
+    reaver::assembler::output output{ frontend };
+
+    output.output(generator.generate(preprocessor.preprocess()));
+}*/
 
 int main(int argc, char ** argv)
 {

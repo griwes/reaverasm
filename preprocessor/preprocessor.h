@@ -29,7 +29,7 @@
 #include <memory>
 #include <map>
 
-#include <reaver/parser/lexer.h>
+#include <reaver/lexer.h>
 
 #include <frontend.h>
 #include <preprocessor/macro.h>
