@@ -23,40 +23,31 @@
  *
  **/
 
-#include <string>
-#include <memory>
+#include <reaver/logger.h>
+#include <reaver/exception.h>
 
-#include <reaver/lexer.h>
+#include <frontend/console.h>
+// #include <preprocessor/preprocessor.h>
+// #include <parser/parser.h>
+// #include <generator/generator.h>
+// #include <output/output.h>
 
-#include <assembler.h>
-#include <frontend.h>
-#include <preprocessor/macro.h>
-#include <utils.h>
-
-/*int main(int argc, char ** argv)
-{
-    reaver::assembler::console_frontend frontend{ argc, argv };
-    reaver::assembler::preprocessor preprocessor{ frontend };
-    reaver::assembler::generator generator{ frontend };
-    reaver::assembler::output output{ frontend };
-
-    output.output(generator.generate(preprocessor.preprocess()));
-}*/
+using namespace reaver::logger;
 
 int main(int argc, char ** argv)
 {
     try
     {
-        reaver::assembler::assembler assembler{ argc, argv };
+        reaver::assembler::console_frontend frontend{ argc, argv };
+//        std::unique_ptr<reaver::assembler::preprocessor> preprocessor = reaver::assembler::create_preprocessor(frontend);
+//        reaver::assembler::parser parser{ *preprocessor };
+//        std::unique_ptr<reaver::assembler::generator> generator = reaver::assembler::create_generator(frontend, parser);
+//        std::unique_ptr<reaver::assembler::output> output = reaver::assembler::create_output(frontend, generator);
+
+//        (*output)();
     }
 
-    catch (reaver::lexer::unexpected_characters & e)
-    {
-        dlog() << style::style(colors::bred, colors::def, styles::bold) << "Lexer error: " << style::style()
-            << e.what();
-    }
-
-    catch (reaver::assembler::exception & e)
+    catch (reaver::exception & e)
     {
         e.print(dlog);
 
@@ -65,6 +56,12 @@ int main(int argc, char ** argv)
             return -2;
         }
 
+        return -1;
+    }
+
+    catch (std::exception & e)
+    {
+        dlog(error) << e.what();
         return -1;
     }
 }
