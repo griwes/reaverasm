@@ -23,37 +23,27 @@
  *
  **/
 
-#pragma once
+#include <reaver/exception.h>
 
-#include <frontend/frontend.h>
+#include <preprocessor/preprocessor.h>
+#include <preprocessor/nasm/nasm.h>
+#include <preprocessor/none/none.h>
 
-#include <boost/program_options.hpp>
+using reaver::style::colors;
+using reaver::style::styles;
 
-namespace reaver
+std::unique_ptr<reaver::assembler::preprocessor> reaver::assembler::create_preprocessor(const reaver::assembler::frontend & front)
 {
-    namespace assembler
+    if (front.preprocessor() == "none")
     {
-        class console_frontend : public frontend
-        {
-        public:
-            console_frontend(int, char **);
-            virtual ~console_frontend() {}
-
-            virtual bool preprocess_only() const;
-
-            virtual std::string preprocessor() const;
-            virtual std::string arch() const;
-            virtual std::string syntax() const;
-
-        private:
-            boost::program_options::variables_map _variables;
-            bool _prep_only;
-            bool _asm_only;
-
-            std::ifstream _input;
-            std::ofstream _output;
-
-            std::string _arch;
-        };
+        return std::unique_ptr<preprocessor>{ new none_preprocessor{ front } };
     }
+
+    if (front.preprocessor() == "nasm")
+    {
+        return std::unique_ptr<preprocessor>{ new nasm_preprocessor{ front } };
+    }
+
+    throw exception(error) << "not supported preprocessor selected: " << style::style(colors::bgray, colors::def, styles::bold)
+        << front.preprocessor() << style::style() << ".";
 }

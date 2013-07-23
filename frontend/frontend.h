@@ -33,6 +33,12 @@ namespace reaver
         {
         public:
             virtual ~frontend() {}
+
+            virtual bool preprocess_only() const = 0;
+
+            virtual std::string preprocessor() const = 0;
+            virtual std::string arch() const = 0;
+            virtual std::string syntax() const = 0;
         };
     }
 }

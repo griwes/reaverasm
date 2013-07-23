@@ -25,35 +25,20 @@
 
 #pragma once
 
-#include <frontend/frontend.h>
+#include <memory>
 
-#include <boost/program_options.hpp>
+#include <frontend/frontend.h>
 
 namespace reaver
 {
     namespace assembler
     {
-        class console_frontend : public frontend
+        class preprocessor
         {
         public:
-            console_frontend(int, char **);
-            virtual ~console_frontend() {}
-
-            virtual bool preprocess_only() const;
-
-            virtual std::string preprocessor() const;
-            virtual std::string arch() const;
-            virtual std::string syntax() const;
-
-        private:
-            boost::program_options::variables_map _variables;
-            bool _prep_only;
-            bool _asm_only;
-
-            std::ifstream _input;
-            std::ofstream _output;
-
-            std::string _arch;
+            virtual ~preprocessor() {}
         };
+
+        std::unique_ptr<preprocessor> create_preprocessor(const frontend &);
     }
 }

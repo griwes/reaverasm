@@ -48,7 +48,7 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
     boost::program_options::options_description general("General options");
     general.add_options()
         ("help,h", "print this message")
-        ("version,v", "prints version information");
+        ("version,v", "print version information");
 
     boost::program_options::options_description config("Configuration");
     config.add_options()
@@ -57,7 +57,14 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
         (",c", boost::program_options::value<bool>(&_asm_only)->implicit_value(true), "assemble only, do not link")
         ("include-dir,I", boost::program_options::value<std::vector<std::string>>(), "specify additional include directories")
         ("include,i", boost::program_options::value<std::vector<std::string>>(), "specify automatically included file")
-        ("format,f", boost::program_options::value<std::string>(), "specify format");
+        ("preprocessor,p", boost::program_options::value<std::string>()->default_value("nasm"), "specify preprocessor "
+            "to use; currently supported:\n- none \n- nasm")
+        ("syntax,s", boost::program_options::value<std::string>()->default_value(""), "specify assembly syntax "
+            "(x86 and x86_64 only); currently supported:\n- intel (default for x86 and x86_64 targets)")
+        ("format,f", boost::program_options::value<std::string>()->default_value("elf64"), "specify format; currently "
+            "supported:\n- binary (flat)\n- elf32\n- elf64")
+        ("target,t", boost::program_options::value<std::string>()->default_value("x86_64-none-elf"), "specify target in "
+            "triple format; currently supported:\n- x86-none-elf\n- x86_64-none-elf");
 
     boost::program_options::options_description hidden("Hidden");
     hidden.add_options()
@@ -110,7 +117,8 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
 
     if (_variables["output"].as<std::string>() == "")
     {
-        _variables.at("output").value() = boost::any{ boost::filesystem::path{ _variables["input"].as<std::string>() }.replace_extension(".out").string() };
+        _variables.at("output").value() = boost::any{ boost::filesystem::path{ _variables["input"].as<std::string>() }
+            .replace_extension(".out").string() };
     }
 
     _output.open(_variables["output"].as<std::string>(), std::ios::out | std::ios::binary);
@@ -124,4 +132,32 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
     {
         _asm_only = true;
     }
+
+    std::string target = _variables["target"].as<std::string>();
+    _arch = target.substr(0, target.find('_'));
+
+    if ((_arch == "x86" || _arch == "x86_64") && _variables["syntax"].as<std::string>() == "")
+    {
+        _variables.at("syntax").value() = boost::any{ std::string{ "intel" } };
+    }
+}
+
+std::string reaver::assembler::console_frontend::preprocessor() const
+{
+    return _variables["preprocessor"].as<std::string>();
+}
+
+std::string reaver::assembler::console_frontend::arch() const
+{
+    return _arch;
+}
+
+std::string reaver::assembler::console_frontend::syntax() const
+{
+    return _variables["syntax"].as<std::string>();
+}
+
+bool reaver::assembler::console_frontend::preprocess_only() const
+{
+    return _prep_only;
 }

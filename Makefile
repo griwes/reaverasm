@@ -26,10 +26,8 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(CFLAGS) $< -o $@
 
 clean: clean-test
-	@rm -rfv *.o
-	@rm -rfv */*.o
-	@rm -rfv *.d
-	@rm -rfv */*.d
+	@find . -name "*.o" -delete
+	@find . -name "*.d" -delete
 
 test: $(EXECUTABLE) $(TESTS) $(ELFTESTS) $(TESTRESULTS)
 
