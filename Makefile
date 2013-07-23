@@ -11,6 +11,14 @@ EXECUTABLE=rasm
 
 all: $(SOURCES) $(EXECUTABLE)
 
+install:
+	@sudo mkdir -p /usr/local/include/reaver/assembler
+	@sudo cp frontend/frontend.h /usr/local/include/reaver/assembler
+	@sudo cp generator/generator.h /usr/local/include/reaver/assembler
+	@sudo cp output/output.h /usr/local/include/reaver/assembler
+	@sudo cp parser/parser.h /usr/local/include/reaver/assembler
+	@sudo cp preprocessor/preprocessor.h /usr/local/include/reaver/assembler
+
 $(EXECUTABLE): $(OBJECTS)
 	$(LD) $(LDFLAGS) -o $@ $(OBJECTS) -lreaver -pthread
 
@@ -30,27 +38,11 @@ clean-test:
 	@rm -rfv tests/*.elf
 
 %.bin: %.asm $(EXECUTABLE) clean-test
-#	@yasm $< -o $@.ref
-	@./rasm $< -o $@
-#	@cmp -s $@ $@.ref; \
-#	RETVAL=$$?; \
-#	if [ $$RETVAL -eq 0 ]; then \
-#		echo $<": SAME"; \
-#	else \
-#		echo $<": NOT SAME"; \
-#	fi
+	./rasm $< -o $@
 
 %: %.elf.asm $(EXECUTABLE) clean-test
-#	@yasm $< -o $@.elf.ref -f elf64
 	./rasm $< -o $@.elf -f elf64
 	ld $@.elf -lc -o $@ -s -dynamic-linker /lib64/ld-linux-x86-64.so.2
 	./$@
-#	@cmp -s $@ $@.ref; \
-#	RETVAL=$$?; \
-#	if [ $$RETVAL -eq 0 ]; then \
-#		echo $<": SAME"; \
-#	else \
-#		echo $<": NOT SAME"; \
-#	fi
 
 -include $(SOURCES:.cpp=.d)

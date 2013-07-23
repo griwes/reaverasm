@@ -34,15 +34,23 @@
 
 using namespace reaver::logger;
 
+namespace reaver
+{
+    namespace assembler
+    {
+        const char * version_string = "Reaver Project Assembler v0.0.1 dev\nCopyright (C) 2013 Reaver Project Team\n";
+    }
+}
+
 int main(int argc, char ** argv)
 {
     try
     {
         reaver::assembler::console_frontend frontend{ argc, argv };
 //        std::unique_ptr<reaver::assembler::preprocessor> preprocessor = reaver::assembler::create_preprocessor(frontend);
-//        reaver::assembler::parser parser{ *preprocessor };
-//        std::unique_ptr<reaver::assembler::generator> generator = reaver::assembler::create_generator(frontend, parser);
-//        std::unique_ptr<reaver::assembler::output> output = reaver::assembler::create_output(frontend, generator);
+//        std::unique_ptr<reaver::assembler::parser> parser = reaver::assembler::create_parser{ frontend, *preprocessor };
+//        std::unique_ptr<reaver::assembler::generator> generator = reaver::assembler::create_generator(frontend, *parser);
+//        std::unique_ptr<reaver::assembler::output> output = reaver::assembler::create_output(frontend, *generator);
 
 //        (*output)();
     }

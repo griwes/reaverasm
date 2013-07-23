@@ -27,6 +27,8 @@
 
 #include <frontend/frontend.h>
 
+#include <boost/program_options.hpp>
+
 namespace reaver
 {
     namespace assembler
@@ -36,6 +38,14 @@ namespace reaver
         public:
             console_frontend(int, char **);
             virtual ~console_frontend() {}
+
+        private:
+            boost::program_options::variables_map _variables;
+            bool _prep_only;
+            bool _asm_only;
+
+            std::ifstream _input;
+            std::ofstream _output;
         };
     }
 }
