@@ -29,7 +29,7 @@
 #include <frontend/console.h>
 #include <preprocessor/preprocessor.h>
 #include <parser/parser.h>
-// #include <generator/generator.h>
+#include <generator/generator.h>
 // #include <output/output.h>
 
 using namespace reaver::logger;
@@ -49,7 +49,7 @@ int main(int argc, char ** argv)
         reaver::assembler::console_frontend frontend{ argc, argv };
         std::unique_ptr<reaver::assembler::preprocessor> preprocessor = reaver::assembler::create_preprocessor(frontend);
         std::unique_ptr<reaver::assembler::parser> parser = reaver::assembler::create_parser(frontend, *preprocessor);
-//        std::unique_ptr<reaver::assembler::generator> generator = reaver::assembler::create_generator(frontend, *parser);
+        std::unique_ptr<reaver::assembler::generator> generator = reaver::assembler::create_generator(frontend, *parser);
 //        std::unique_ptr<reaver::assembler::output> output = reaver::assembler::create_output(frontend, *generator);
 
 //        (*output)();

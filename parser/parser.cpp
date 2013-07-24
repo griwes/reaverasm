@@ -42,7 +42,7 @@ namespace
         using reaver::exception;
 
         throw exception(error) << "Syntax " << reaver::style::style(colors::bgray, colors::def, styles::bold)
-            << front.syntax() << reaver::style::style() << " is not allowed for architecture " << reaver::style::style(
+            << front.syntax() << reaver::style::style() << " is not allowed for target " << reaver::style::style(
             colors::bgray, colors::def, styles::bold) << front.target() << reaver::style::style() <<".";
     }
 }
