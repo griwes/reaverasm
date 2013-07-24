@@ -24,6 +24,7 @@
  **/
 
 #include <reaver/exception.h>
+#include <reaver/target.h>
 
 #include <parser/parser.h>
 #include <parser/intel/intel.h>
@@ -31,6 +32,8 @@
 
 using reaver::style::colors;
 using reaver::style::styles;
+
+using namespace reaver::target;
 
 namespace
 {
@@ -40,7 +43,7 @@ namespace
 
         throw exception(error) << "Syntax " << reaver::style::style(colors::bgray, colors::def, styles::bold)
             << front.syntax() << reaver::style::style() << " is not allowed for architecture " << reaver::style::style(
-            colors::bgray, colors::def, styles::bold) << front.arch() << reaver::style::style() <<".";
+            colors::bgray, colors::def, styles::bold) << front.target() << reaver::style::style() <<".";
     }
 }
 
@@ -54,7 +57,7 @@ std::unique_ptr<reaver::assembler::parser> reaver::assembler::create_parser(cons
 
     if (front.syntax() == "intel")
     {
-        if (front.arch() != "x86" && front.arch() != "x86_64")
+        if (front.target().arch() < arch::i386 || front.target().arch() > arch::x86_64)
         {
             _mismatch(front);
         }

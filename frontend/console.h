@@ -25,9 +25,11 @@
 
 #pragma once
 
-#include <frontend/frontend.h>
-
 #include <boost/program_options.hpp>
+
+#include <reaver/target.h>
+
+#include <frontend/frontend.h>
 
 namespace reaver
 {
@@ -42,8 +44,8 @@ namespace reaver
             virtual bool preprocess_only() const;
 
             virtual std::string preprocessor() const;
-            virtual std::string arch() const;
             virtual std::string syntax() const;
+            virtual ::reaver::target::triple target() const;
 
         private:
             boost::program_options::variables_map _variables;
@@ -53,7 +55,7 @@ namespace reaver
             std::ifstream _input;
             std::ofstream _output;
 
-            std::string _arch;
+            ::reaver::target::triple _target;
         };
     }
 }

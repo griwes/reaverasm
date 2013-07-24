@@ -108,7 +108,7 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
         throw exception(error) << "you must specify input file.";
     }
 
-    _input.open(_variables["input"].as<std::string>(), std::ios::in | std::ios::binary);
+    _input.open(_variables["input"].as<std::string>(), std::ios::in);
     if (!_input)
     {
         throw exception(error) << "failed to open input file " << style::style(colors::bgray, colors::def, styles::bold)
@@ -133,13 +133,7 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
         _asm_only = true;
     }
 
-    std::string target = _variables["target"].as<std::string>();
-    _arch = target.substr(0, target.find('_'));
-
-    if ((_arch == "x86" || _arch == "x86_64") && _variables["syntax"].as<std::string>() == "")
-    {
-        _variables.at("syntax").value() = boost::any{ std::string{ "intel" } };
-    }
+    _target = _variables["target"].as<std::string>();
 }
 
 std::string reaver::assembler::console_frontend::preprocessor() const
@@ -147,9 +141,9 @@ std::string reaver::assembler::console_frontend::preprocessor() const
     return _variables["preprocessor"].as<std::string>();
 }
 
-std::string reaver::assembler::console_frontend::arch() const
+reaver::target::triple reaver::assembler::console_frontend::target() const
 {
-    return _arch;
+    return _target;
 }
 
 std::string reaver::assembler::console_frontend::syntax() const
