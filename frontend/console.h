@@ -49,8 +49,12 @@ namespace reaver
 
         private:
             boost::program_options::variables_map _variables;
-            bool _prep_only;
-            bool _asm_only;
+            bool _prep_only = false;
+            bool _asm_only = false;
+            bool _wextra = false;
+            bool _werror = false;
+            bool _no_ss_warning = false;
+            uint8_t _opt = 1;
 
             std::ifstream _input;
             std::ofstream _output;

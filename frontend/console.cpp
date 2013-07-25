@@ -26,6 +26,7 @@
 #include <iostream>
 
 #include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <reaver/exception.h>
 
@@ -42,6 +43,8 @@ namespace reaver
 using reaver::style::style;
 using reaver::style::colors;
 using reaver::style::styles;
+
+using namespace reaver::target;
 
 reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
 {
@@ -64,7 +67,16 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
         ("format,f", boost::program_options::value<std::string>()->default_value("elf64"), "specify format; currently "
             "supported:\n- binary (flat)\n- elf32\n- elf64")
         ("target,t", boost::program_options::value<std::string>()->default_value("x86_64-none-elf"), "specify target in "
-            "triple format; currently supported:\n- x86-none-elf\n- x86_64-none-elf");
+            "triple format; currently supported:\n- i(X)86-none-elf\n- i(X)86-linux-elf\n- x86_64-none-elf\n- x86_64-linux-elf");
+
+    boost::program_options::options_description errors("Error and optimization options");
+    errors.add_options()
+        ("Wextra", boost::program_options::value<bool>(&_wextra)->implicit_value(true), " enable additional warnings")
+        ("Werror", boost::program_options::value<bool>(&_werror)->implicit_value(true), " throw errors instead of warnings")
+        ("Wno-long-mode-ss-write", boost::program_options::value<bool>(&_no_ss_warning)->implicit_value(true), " disable warning"
+            " about write to segment register being ignored in 64 bit mode, if the segment register is SS (i(X)86 and x86_64 only)")
+        (",O", boost::program_options::value<uint8_t>(&_opt), "set optimization level; supported levels:\n"
+            "- O0 - disable all optimizations\n- O1 - enable space optimizations (default)\n- O2 - enable additional optimizations");
 
     boost::program_options::options_description hidden("Hidden");
     hidden.add_options()
@@ -74,10 +86,11 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
     pod.add("input", 1);
 
     boost::program_options::options_description options;
-    options.add(hidden).add(general).add(config);
+    options.add(hidden).add(general).add(config).add(errors);
 
     boost::program_options::store(boost::program_options::command_line_parser(argc, argv).options(options).positional(pod)
-        .style(boost::program_options::command_line_style::unix_style).run(), _variables);
+        .style(boost::program_options::command_line_style::unix_style | boost::program_options::command_line_style
+        ::allow_long_disguise).run(), _variables);
 
     if (_variables.count("help"))
     {
@@ -86,7 +99,12 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
         std::cout << "Usage:\n";
         std::cout << "  rasm [options] <input file> [options]\n\n";
 
-        std::cout << general << std::endl << config;
+        std::stringstream ss;
+        ss << general << std::endl << config << std::endl << errors;
+        std::string str = ss.str();
+        boost::algorithm::replace_all(str, "--W", "-W");
+
+        std::cout << str;
 
         std::exit(0);
     }
@@ -134,6 +152,11 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
     }
 
     _target = _variables["target"].as<std::string>();
+
+    if (_target.arch() >= arch::i386 && _target.arch() <= arch::x86_64)
+    {
+        _variables.at("syntax").value() = boost::any{ std::string{ "intel" } };
+    }
 }
 
 std::string reaver::assembler::console_frontend::preprocessor() const
