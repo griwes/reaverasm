@@ -41,11 +41,35 @@ namespace reaver
             console_frontend(int, char **);
             virtual ~console_frontend() {}
 
-            virtual bool preprocess_only() const;
+            virtual bool preprocess_only() const
+            {
+                return _prep_only;
+            }
 
-            virtual std::string preprocessor() const;
-            virtual std::string syntax() const;
-            virtual ::reaver::target::triple target() const;
+            virtual bool assemble_only() const
+            {
+                return _asm_only;
+            }
+
+            virtual std::string preprocessor() const
+            {
+                return _variables["preprocessor"].as<std::string>();
+            }
+
+            virtual std::string syntax() const
+            {
+                return _variables["syntax"].as<std::string>();
+            }
+
+            virtual ::reaver::target::triple target() const
+            {
+                return _target;
+            }
+
+            virtual std::string format() const
+            {
+                return _variables["format"].as<std::string>();
+            }
 
         private:
             boost::program_options::variables_map _variables;

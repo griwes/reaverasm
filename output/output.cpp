@@ -23,29 +23,36 @@
  *
  **/
 
-#pragma once
+#include <reaver/exception.h>
 
-namespace reaver
+#include <output/output.h>
+#include <output/elf32/elf32.h>
+#include <output/elf64/elf64.h>
+#include <output/text/text.h>
+
+std::unique_ptr<reaver::assembler::output> reaver::assembler::create_output(const reaver::assembler::frontend & front,
+    const reaver::assembler::generator & gen)
 {
-    namespace target
+    if (front.preprocess_only())
     {
-        class triple;
+        return std::unique_ptr<output>{ new text_output{ front, gen } };
     }
 
-    namespace assembler
+    if (front.assemble_only())
     {
-        class frontend
+        if (front.format() == "elf32")
         {
-        public:
-            virtual ~frontend() {}
+            return std::unique_ptr<output>{ new elf32_output{ front, gen } };
+        }
 
-            virtual bool preprocess_only() const = 0;
-            virtual bool assemble_only() const = 0;
-
-            virtual std::string preprocessor() const = 0;
-            virtual std::string syntax() const = 0;
-            virtual ::reaver::target::triple target() const = 0;
-            virtual std::string format() const = 0;
-        };
+        if (front.format() == "elf64")
+        {
+            return std::unique_ptr<output>{ new elf64_output{ front, gen } };
+        }
     }
+
+    throw exception(error) << "linker plugin not implemented yet, use -c to disable it.";
+//    std::unique_ptr<linker::frontend> linker_front{ new linker::assembler_frontend{ front } };
+//    return std::unique_ptr<output>{ new linker_output{ linker_front, gen } };
 }
+

@@ -56,10 +56,10 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
     boost::program_options::options_description config("Configuration");
     config.add_options()
         ("output,o", boost::program_options::value<std::string>()->default_value(""), "specify output file")
-        (",E", boost::program_options::value<bool>(&_prep_only)->implicit_value(true), "preprocess only")
-        (",c", boost::program_options::value<bool>(&_asm_only)->implicit_value(true), "assemble only, do not link")
-        ("include-dir,I", boost::program_options::value<std::vector<std::string>>(), "specify additional include directories")
-        ("include,i", boost::program_options::value<std::vector<std::string>>(), "specify automatically included file")
+        ("preprocess-only,E", "preprocess only")
+        ("assemble-only,c", "assemble only, do not link")
+        ("include-dir,I", boost::program_options::value<std::vector<std::string>>()->composing(), "specify additional include directories")
+        ("include,i", boost::program_options::value<std::vector<std::string>>()->composing(), "specify automatically included file")
         ("preprocessor,p", boost::program_options::value<std::string>()->default_value("nasm"), "specify preprocessor "
             "to use; currently supported:\n- none \n- nasm")
         ("syntax,s", boost::program_options::value<std::string>()->default_value(""), "specify assembly syntax "
@@ -86,8 +86,8 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
     pod.add("input", 1);
 
     boost::program_options::options_description options;
-    options.add(hidden).add(general).add(config).add(errors);
 
+    options.add(config).add(hidden).add(general).add(errors);
     boost::program_options::store(boost::program_options::command_line_parser(argc, argv).options(options).positional(pod)
         .style(boost::program_options::command_line_style::unix_style | boost::program_options::command_line_style
         ::allow_long_disguise).run(), _variables);
@@ -146,9 +146,19 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
             << _variables["output"].as<std::string>() << style::style() << ".";
     }
 
-    if (boost::filesystem::path(_variables["output"].as<std::string>()).extension() == ".o")
+    if (_variables.count("preprocess-only"))
+    {
+        _prep_only = true;
+    }
+
+    if (_variables.count("assemble-only") || boost::filesystem::path(_variables["output"].as<std::string>()).extension() == ".o")
     {
         _asm_only = true;
+    }
+
+    if (_asm_only && _prep_only)
+    {
+        throw exception(error) << "-c (--assemble-only) and -E (--preprocess-only) are not allowed together.";
     }
 
     _target = _variables["target"].as<std::string>();
@@ -157,24 +167,4 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
     {
         _variables.at("syntax").value() = boost::any{ std::string{ "intel" } };
     }
-}
-
-std::string reaver::assembler::console_frontend::preprocessor() const
-{
-    return _variables["preprocessor"].as<std::string>();
-}
-
-reaver::target::triple reaver::assembler::console_frontend::target() const
-{
-    return _target;
-}
-
-std::string reaver::assembler::console_frontend::syntax() const
-{
-    return _variables["syntax"].as<std::string>();
-}
-
-bool reaver::assembler::console_frontend::preprocess_only() const
-{
-    return _prep_only;
 }

@@ -24,28 +24,20 @@
  **/
 
 #pragma once
+#include <output/output.h>
 
 namespace reaver
 {
-    namespace target
-    {
-        class triple;
-    }
-
     namespace assembler
     {
-        class frontend
+        class text_output : public output
         {
         public:
-            virtual ~frontend() {}
+            text_output(const frontend &, const generator &)
+            {
+            }
 
-            virtual bool preprocess_only() const = 0;
-            virtual bool assemble_only() const = 0;
-
-            virtual std::string preprocessor() const = 0;
-            virtual std::string syntax() const = 0;
-            virtual ::reaver::target::triple target() const = 0;
-            virtual std::string format() const = 0;
+            virtual ~text_output() {}
         };
     }
 }
