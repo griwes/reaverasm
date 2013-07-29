@@ -58,7 +58,8 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
         ("output,o", boost::program_options::value<std::string>()->default_value(""), "specify output file")
         ("preprocess-only,E", "preprocess only")
         ("assemble-only,s", "assemble only, do not link")
-        ("include-dir,I", boost::program_options::value<std::vector<std::string>>()->composing(), "specify additional include directories")
+        ("include-dir,I", boost::program_options::value<std::vector<std::string>>(&_include_paths)->composing(), "specify additional"
+            " include directories")
         ("include,i", boost::program_options::value<std::vector<std::string>>()->composing(), "specify automatically included file")
         ("preprocessor,p", boost::program_options::value<std::string>()->default_value("nasm"), "specify preprocessor "
             "to use; currently supported:\n- none \n- nasm")
@@ -80,7 +81,7 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
 
     boost::program_options::options_description hidden("Hidden");
     hidden.add_options()
-        ("input", boost::program_options::value<std::string>()->required(), "specify input file");
+        ("input", boost::program_options::value<std::string>(&_input_name)->required(), "specify input file");
 
     boost::program_options::positional_options_description pod;
     pod.add("input", 1);
@@ -131,17 +132,16 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
         throw exception(error) << "you must specify input file.";
     }
 
-    _input.open(_variables["input"].as<std::string>(), std::ios::in);
+    _input.open(_input_name, std::ios::in);
     if (!_input)
     {
         throw exception(error) << "failed to open input file " << style::style(colors::bgray, colors::def, styles::bold)
-            << _variables["input"].as<std::string>() << style::style() << ".";
+            << _input_name << style::style() << ".";
     }
 
     if (_variables["output"].as<std::string>() == "")
     {
-        _variables.at("output").value() = boost::any{ boost::filesystem::path{ _variables["input"].as<std::string>() }
-            .replace_extension(".out").string() };
+        _variables.at("output").value() = boost::any{ boost::filesystem::path{ _input_name }.replace_extension(".out").string() };
     }
 
     _output.open(_variables["output"].as<std::string>(), std::ios::out | std::ios::binary);
@@ -172,4 +172,55 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
     {
         _variables.at("syntax").value() = boost::any{ std::string{ "intel" } };
     }
+
+    if (_variables.count("include"))
+    {
+        for (const auto & x : _variables.at("include").as<std::vector<std::string>>())
+        {
+            _default_includes.emplace_back(x, open_file(x));
+        }
+    }
+
+    _include_paths.insert(_include_paths.begin(), boost::filesystem::current_path().string());
+    _include_paths.insert(_include_paths.begin() + 1, boost::filesystem::absolute(_input_name).parent_path().string());
+}
+
+std::ifstream reaver::assembler::console_frontend::open_file(std::string filename) const
+{
+    if (boost::filesystem::path(filename).is_absolute())
+    {
+        if (boost::filesystem::is_regular_file(filename))
+        {
+            std::ifstream ret{ filename, std::ios::in };
+
+            if (!ret)
+            {
+                throw file_failed_to_open{ filename };
+            }
+
+            return std::move(ret);
+        }
+
+        else
+        {
+            throw file_is_directory{ filename };
+        }
+    }
+
+    for (auto & path : _include_paths)
+    {
+        if (boost::filesystem::is_regular_file(path + "/" + filename))
+        {
+            std::ifstream ret{ path + "/" + filename, std::ios::in };
+
+            if (!ret)
+            {
+                throw file_failed_to_open{ filename };
+            }
+
+            return std::move(ret);
+        }
+    }
+
+    throw file_not_found{ filename };
 }

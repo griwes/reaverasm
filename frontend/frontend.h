@@ -25,7 +25,8 @@
 
 #pragma once
 
-#include <iosfwd>
+#include <fstream>
+#include <vector>
 
 namespace reaver
 {
@@ -36,6 +37,18 @@ namespace reaver
 
     namespace assembler
     {
+        struct file
+        {
+            file(file &&) = default;
+
+            file(std::string n, std::ifstream && str) : name{ std::move(n) }, stream{ std::move(str) }
+            {
+            }
+
+            std::string name;
+            std::ifstream stream;
+        };
+
         class frontend
         {
         public:
@@ -51,6 +64,11 @@ namespace reaver
 
             virtual const std::istream & input() const = 0;
             virtual std::ostream & output() const = 0;
+
+            virtual std::string input_name() const = 0;
+            virtual const std::vector<file> & default_includes() const = 0;
+
+            virtual std::ifstream open_file(std::string) const = 0;
         };
     }
 }

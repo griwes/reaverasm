@@ -26,8 +26,10 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 #include <frontend/frontend.h>
+#include <preprocessor/line.h>
 
 namespace reaver
 {
@@ -38,7 +40,7 @@ namespace reaver
         public:
             virtual ~preprocessor() {}
 
-            virtual std::string operator()() const = 0;
+            virtual std::vector<line> operator()() const = 0;
         };
 
         std::unique_ptr<preprocessor> create_preprocessor(const frontend &);

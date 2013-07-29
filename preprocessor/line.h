@@ -23,34 +23,22 @@
  *
  **/
 
-#include <reaver/exception.h>
-#include <reaver/lexer.h>
+#pragma once
 
-#include <preprocessor/nasm/nasm.h>
-#include <preprocessor/nasm/lexer.h>
-#include <preprocessor/nasm/parser.h>
+#include <string>
 
-std::vector<reaver::assembler::line> reaver::assembler::nasm_preprocessor::operator()() const
+#include <utils/include_chain.h>
+
+namespace reaver
 {
-    std::vector<line> ret;
-
-    if (_front.default_includes().size())
+    namespace assembler
     {
-        auto cmdline_inc = std::make_shared<utils::include_chain>("<command line>");
-
-        for (const auto & x : _front.default_includes())
+        struct line
         {
-            _include_stream(x.stream, ret, std::make_shared<utils::include_chain>(x.name, cmdline_inc));
-        }
+            std::string preprocessed;
+            std::string original;
+
+            utils::include_chain include_chain;
+        };
     }
-
-    _include_stream(_front.input(), ret, std::make_shared<utils::include_chain>(_front.input_name()));
-
-    return ret;
-}
-
-void reaver::assembler::nasm_preprocessor::_include_stream(const std::istream &, std::vector<reaver::assembler::line> &,
-    std::shared_ptr<reaver::assembler::utils::include_chain>) const
-{
-
 }

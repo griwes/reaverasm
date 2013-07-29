@@ -81,6 +81,18 @@ namespace reaver
                 return _output;
             }
 
+            virtual std::string input_name() const
+            {
+                return _input_name;
+            }
+
+            virtual const std::vector<file> & default_includes() const
+            {
+                return _default_includes;
+            }
+
+            virtual std::ifstream open_file(std::string) const;
+
         private:
             boost::program_options::variables_map _variables;
             bool _prep_only = false;
@@ -92,6 +104,10 @@ namespace reaver
 
             std::ifstream _input;
             mutable std::ofstream _output;
+
+            std::string _input_name;
+            std::vector<file> _default_includes;
+            std::vector<std::string> _include_paths;
 
             ::reaver::target::triple _target;
         };

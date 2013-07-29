@@ -34,13 +34,18 @@ namespace reaver
         class nasm_preprocessor : public preprocessor
         {
         public:
-            nasm_preprocessor(const frontend &)
+            nasm_preprocessor(const frontend & front) : _front{ front }
             {
             }
 
             virtual ~nasm_preprocessor() {}
 
-            virtual std::string operator()() const;
+            virtual std::vector<line> operator()() const;
+
+        private:
+            void _include_stream(const std::istream &, std::vector<line> &, std::shared_ptr<utils::include_chain>) const;
+
+            const frontend & _front;
         };
     }
 }

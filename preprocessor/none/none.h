@@ -40,9 +40,9 @@ namespace reaver
 
             virtual ~none_preprocessor() {}
 
-            virtual std::string operator()() const
+            virtual std::vector<line> operator()() const
             {
-                return { std::istreambuf_iterator<char>{ _front.input().rdbuf() }, std::istreambuf_iterator<char>{} };
+                return { { { std::istreambuf_iterator<char>{ _front.input().rdbuf() }, std::istreambuf_iterator<char>{} }, "", {} } };
             }
 
         private:
