@@ -71,6 +71,16 @@ namespace reaver
                 return _variables["format"].as<std::string>();
             }
 
+            virtual const std::istream & input() const
+            {
+                return _input;
+            }
+
+            virtual std::ostream & output() const
+            {
+                return _output;
+            }
+
         private:
             boost::program_options::variables_map _variables;
             bool _prep_only = false;
@@ -81,7 +91,7 @@ namespace reaver
             uint8_t _opt = 1;
 
             std::ifstream _input;
-            std::ofstream _output;
+            mutable std::ofstream _output;
 
             ::reaver::target::triple _target;
         };

@@ -26,6 +26,7 @@
 #pragma once
 
 #include <generator/generator.h>
+#include <generator/section.h>
 
 namespace reaver
 {
@@ -34,11 +35,24 @@ namespace reaver
         class none_generator : public generator
         {
         public:
-            none_generator(const parser &)
+            none_generator(const class parser & par) : _parser{ par }
             {
             }
 
             virtual ~none_generator() {}
+
+            virtual const class parser & parser() const
+            {
+                return _parser;
+            }
+
+            virtual std::map<std::string, section> operator()() const
+            {
+                return std::map<std::string, section>{};
+            }
+
+        private:
+            const class parser & _parser;
         };
     }
 }

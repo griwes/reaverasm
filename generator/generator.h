@@ -26,6 +26,7 @@
 #pragma once
 
 #include <memory>
+#include <map>
 
 #include <frontend/frontend.h>
 #include <parser/parser.h>
@@ -34,10 +35,16 @@ namespace reaver
 {
     namespace assembler
     {
+        class section;
+
         class generator
         {
         public:
             virtual ~generator() {}
+
+            virtual const class parser & parser() const = 0;
+
+            virtual std::map<std::string, section> operator()() const = 0;
         };
 
         std::unique_ptr<generator> create_generator(const frontend &, const parser &);

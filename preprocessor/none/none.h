@@ -34,11 +34,19 @@ namespace reaver
         class none_preprocessor : public preprocessor
         {
         public:
-            none_preprocessor(const frontend &)
+            none_preprocessor(const frontend & front) : _front{ front }
             {
             }
 
             virtual ~none_preprocessor() {}
+
+            virtual std::string operator()() const
+            {
+                return { std::istreambuf_iterator<char>{ _front.input().rdbuf() }, std::istreambuf_iterator<char>{} };
+            }
+
+        private:
+            const frontend & _front;
         };
     }
 }

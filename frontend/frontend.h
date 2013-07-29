@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include <iosfwd>
+
 namespace reaver
 {
     namespace target
@@ -46,6 +48,9 @@ namespace reaver
             virtual std::string syntax() const = 0;
             virtual ::reaver::target::triple target() const = 0;
             virtual std::string format() const = 0;
+
+            virtual const std::istream & input() const = 0;
+            virtual std::ostream & output() const = 0;
         };
     }
 }

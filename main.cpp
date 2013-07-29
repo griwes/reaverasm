@@ -52,7 +52,7 @@ int main(int argc, char ** argv)
         std::unique_ptr<reaver::assembler::generator> generator = reaver::assembler::create_generator(frontend, *parser);
         std::unique_ptr<reaver::assembler::output> output = reaver::assembler::create_output(frontend, *generator);
 
-//        (*output)();
+        (*output)();
     }
 
     catch (reaver::exception & e)

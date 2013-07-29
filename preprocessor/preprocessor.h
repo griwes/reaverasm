@@ -37,6 +37,8 @@ namespace reaver
         {
         public:
             virtual ~preprocessor() {}
+
+            virtual std::string operator()() const = 0;
         };
 
         std::unique_ptr<preprocessor> create_preprocessor(const frontend &);

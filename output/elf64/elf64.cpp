@@ -23,23 +23,11 @@
  *
  **/
 
-#pragma once
-#include <output/output.h>
+#include <reaver/exception.h>
 
-namespace reaver
+#include <output/elf64/elf64.h>
+
+void reaver::assembler::elf64_output::operator()() const
 {
-    namespace assembler
-    {
-        class elf64_output : public output
-        {
-        public:
-            elf64_output(const frontend &, const generator &)
-            {
-            }
-
-            virtual ~elf64_output() {}
-
-            virtual void operator()() const;
-        };
-    }
+    throw exception(crash) << "not implemented yet: " << __PRETTY_FUNCTION__;
 }

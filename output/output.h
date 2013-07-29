@@ -38,6 +38,8 @@ namespace reaver
         {
         public:
             virtual ~output() {}
+
+            virtual void operator()() const = 0;
         };
 
         std::unique_ptr<output> create_output(const frontend &, const generator &);

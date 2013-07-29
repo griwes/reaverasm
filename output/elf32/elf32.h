@@ -37,8 +37,10 @@ namespace reaver
             elf32_output(const frontend &, const generator &)
             {
             }
-            
+
             virtual ~elf32_output() {}
+
+            virtual void operator()() const;
         };
     }
 }

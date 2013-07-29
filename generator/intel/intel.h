@@ -24,6 +24,7 @@
  **/
 
 #pragma once
+
 #include <generator/generator.h>
 
 namespace reaver
@@ -33,11 +34,21 @@ namespace reaver
         class intel_generator : public generator
         {
         public:
-            intel_generator(const frontend &, const parser &)
+            intel_generator(const frontend &, const class parser & par) : _parser{ par }
             {
             }
 
             virtual ~intel_generator() {}
+
+            virtual const class parser & parser() const
+            {
+                return _parser;
+            }
+
+            virtual std::map<std::string, section> operator()() const;
+
+        private:
+            const class parser & _parser;
         };
     }
 }

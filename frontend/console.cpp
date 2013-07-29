@@ -57,7 +57,7 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
     config.add_options()
         ("output,o", boost::program_options::value<std::string>()->default_value(""), "specify output file")
         ("preprocess-only,E", "preprocess only")
-        ("assemble-only,c", "assemble only, do not link")
+        ("assemble-only,a", "assemble only, do not link")
         ("include-dir,I", boost::program_options::value<std::vector<std::string>>()->composing(), "specify additional include directories")
         ("include,i", boost::program_options::value<std::vector<std::string>>()->composing(), "specify automatically included file")
         ("preprocessor,p", boost::program_options::value<std::string>()->default_value("nasm"), "specify preprocessor "

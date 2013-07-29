@@ -23,23 +23,11 @@
  *
  **/
 
-#pragma once
-#include <output/output.h>
+#include <iostream>
 
-namespace reaver
+#include <output/text/text.h>
+
+void reaver::assembler::text_output::operator()() const
 {
-    namespace assembler
-    {
-        class elf64_output : public output
-        {
-        public:
-            elf64_output(const frontend &, const generator &)
-            {
-            }
-
-            virtual ~elf64_output() {}
-
-            virtual void operator()() const;
-        };
-    }
+    _front.output() << _gen.parser().preprocessor()() << std::endl;
 }

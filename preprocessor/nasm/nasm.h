@@ -39,6 +39,8 @@ namespace reaver
             }
 
             virtual ~nasm_preprocessor() {}
+
+            virtual std::string operator()() const;
         };
     }
 }

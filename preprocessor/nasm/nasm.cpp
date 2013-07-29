@@ -23,23 +23,11 @@
  *
  **/
 
-#pragma once
-#include <output/output.h>
+#include <reaver/exception.h>
 
-namespace reaver
+#include <preprocessor/nasm/nasm.h>
+
+std::string reaver::assembler::nasm_preprocessor::operator()() const
 {
-    namespace assembler
-    {
-        class elf64_output : public output
-        {
-        public:
-            elf64_output(const frontend &, const generator &)
-            {
-            }
-
-            virtual ~elf64_output() {}
-
-            virtual void operator()() const;
-        };
-    }
+    throw exception(crash) << "not implemented yet: " << __PRETTY_FUNCTION__;
 }

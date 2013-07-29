@@ -24,22 +24,14 @@
  **/
 
 #pragma once
-#include <output/output.h>
 
 namespace reaver
 {
     namespace assembler
     {
-        class elf64_output : public output
+        class section
         {
-        public:
-            elf64_output(const frontend &, const generator &)
-            {
-            }
 
-            virtual ~elf64_output() {}
-
-            virtual void operator()() const;
         };
     }
 }
