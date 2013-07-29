@@ -57,12 +57,12 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
     config.add_options()
         ("output,o", boost::program_options::value<std::string>()->default_value(""), "specify output file")
         ("preprocess-only,E", "preprocess only")
-        ("assemble-only,a", "assemble only, do not link")
+        ("assemble-only,s", "assemble only, do not link")
         ("include-dir,I", boost::program_options::value<std::vector<std::string>>()->composing(), "specify additional include directories")
         ("include,i", boost::program_options::value<std::vector<std::string>>()->composing(), "specify automatically included file")
         ("preprocessor,p", boost::program_options::value<std::string>()->default_value("nasm"), "specify preprocessor "
             "to use; currently supported:\n- none \n- nasm")
-        ("syntax,s", boost::program_options::value<std::string>()->default_value(""), "specify assembly syntax "
+        ("syntax", boost::program_options::value<std::string>()->default_value(""), "specify assembly syntax "
             "(x86 and x86_64 only); currently supported:\n- intel (default for x86 and x86_64 targets)")
         ("format,f", boost::program_options::value<std::string>()->default_value("elf64"), "specify format; currently "
             "supported:\n- binary (flat)\n- elf32\n- elf64")
@@ -89,8 +89,13 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
 
     options.add(config).add(hidden).add(general).add(errors);
     boost::program_options::store(boost::program_options::command_line_parser(argc, argv).options(options).positional(pod)
-        .style(boost::program_options::command_line_style::unix_style | boost::program_options::command_line_style
-        ::allow_long_disguise).run(), _variables);
+        .style(boost::program_options::command_line_style::allow_short
+            | boost::program_options::command_line_style::allow_long
+            | boost::program_options::command_line_style::allow_sticky
+            | boost::program_options::command_line_style::allow_dash_for_short
+            | boost::program_options::command_line_style::long_allow_next
+            | boost::program_options::command_line_style::short_allow_next
+            | boost::program_options::command_line_style::allow_long_disguise).run(), _variables);
 
     if (_variables.count("help"))
     {
@@ -158,12 +163,12 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
 
     if (_asm_only && _prep_only)
     {
-        throw exception(error) << "-c (--assemble-only) and -E (--preprocess-only) are not allowed together.";
+        throw exception(error) << "-s (--assemble-only) and -E (--preprocess-only) are not allowed together.";
     }
 
     _target = _variables["target"].as<std::string>();
 
-    if (_target.arch() >= arch::i386 && _target.arch() <= arch::x86_64)
+    if (_target.arch() >= arch::i386 && _target.arch() <= arch::x86_64 && !_variables.count("syntax"))
     {
         _variables.at("syntax").value() = boost::any{ std::string{ "intel" } };
     }

@@ -51,7 +51,7 @@ std::unique_ptr<reaver::assembler::output> reaver::assembler::create_output(cons
         }
     }
 
-    throw exception(error) << "linker plugin not implemented yet, use -c to disable it.";
+    throw exception(error) << "linker plugin not implemented yet, use -s to disable it.";
 //    std::unique_ptr<linker::frontend> linker_front{ new linker::assembler_frontend{ front } };
 //    return std::unique_ptr<output>{ new linker_output{ linker_front, gen } };
 }
