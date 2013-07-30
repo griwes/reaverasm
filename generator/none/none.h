@@ -35,24 +35,16 @@ namespace reaver
         class none_generator : public generator
         {
         public:
-            none_generator(const class parser & par) : _parser{ par }
+            none_generator(const class parser & par) : generator{ par }
             {
             }
 
             virtual ~none_generator() {}
 
-            virtual const class parser & parser() const
-            {
-                return _parser;
-            }
-
             virtual std::map<std::string, section> operator()() const
             {
                 return std::map<std::string, section>{};
             }
-
-        private:
-            const class parser & _parser;
         };
     }
 }

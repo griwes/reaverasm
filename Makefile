@@ -36,10 +36,10 @@ clean-test:
 	@rm -rfv tests/*.elf
 
 %.bin: %.asm $(EXECUTABLE) clean-test
-	./rasm $< -o $@
+	./rasm $< -o $@ -s
 
 %: %.elf.asm $(EXECUTABLE) clean-test
-	./rasm $< -o $@.elf -f elf64
+	./rasm $< -o $@.elf -f elf64 -s
 	ld $@.elf -lc -o $@ -s -dynamic-linker /lib64/ld-linux-x86-64.so.2
 	./$@
 

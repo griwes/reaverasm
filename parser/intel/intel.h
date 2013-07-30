@@ -34,7 +34,7 @@ namespace reaver
         class intel_parser : public parser
         {
         public:
-            intel_parser(const frontend &, const class preprocessor & ppc) : parser{ ppc }
+            intel_parser(const frontend &, class preprocessor & ppc) : parser{ ppc }
             {
             }
 

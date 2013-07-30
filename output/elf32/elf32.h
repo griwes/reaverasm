@@ -34,7 +34,7 @@ namespace reaver
         class elf32_output : public output
         {
         public:
-            elf32_output(const frontend &, const generator &)
+            elf32_output(const frontend &, const class generator & gen) : output{ gen }
             {
             }
 

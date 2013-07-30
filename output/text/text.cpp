@@ -29,7 +29,7 @@
 
 void reaver::assembler::text_output::operator()() const
 {
-    for (const auto & x : _gen.parser().preprocessor()())
+    for (auto & x : _generator.parser().preprocessor()())
     {
         _front.output() << x.preprocessed;
     }

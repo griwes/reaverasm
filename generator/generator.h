@@ -40,11 +40,21 @@ namespace reaver
         class generator
         {
         public:
+            generator(const class parser & par) : _parser{ par }
+            {
+            }
+
             virtual ~generator() {}
 
-            virtual const class parser & parser() const = 0;
+            virtual const class parser & parser() const
+            {
+                return _parser;
+            }
 
             virtual std::map<std::string, section> operator()() const = 0;
+
+        protected:
+            const class parser & _parser;
         };
 
         std::unique_ptr<generator> create_generator(const frontend &, const parser &);

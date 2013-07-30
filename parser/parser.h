@@ -52,6 +52,6 @@ namespace reaver
             const class preprocessor & _preprocessor;
         };
 
-        std::unique_ptr<parser> create_parser(const frontend &, const preprocessor &);
+        std::unique_ptr<parser> create_parser(const frontend &, preprocessor &);
     }
 }

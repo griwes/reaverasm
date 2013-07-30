@@ -48,7 +48,7 @@ namespace
 }
 
 std::unique_ptr<reaver::assembler::parser> reaver::assembler::create_parser(const reaver::assembler::frontend & front,
-    const reaver::assembler::preprocessor & ppc)
+    reaver::assembler::preprocessor & ppc)
 {
     if (front.preprocess_only())
     {

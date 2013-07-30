@@ -84,7 +84,7 @@ namespace reaver
                     | parser::token(lex.number) | parser::token(lex.string) | parser::token(lex.symbol))
                     - parser::token(lex.symbol)({ ",", "(", ")" }));
 
-                macro_call = parser::token(lex.identifier) >> ~parser::token(lex.symbol)({ "(" }) >> anything_but_comma_and_parens
+                define_call = parser::token(lex.identifier) >> ~parser::token(lex.symbol)({ "(" }) >> anything_but_comma_and_parens
                     % parser::token(lex.symbol)({ "," }) >> ~parser::token(lex.symbol)({ ")" });
 
                 skip = parser::token(lex.whitespace);
@@ -101,7 +101,7 @@ namespace reaver
             parser::rule<std::string> else_directive;           // rule<>
             parser::rule<reaver::assembler::rep_match> rep;
 
-            parser::rule<reaver::assembler::macro_call_match> macro_call;
+            parser::rule<reaver::assembler::macro_call_match> define_call;
 
             parser::rule<std::string> anything_but_comma_and_parens;
 

@@ -26,15 +26,21 @@
 #pragma once
 
 #include <preprocessor/preprocessor.h>
+#include <preprocessor/nasm/lexer.h>
+#include <preprocessor/nasm/parser.h>
+#include <preprocessor/macro.h>
+#include <preprocessor/define.h>
 
 namespace reaver
 {
     namespace assembler
     {
+        struct nasm_preprocessor_state;
+
         class nasm_preprocessor : public preprocessor
         {
         public:
-            nasm_preprocessor(const frontend & front) : _front{ front }
+            nasm_preprocessor(const frontend & front) : _front{ front }, _parser{ _lexer }
             {
             }
 
@@ -43,9 +49,16 @@ namespace reaver
             virtual std::vector<line> operator()() const;
 
         private:
-            void _include_stream(const std::istream &, std::vector<line> &, std::shared_ptr<utils::include_chain>) const;
+            void _include_stream(std::istream &, nasm_preprocessor_state &, std::shared_ptr<utils::include_chain>) const;
+
+            std::string _apply_defines(std::string, nasm_preprocessor_state &, std::shared_ptr<utils::include_chain>) const;
+            std::string _apply_defines(std::vector<lexer::token>::const_iterator, std::vector<lexer::token>::const_iterator,
+                nasm_preprocessor_state &, std::shared_ptr<utils::include_chain>) const;
 
             const frontend & _front;
+
+            nasm_preprocessor_lexer _lexer;
+            nasm_preprocessor_parser _parser;
         };
     }
 }

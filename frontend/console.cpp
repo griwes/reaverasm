@@ -79,16 +79,19 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
         (",O", boost::program_options::value<uint8_t>(&_opt), "set optimization level; supported levels:\n"
             "- O0 - disable all optimizations\n- O1 - enable space optimizations (default)\n- O2 - enable additional optimizations");
 
+    boost::program_options::options_description preprocessor("Preprocessor options");
+    preprocessor.add_options()
+        ("D*", boost::program_options::value<std::string>(), " define names for preprocessor");
+
     boost::program_options::options_description hidden("Hidden");
     hidden.add_options()
-        ("input", boost::program_options::value<std::string>(&_input_name)->required(), "specify input file");
+        ("input", boost::program_options::value<std::string>(), "specify input file");
 
     boost::program_options::positional_options_description pod;
     pod.add("input", 1);
 
     boost::program_options::options_description options;
-
-    options.add(config).add(hidden).add(general).add(errors);
+    options.add(config).add(hidden).add(general).add(errors).add(preprocessor);
     boost::program_options::store(boost::program_options::command_line_parser(argc, argv).options(options).positional(pod)
         .style(boost::program_options::command_line_style::allow_short
             | boost::program_options::command_line_style::allow_long
@@ -106,9 +109,10 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
         std::cout << "  rasm [options] <input file> [options]\n\n";
 
         std::stringstream ss;
-        ss << general << std::endl << config << std::endl << errors;
+        ss << general << std::endl << config << std::endl << errors << std::endl << preprocessor;
         std::string str = ss.str();
         boost::algorithm::replace_all(str, "--W", "-W");
+        boost::algorithm::replace_all(str, "--D", "-D");
 
         std::cout << str;
 
@@ -127,7 +131,9 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
         std::exit(0);
     }
 
-    if (!_variables.count("input"))
+    _input_name = _variables.count("input") ? _variables["input"].as<std::string>() : "";
+
+    if (_input_name == "")
     {
         throw exception(error) << "you must specify input file.";
     }
@@ -168,7 +174,7 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
 
     _target = _variables["target"].as<std::string>();
 
-    if (_target.arch() >= arch::i386 && _target.arch() <= arch::x86_64 && !_variables.count("syntax"))
+    if (_target.arch() >= arch::i386 && _target.arch() <= arch::x86_64 && _variables["syntax"].as<std::string>() == "")
     {
         _variables.at("syntax").value() = boost::any{ std::string{ "intel" } };
     }
@@ -177,15 +183,20 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
     {
         for (const auto & x : _variables.at("include").as<std::vector<std::string>>())
         {
-            _default_includes.emplace_back(x, open_file(x));
+            _default_includes.emplace_back(open_file(x));
         }
+    }
+
+    if (_opt > 2)
+    {
+        throw exception(error) << "not supported optimization level requested.";
     }
 
     _include_paths.insert(_include_paths.begin(), boost::filesystem::current_path().string());
     _include_paths.insert(_include_paths.begin() + 1, boost::filesystem::absolute(_input_name).parent_path().string());
 }
 
-std::ifstream reaver::assembler::console_frontend::open_file(std::string filename) const
+reaver::assembler::file reaver::assembler::console_frontend::open_file(std::string filename) const
 {
     if (boost::filesystem::path(filename).is_absolute())
     {
@@ -198,7 +209,7 @@ std::ifstream reaver::assembler::console_frontend::open_file(std::string filenam
                 throw file_failed_to_open{ filename };
             }
 
-            return std::move(ret);
+            return { filename, std::move(ret) };
         }
 
         else
@@ -218,7 +229,7 @@ std::ifstream reaver::assembler::console_frontend::open_file(std::string filenam
                 throw file_failed_to_open{ filename };
             }
 
-            return std::move(ret);
+            return { (path == _include_paths[0] || path == _include_paths[1]) ? filename : path + "/" + filename, std::move(ret) };
         }
     }
 

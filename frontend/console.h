@@ -30,6 +30,7 @@
 #include <reaver/target.h>
 
 #include <frontend/frontend.h>
+#include <preprocessor/define.h>
 
 namespace reaver
 {
@@ -71,7 +72,7 @@ namespace reaver
                 return _variables["format"].as<std::string>();
             }
 
-            virtual const std::istream & input() const
+            virtual std::istream & input() const
             {
                 return _input;
             }
@@ -86,12 +87,17 @@ namespace reaver
                 return _input_name;
             }
 
-            virtual const std::vector<file> & default_includes() const
+            virtual std::vector<file> & default_includes() const
             {
                 return _default_includes;
             }
 
-            virtual std::ifstream open_file(std::string) const;
+            virtual file open_file(std::string) const;
+
+            virtual const std::map<std::string, define> & defines() const
+            {
+                return _defines;
+            }
 
         private:
             boost::program_options::variables_map _variables;
@@ -102,12 +108,14 @@ namespace reaver
             bool _no_ss_warning = false;
             uint8_t _opt = 1;
 
-            std::ifstream _input;
+            mutable std::ifstream _input;
             mutable std::ofstream _output;
 
             std::string _input_name;
-            std::vector<file> _default_includes;
+            mutable std::vector<file> _default_includes;
             std::vector<std::string> _include_paths;
+
+            std::map<std::string, define> _defines;
 
             ::reaver::target::triple _target;
         };

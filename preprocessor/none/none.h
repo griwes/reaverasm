@@ -42,7 +42,7 @@ namespace reaver
 
             virtual std::vector<line> operator()() const
             {
-                return { { { std::istreambuf_iterator<char>{ _front.input().rdbuf() }, std::istreambuf_iterator<char>{} }, "", {} } };
+                return { { { std::istreambuf_iterator<char>{ _front.input().rdbuf() }, std::istreambuf_iterator<char>{} }, {}, 0, {} } };
             }
 
         private:

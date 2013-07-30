@@ -33,7 +33,7 @@ namespace reaver
         class elf64_output : public output
         {
         public:
-            elf64_output(const frontend &, const generator &)
+            elf64_output(const frontend &, const class generator & gen) : output{ gen }
             {
             }
 

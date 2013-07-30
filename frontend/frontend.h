@@ -27,6 +27,7 @@
 
 #include <fstream>
 #include <vector>
+#include <map>
 
 namespace reaver
 {
@@ -37,6 +38,8 @@ namespace reaver
 
     namespace assembler
     {
+        class define;
+
         struct file
         {
             file(file &&) = default;
@@ -62,13 +65,15 @@ namespace reaver
             virtual ::reaver::target::triple target() const = 0;
             virtual std::string format() const = 0;
 
-            virtual const std::istream & input() const = 0;
+            virtual std::istream & input() const = 0;
             virtual std::ostream & output() const = 0;
 
             virtual std::string input_name() const = 0;
-            virtual const std::vector<file> & default_includes() const = 0;
+            virtual std::vector<file> & default_includes() const = 0;
 
-            virtual std::ifstream open_file(std::string) const = 0;
+            virtual file open_file(std::string) const = 0;
+
+            virtual const std::map<std::string, define> & defines() const = 0;
         };
     }
 }

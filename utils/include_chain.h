@@ -35,15 +35,24 @@ namespace reaver
         {
             struct include_chain
             {
+                include_chain(const include_chain &) = default;
+                include_chain(include_chain &&) = default;
+
                 include_chain(std::string f = "", std::shared_ptr<include_chain> u = nullptr, uint64_t l = 0, bool m = false)
                     : file{ std::move(f) }, up{ std::move(u) }, line{ l }, macro{ m }
                 {
+                    if (up)
+                    {
+                        size = up->size + 1;
+                    }
                 }
 
                 std::string file;
                 std::shared_ptr<include_chain> up;
                 uint64_t line;
                 bool macro;
+
+                uint64_t size = 0;
             };
         }
     }

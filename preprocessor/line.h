@@ -26,6 +26,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include <utils/include_chain.h>
 
@@ -35,10 +36,16 @@ namespace reaver
     {
         struct line
         {
-            std::string preprocessed;
-            std::string original;
+            line(std::string pp, std::vector<std::string> orig, uint64_t number, std::shared_ptr<utils::include_chain> inc)
+                : preprocessed{ std::move(pp) }, original{ std::move(orig) }, number{ number }, include_chain{ std::move(inc) }
+            {
+            }
 
-            utils::include_chain include_chain;
+            std::string preprocessed;
+            std::vector<std::string> original;
+            uint64_t number;
+
+            std::shared_ptr<utils::include_chain> include_chain;
         };
     }
 }

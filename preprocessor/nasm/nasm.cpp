@@ -27,30 +27,295 @@
 #include <reaver/lexer.h>
 
 #include <preprocessor/nasm/nasm.h>
-#include <preprocessor/nasm/lexer.h>
-#include <preprocessor/nasm/parser.h>
+
+using reaver::style::style;
+using reaver::style::colors;
+using reaver::style::styles;
+
+namespace reaver
+{
+    namespace assembler
+    {
+        struct nasm_preprocessor_state
+        {
+            std::vector<line> lines;
+            std::vector<std::string> define_stack;
+            std::map<std::string, define> defines;
+            std::map<std::string, std::shared_ptr<macro>> macros;
+        };
+    }
+}
 
 std::vector<reaver::assembler::line> reaver::assembler::nasm_preprocessor::operator()() const
 {
-    std::vector<line> ret;
+    nasm_preprocessor_state state;
+    state.defines = _front.defines();
 
     if (_front.default_includes().size())
     {
         auto cmdline_inc = std::make_shared<utils::include_chain>("<command line>");
 
-        for (const auto & x : _front.default_includes())
+        for (auto & x : _front.default_includes())
         {
-            _include_stream(x.stream, ret, std::make_shared<utils::include_chain>(x.name, cmdline_inc));
+            _include_stream(x.stream, state, std::make_shared<utils::include_chain>(x.name, cmdline_inc));
         }
     }
 
-    _include_stream(_front.input(), ret, std::make_shared<utils::include_chain>(_front.input_name()));
+    _include_stream(_front.input(), state, std::make_shared<utils::include_chain>(_front.input_name()));
 
-    return ret;
+    return state.lines;
 }
 
-void reaver::assembler::nasm_preprocessor::_include_stream(const std::istream &, std::vector<reaver::assembler::line> &,
-    std::shared_ptr<reaver::assembler::utils::include_chain>) const
+void reaver::assembler::nasm_preprocessor::_include_stream(std::istream & input, reaver::assembler::nasm_preprocessor_state & state,
+    std::shared_ptr<reaver::assembler::utils::include_chain> inc) const
 {
+    std::string buffer;
+    uint64_t new_lines = 1;
+    uint64_t current_line = 0;
 
+    auto chain = [&](){
+        auto i = std::make_shared<utils::include_chain>(*inc);
+        i->line = current_line;
+        return i;
+    };
+
+    while (std::getline(input, buffer) && (current_line += new_lines))
+    {
+        new_lines = 1;
+        std::vector<std::string> v{ buffer };
+
+        if (inc->size > 1024)
+        {
+            throw exception(error) << "maximum include (or macro) depth reached.";
+        }
+
+        while (buffer.size() && buffer.back() == '\\')
+        {
+            buffer.pop_back();
+
+            std::string next;
+
+            if (!std::getline(input, next))
+            {
+                throw exception(error) << "invalid `\\` at the end of file.";
+            }
+
+            buffer.append(next);
+            v.push_back(next);
+            ++new_lines;
+        }
+
+        if (buffer.empty())
+        {
+            continue;
+        }
+
+        auto tokens = reaver::lexer::tokenize(buffer, _lexer.desc);
+        auto begin = tokens.cbegin();
+
+        {
+            auto define = reaver::parser::parse(_parser.define, begin, tokens.cend(), _parser.skip);
+
+            if (define)
+            {
+                if (state.defines.find(define->name) != state.defines.end())
+                {
+                    throw exception(error) << "define name `" << style::style(colors::bgray, colors::def, styles::bold)
+                        << define->name << style::style() << "` redefined.";
+                }
+
+                if (define->directive == "%define" && !define->args)
+                {
+                    std::string definition;
+
+                    for (; begin != tokens.cend(); ++begin)
+                    {
+                        definition.append(begin->as<std::string>());
+                    }
+
+                    state.defines.emplace(define->name, assembler::define{ define->name, definition, chain() });
+                }
+
+                else if (define->directive == "%xdefine" && !define->args)
+                {
+                    auto i = chain();
+                    state.defines.emplace(define->name, assembler::define{ define->name, _apply_defines(begin, tokens.cend(),
+                        state, i), i });
+                }
+
+                else if (define->directive == "%define")
+                {
+                    std::string definition;
+
+                    while (begin != tokens.cend())
+                    {
+                        definition.append((begin++)->as<std::string>());
+                    }
+
+                    state.defines.emplace(define->name, assembler::define{ define->name, *define->args, definition,
+                        chain() });
+                }
+
+                else
+                {
+                    auto i = chain();
+                    state.defines.emplace(define->name, assembler::define{ define->name, *define->args, _apply_defines(begin,
+                        tokens.cend(), state, i), i });
+                }
+
+                continue;
+            }
+        }
+
+        {
+            begin = tokens.cbegin();
+            auto include = parser::parse(_parser.include, begin, tokens.cend(), _parser.skip);
+
+            if (include)
+            {
+                auto file = _front.open_file(include->substr(1, include->size() - 2));
+
+                if (begin != tokens.cend())
+                {
+                    throw exception(error) << "junk after %include directive.";
+                }
+
+                auto i = std::make_shared<utils::include_chain>(file.name, chain(), 0, false);
+                _include_stream(file.stream, state, i);
+
+                continue;
+            }
+        }
+
+        {
+            begin = tokens.cbegin();
+            auto undef = parser::parse(_parser.undef, begin, tokens.cend(), _parser.skip);
+
+            if (undef)
+            {
+                if (begin != tokens.cend())
+                {
+                    throw exception(error) << "junk after %undef directive.";
+                }
+
+                if (state.defines.find(*undef) == state.defines.end())
+                {
+                    throw exception(error) << "unknown define: `" << style::style(colors::white, colors::def,
+                        styles::bold) << *undef << style::style() << "`.";
+                }
+
+                state.defines.erase(state.defines.find(*undef));
+
+                continue;
+            }
+        }
+
+        {
+            begin = tokens.cbegin();
+
+            if (begin->type() == assembler::pp_directive && begin->as<std::string>() == "%error")
+            {
+                std::string error;
+
+                while ((++begin)->type() == assembler::pp_whitespace) {}
+
+                while (begin != tokens.cend())
+                {
+                    error.append((begin++)->as<std::string>());
+                }
+
+                throw exception(logger::error) << error;
+            }
+        }
+
+        state.lines.emplace_back(_apply_defines(buffer, state, chain()), v, current_line, inc);
+    }
+}
+
+std::string reaver::assembler::nasm_preprocessor::_apply_defines(std::string str, reaver::assembler::nasm_preprocessor_state
+    & state, std::shared_ptr<reaver::assembler::utils::include_chain> inc) const
+{
+    auto tokens = lexer::tokenize(str, _lexer.desc);
+    return _apply_defines(tokens.begin(), tokens.end(), state, inc);
+}
+
+std::string reaver::assembler::nasm_preprocessor::_apply_defines(std::vector<lexer::token>::const_iterator begin,
+    std::vector<lexer::token>::const_iterator end, reaver::assembler::nasm_preprocessor_state & state, std::shared_ptr<
+    reaver::assembler::utils::include_chain> inc) const
+{
+    std::string ret;
+
+    while (begin != end)
+    {
+        if (state.defines.find(begin->as<std::string>()) != state.defines.end())
+        {
+            if (std::find(state.define_stack.begin(), state.define_stack.end(), begin->as<std::string>())
+                != state.define_stack.end())
+            {
+                throw exception(error) << "define `" << style::style(colors::white, colors::def, styles::bold) <<
+                    begin->as<std::string>() << style::style() << "` defined recursively.";
+            }
+
+            auto & define = state.defines.at(begin->as<std::string>());
+            state.define_stack.push_back(begin->as<std::string>());
+
+            if (define.parameters().size())
+            {
+                auto t = begin;
+                auto match = reaver::parser::parse(_parser.define_call, t, end, _parser.skip);
+
+                if (match)
+                {
+                    begin = t - 1;
+
+                    if (match->args.size() != define.parameters().size())
+                    {
+                        throw exception(error) << "wrong number of parameters for define `" << style::style(colors::white,
+                            colors::def, styles::bold) << define.name() << style::style() << "`; expected " << define.parameters()
+                            .size() << ", got " << match->args.size() << ".";
+                    }
+
+                    std::map<std::string, std::string> params;
+                    for (uint64_t i = 0; i < define.parameters().size(); ++i)
+                    {
+                        params[define.parameters()[i]] = match->args[i];
+                    }
+
+                    for (auto & x : lexer::tokenize(define.definition(), _lexer.desc))
+                    {
+                        if (params.find(x.as<std::string>()) != params.end())
+                        {
+                            ret.append(_apply_defines(params[x.as<std::string>()], state, inc));
+                        }
+
+                        else
+                        {
+                            ret.append(_apply_defines(x.as<std::string>(), state, inc));
+                        }
+                    }
+                }
+
+                else
+                {
+                    throw exception(error) << "no parameters supplied for macro `" << style::style(colors::white,
+                        colors::def, styles::bold) << define.name() << style::style() << "` taking " << define.parameters()
+                        .size() << " arguments.";
+                }
+            }
+
+            else
+            {
+                ret.append(_apply_defines(define.definition(), state, inc));
+            }
+        }
+
+        else
+        {
+            ret.append(begin->as<std::string>());
+        }
+
+        ++begin;
+    }
+
+    return ret;
 }

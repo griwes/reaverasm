@@ -29,7 +29,7 @@
 #include <string>
 #include <utility>
 
-#include <include_chain.h>
+#include <utils/include_chain.h>
 
 namespace reaver
 {
@@ -42,13 +42,13 @@ namespace reaver
             {
             }
 
-            define(std::string name, std::string definition, include_chain include_chain)
+            define(std::string name, std::string definition, std::shared_ptr<utils::include_chain> include_chain)
                 : _name{ std::move(name) }, _body{ std::move(definition) }, _inc_chain{ std::move(include_chain) }
             {
             }
 
-            define(std::string name, std::vector<std::string> params, std::string definition, include_chain include_chain)
-                : _name{ std::move(name) }, _body{ std::move(definition) }, _inc_chain{ std::move(include_chain) },
+            define(std::string name, std::vector<std::string> params, std::string definition, std::shared_ptr<utils::include_chain>
+                include_chain) : _name{ std::move(name) }, _body{ std::move(definition) }, _inc_chain{ std::move(include_chain) },
                 _params{ std::move(params) }
             {
             }
@@ -63,7 +63,7 @@ namespace reaver
                 return _body;
             }
 
-            include_chain source() const
+            std::shared_ptr<utils::include_chain> source() const
             {
                 return _inc_chain;
             }
@@ -76,7 +76,7 @@ namespace reaver
         private:
             std::string _name;
             std::string _body;
-            include_chain _inc_chain;
+            std::shared_ptr<utils::include_chain> _inc_chain;
             std::vector<std::string> _params;
         };
     }

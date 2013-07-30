@@ -37,9 +37,21 @@ namespace reaver
         class output
         {
         public:
+            output(const class generator & gen) : _generator{ gen }
+            {
+            }
+
             virtual ~output() {}
 
+            virtual const class generator & generator() const
+            {
+                return _generator;
+            }
+
             virtual void operator()() const = 0;
+
+        protected:
+            const class generator & _generator;
         };
 
         std::unique_ptr<output> create_output(const frontend &, const generator &);

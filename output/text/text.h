@@ -33,7 +33,7 @@ namespace reaver
         class text_output : public output
         {
         public:
-            text_output(const frontend & front, const generator & gen) : _front{ front }, _gen{ gen }
+            text_output(const frontend & front, const class generator & gen) : output{ gen }, _front{ front }
             {
             }
 
@@ -43,7 +43,6 @@ namespace reaver
 
         private:
             const frontend & _front;
-            const generator & _gen;
         };
     }
 }

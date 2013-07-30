@@ -34,7 +34,7 @@ namespace reaver
         class none_parser : public parser
         {
         public:
-            none_parser(const class preprocessor & ppc) : parser{ ppc }
+            none_parser(class preprocessor & ppc) : parser{ ppc }
             {
             }
 
