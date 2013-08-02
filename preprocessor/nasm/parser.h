@@ -75,9 +75,10 @@ namespace reaver
                 assign = ~parser::token(lex.directive)({ "%assign" }) >> parser::token(lex.identifier) >> parser::token(lex.number);
                 macro = ~parser::token(lex.directive)({ "%macro" }) >> parser::token(lex.identifier);
                 endmacro = parser::token(lex.directive)({ "%endmacro" });           // parser TODO: `rule<>`
-                if_directive = parser::token(lex.directive)({ "%if", "%ifdef" });   // TODO
-                elseif = parser::token(lex.directive)({ "%elseif", "%elif" });      // TODO
-                else_directive = parser::token(lex.directive)({ "%else" });         // TODO
+                if_directive = parser::token(lex.directive)({ "%if", "%ifdef" });
+                elseif = parser::token(lex.directive)({ "%elseif", "%elif" });
+                else_directive = parser::token(lex.directive)({ "%else" });
+                endif = parser::token(lex.directive)({ "%else" });
                 rep = parser::token(lex.directive)({ "%rep" });                     // TODO
 
                 anything_but_comma_and_parens = +((parser::token(lex.identifier) | parser::token(lex.character)
@@ -99,6 +100,7 @@ namespace reaver
             parser::rule<reaver::assembler::if_match> if_directive;
             parser::rule<std::string> elseif;
             parser::rule<std::string> else_directive;           // rule<>
+            parser::rule<std::string> endif;                    // rule<>
             parser::rule<reaver::assembler::rep_match> rep;
 
             parser::rule<reaver::assembler::macro_call_match> define_call;

@@ -32,6 +32,19 @@ using reaver::style::style;
 using reaver::style::colors;
 using reaver::style::styles;
 
+namespace
+{
+    enum if_state
+    {
+        if_true,
+        if_false,
+        elif_true,
+        elif_false,
+        else_true,
+        else_false
+    };
+}
+
 namespace reaver
 {
     namespace assembler
@@ -42,6 +55,7 @@ namespace reaver
             std::vector<std::string> define_stack;
             std::map<std::string, define> defines;
             std::map<std::string, std::shared_ptr<macro>> macros;
+            std::vector<if_state> if_state_stack;
         };
     }
 }
@@ -69,6 +83,11 @@ std::vector<reaver::assembler::line> reaver::assembler::nasm_preprocessor::opera
 void reaver::assembler::nasm_preprocessor::_include_stream(std::istream & input, reaver::assembler::nasm_preprocessor_state & state,
     std::shared_ptr<reaver::assembler::utils::include_chain> inc) const
 {
+    if (inc->size > 1024)
+    {
+        throw exception(error) << "maximum include (or macro) depth reached.";
+    }
+
     std::string buffer;
     uint64_t new_lines = 1;
     uint64_t current_line = 0;
@@ -83,11 +102,6 @@ void reaver::assembler::nasm_preprocessor::_include_stream(std::istream & input,
     {
         new_lines = 1;
         std::vector<std::string> v{ buffer };
-
-        if (inc->size > 1024)
-        {
-            throw exception(error) << "maximum include (or macro) depth reached.";
-        }
 
         while (buffer.size() && buffer.back() == '\\')
         {
@@ -114,11 +128,107 @@ void reaver::assembler::nasm_preprocessor::_include_stream(std::istream & input,
         auto begin = tokens.cbegin();
 
         {
+            auto if_match = parser::parse(_parser.if_directive, begin, tokens.cend(), _parser.skip);
+
+            if (if_match)
+            {
+                if (if_match->type == "%if")
+                {
+                    throw exception(crash) << "%if directive is not implemented yet.";
+                }
+
+                else
+                {
+                    if (state.defines.count(if_match->condition))
+                    {
+                        state.if_state_stack.push_back(if_true);
+                    }
+
+                    else
+                    {
+                        state.if_state_stack.push_back(if_false);
+                    }
+
+                    continue;
+                }
+            }
+        }
+
+        {
+            begin = tokens.cbegin();
+            auto elif = parser::parse(_parser.elseif, begin, tokens.cend(), _parser.skip);
+
+            if (elif && (state.if_state_stack.empty() || state.if_state_stack.back() == else_true || state.if_state_stack.back()
+                == else_false))
+            {
+                throw exception(error) << "invalid %elif directive.";
+            }
+
+            throw exception(crash) << "%elif directive is not implemented yet.";
+        }
+
+        {
+            begin = tokens.cbegin();
+            auto else_match = parser::parse(_parser.else_directive, begin, tokens.cend(), _parser.skip);
+
+            if (else_match)
+            {
+                if (state.if_state_stack.empty() || state.if_state_stack.back() == else_true || state.if_state_stack.back()
+                    == else_false)
+                {
+                    throw exception(error) << "invalid %else directive.";
+                }
+
+                if (state.if_state_stack.back() == if_true || state.if_state_stack.back() == elif_true)
+                {
+                    state.if_state_stack.back() = else_false;
+                }
+
+                else
+                {
+                    state.if_state_stack.back() = else_true;
+                }
+
+                continue;
+            }
+        }
+
+        {
+            begin = tokens.cbegin();
+            auto endif = parser::parse(_parser.endif, begin, tokens.cend(), _parser.skip);
+
+            if (endif)
+            {
+                if (state.if_state_stack.size())
+                {
+                    state.if_state_stack.pop_back();
+                }
+
+                else
+                {
+                    throw exception(error) << "invalid %endif directive.";
+                }
+            }
+        }
+
+        {
+            auto find = [&](if_state s){
+                return std::find(state.if_state_stack.begin(), state.if_state_stack.end(), s) != state.if_state_stack.end();
+            };
+
+            if (state.if_state_stack.size() && (find(if_false) || find(elif_false) || find(else_false)))
+            {
+                continue;
+            }
+        }
+
+        {
+            begin = tokens.cbegin();
             auto define = reaver::parser::parse(_parser.define, begin, tokens.cend(), _parser.skip);
 
             if (define)
             {
-                if (state.defines.find(define->name) != state.defines.end())
+                if (state.defines.count(define->name))
                 {
                     throw exception(error) << "define name `" << style::style(colors::bgray, colors::def, styles::bold)
                         << define->name << style::style() << "` redefined.";
@@ -225,6 +335,17 @@ void reaver::assembler::nasm_preprocessor::_include_stream(std::istream & input,
                 }
 
                 throw exception(logger::error) << error;
+            }
+        }
+
+        {
+            begin = tokens.cbegin();
+            while ((begin++)->type() == pp_whitespace) {}
+
+            if (begin->type() == pp_directive)
+            {
+                throw exception(error) << "unknown preprocessor directive: `" << style::style(colors::bgray, colors::def,
+                    styles::bold) << begin->as<std::string>() << style::style() << "`.";
             }
         }
 

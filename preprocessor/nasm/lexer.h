@@ -45,7 +45,7 @@ namespace reaver
         struct nasm_preprocessor_lexer
         {
             nasm_preprocessor_lexer() : directive{ reaver::assembler::pp_directive, "%[a-z]+" },
-                identifier{ reaver::assembler::pp_identifier, "\\.?[a-zA-Z_][a-zA-Z0-9_]*" },
+                identifier{ reaver::assembler::pp_identifier, "[a-zA-Z_.][a-zA-Z0-9_.]*" },
                 number{ reaver::assembler::pp_number, "(0x[0-9a-fA-F]+)|(0b[01]+)|([0-9a-fA-F]+[hH])|([0-9]*\\.[0-9]*)|([0-9]+)" },
                 character{ reaver::assembler::pp_character, "'\\\\?.'" },
                 string{ reaver::assembler::pp_string, "\"([^\"\\\\]*(\\.[^\"\\\\]*)*)\"" },

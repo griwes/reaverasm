@@ -81,7 +81,7 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
 
     boost::program_options::options_description preprocessor("Preprocessor options");
     preprocessor.add_options()
-        ("D*", boost::program_options::value<std::string>(), " define names for preprocessor");
+        ("D*", boost::program_options::value<std::string>()->implicit_value(""), " define names for preprocessor");
 
     boost::program_options::options_description hidden("Hidden");
     hidden.add_options()
@@ -190,6 +190,16 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
     if (_opt > 2)
     {
         throw exception(error) << "not supported optimization level requested.";
+    }
+
+    auto chain = std::make_shared<utils::include_chain>("<command line>");
+    for (const auto & value : _variables)
+    {
+        if (value.first[0] == 'D')
+        {
+            _defines.emplace(std::make_pair(value.first.substr(1), define{ value.first.substr(1), value.second.as<std::string>(),
+                chain }));
+        }
     }
 
     _include_paths.insert(_include_paths.begin(), boost::filesystem::current_path().string());
