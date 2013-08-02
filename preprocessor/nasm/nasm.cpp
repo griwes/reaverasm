@@ -128,29 +128,34 @@ void reaver::assembler::nasm_preprocessor::_include_stream(std::istream & input,
         auto begin = tokens.cbegin();
 
         {
-            auto if_match = parser::parse(_parser.if_directive, begin, tokens.cend(), _parser.skip);
-
-            if (if_match)
+            while (begin != tokens.cend() && begin->type() == pp_whitespace)
             {
-                if (if_match->type == "%if")
+                ++begin;
+            }
+
+            if (begin->type() == pp_directive && begin->as<std::string>() == "%if")
+            {
+                throw exception(crash) << "%if directive is not implemented yet.";
+            }
+        }
+
+        {
+            begin = tokens.cbegin();
+            auto ifdef = parser::parse(_parser.ifdef, begin, tokens.cend(), _parser.skip);
+
+            if (ifdef)
+            {
+                if (state.defines.count(*ifdef))
                 {
-                    throw exception(crash) << "%if directive is not implemented yet.";
+                    state.if_state_stack.push_back(if_true);
                 }
 
                 else
                 {
-                    if (state.defines.count(if_match->condition))
-                    {
-                        state.if_state_stack.push_back(if_true);
-                    }
-
-                    else
-                    {
-                        state.if_state_stack.push_back(if_false);
-                    }
-
-                    continue;
+                    state.if_state_stack.push_back(if_false);
                 }
+
+                continue;
             }
         }
 
@@ -158,13 +163,16 @@ void reaver::assembler::nasm_preprocessor::_include_stream(std::istream & input,
             begin = tokens.cbegin();
             auto elif = parser::parse(_parser.elseif, begin, tokens.cend(), _parser.skip);
 
-            if (elif && (state.if_state_stack.empty() || state.if_state_stack.back() == else_true || state.if_state_stack.back()
-                == else_false))
+            if (elif)
             {
-                throw exception(error) << "invalid %elif directive.";
-            }
+                if (state.if_state_stack.empty() || state.if_state_stack.back() == else_true || state.if_state_stack.back()
+                    == else_false)
+                {
+                    throw exception(error) << "invalid %elif directive.";
+                }
 
-            throw exception(crash) << "%elif directive is not implemented yet.";
+                throw exception(crash) << "%elif directive is not implemented yet.";
+            }
         }
 
         {
@@ -202,6 +210,8 @@ void reaver::assembler::nasm_preprocessor::_include_stream(std::istream & input,
                 if (state.if_state_stack.size())
                 {
                     state.if_state_stack.pop_back();
+
+                    continue;
                 }
 
                 else
@@ -340,12 +350,27 @@ void reaver::assembler::nasm_preprocessor::_include_stream(std::istream & input,
 
         {
             begin = tokens.cbegin();
-            while ((begin++)->type() == pp_whitespace) {}
+            while (begin != tokens.cend() && begin->type() == pp_whitespace)
+            {
+                ++begin;
+            }
 
             if (begin->type() == pp_directive)
             {
-                throw exception(error) << "unknown preprocessor directive: `" << style::style(colors::bgray, colors::def,
+                throw exception(error) << "unknown preprocessor directive `" << style::style(colors::bgray, colors::def,
                     styles::bold) << begin->as<std::string>() << style::style() << "`.";
+            }
+
+            begin = tokens.cbegin();
+            while (begin != tokens.cend())
+            {
+                if (begin->type() == pp_directive)
+                {
+                    throw exception(error) << "invalid place for a preprocessor directive `" << style::style(colors::bgray,
+                        colors::def, styles::bold) << begin->as<std::string>() << style::style() << "`.";
+                }
+
+                ++begin;
             }
         }
 
