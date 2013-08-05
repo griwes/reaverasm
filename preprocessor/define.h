@@ -28,6 +28,7 @@
 #include <vector>
 #include <string>
 #include <utility>
+#include <reaver/lexer.h>
 
 #include <utils/include_chain.h>
 
@@ -53,6 +54,25 @@ namespace reaver
             {
             }
 
+            define(std::string name, std::vector<lexer::token> tokens, std::shared_ptr<utils::include_chain> include_chain)
+                : _name{ std::move(name) }, _inc_chain{ std::move(include_chain) }, _tokens{ std::move(tokens) }
+            {
+                for (const auto & x : _tokens)
+                {
+                    _body.append(x.as<std::string>());
+                }
+            }
+
+            define(std::string name, std::vector<std::string> params, std::vector<lexer::token> tokens, std::shared_ptr<
+                utils::include_chain> include_chain) : _name{ std::move(name) }, _inc_chain{ std::move(include_chain) },
+                _params{ std::move(params) }, _tokens{ std::move(tokens) }
+            {
+                for (const auto & x : _tokens)
+                {
+                    _body.append(x.as<std::string>());
+                }
+            }
+
             std::string name() const
             {
                 return _name;
@@ -73,11 +93,23 @@ namespace reaver
                 return _params;
             }
 
+            template<typename Lexer>
+            const std::vector<lexer::token> & tokens(const Lexer & lex)
+            {
+                if (_tokens.empty())
+                {
+                    _tokens = lexer::tokenize(_body, lex.desc);
+                }
+
+                return _tokens;
+            }
+
         private:
             std::string _name;
             std::string _body;
             std::shared_ptr<utils::include_chain> _inc_chain;
             std::vector<std::string> _params;
+            std::vector<lexer::token> _tokens;
         };
     }
 }

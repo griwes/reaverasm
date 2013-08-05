@@ -28,6 +28,7 @@
 #include <fstream>
 #include <vector>
 #include <map>
+#include <memory>
 
 namespace reaver
 {
@@ -73,7 +74,7 @@ namespace reaver
 
             virtual file open_file(std::string) const = 0;
 
-            virtual const std::map<std::string, define> & defines() const = 0;
+            virtual const std::map<std::string, std::shared_ptr<define>> & defines() const = 0;
         };
     }
 }

@@ -27,6 +27,7 @@
 #include <reaver/lexer.h>
 
 #include <preprocessor/nasm/nasm.h>
+#include <preprocessor/define_chain.h>
 
 using reaver::style::style;
 using reaver::style::colors;
@@ -53,7 +54,7 @@ namespace reaver
         {
             std::vector<line> lines;
             std::vector<std::string> define_stack;
-            std::map<std::string, define> defines;
+            std::map<std::string, std::shared_ptr<define>> defines;
             std::map<std::string, std::shared_ptr<macro>> macros;
             std::vector<if_state> if_state_stack;
         };
@@ -253,14 +254,15 @@ void reaver::assembler::nasm_preprocessor::_include_stream(std::istream & input,
                         definition.append(begin->as<std::string>());
                     }
 
-                    state.defines.emplace(define->name, assembler::define{ define->name, definition, chain() });
+                    state.defines.emplace(define->name, std::make_shared<assembler::define>(define->name, definition,
+                        chain()));
                 }
 
                 else if (define->directive == "%xdefine" && !define->args)
                 {
                     auto i = chain();
-                    state.defines.emplace(define->name, assembler::define{ define->name, _apply_defines(begin, tokens.cend(),
-                        state, i), i });
+                    _apply_defines(tokens, state, i);
+                    state.defines.emplace(define->name, std::make_shared<assembler::define>(define->name, tokens, i));
                 }
 
                 else if (define->directive == "%define")
@@ -272,15 +274,16 @@ void reaver::assembler::nasm_preprocessor::_include_stream(std::istream & input,
                         definition.append((begin++)->as<std::string>());
                     }
 
-                    state.defines.emplace(define->name, assembler::define{ define->name, *define->args, definition,
-                        chain() });
+                    state.defines.emplace(define->name, std::make_shared<assembler::define>(define->name, *define->args,
+                        definition, chain()));
                 }
 
                 else
                 {
                     auto i = chain();
-                    state.defines.emplace(define->name, assembler::define{ define->name, *define->args, _apply_defines(begin,
-                        tokens.cend(), state, i), i });
+                    _apply_defines(tokens, state, i);
+                    state.defines.emplace(define->name, std::make_shared<assembler::define>(define->name, *define->args,
+                        tokens, i));
                 }
 
                 continue;
@@ -378,23 +381,39 @@ void reaver::assembler::nasm_preprocessor::_include_stream(std::istream & input,
     }
 }
 
-std::string reaver::assembler::nasm_preprocessor::_apply_defines(std::string str, reaver::assembler::nasm_preprocessor_state
-    & state, std::shared_ptr<reaver::assembler::utils::include_chain> inc) const
+std::pair<std::string, reaver::assembler::define_chain> reaver::assembler::nasm_preprocessor::_apply_defines(std::string str,
+    reaver::assembler::nasm_preprocessor_state & state, std::shared_ptr<reaver::assembler::utils::include_chain> inc) const
 {
     auto tokens = lexer::tokenize(str, _lexer.desc);
-    return _apply_defines(tokens.begin(), tokens.end(), state, inc);
+    auto chain = _apply_defines(tokens, state, inc);
+
+    std::string s;
+
+    for (const auto & token : tokens)
+    {
+        s.append(token.as<std::string>());
+    }
+
+    return { s, chain };
 }
 
-std::string reaver::assembler::nasm_preprocessor::_apply_defines(std::vector<lexer::token>::const_iterator begin,
-    std::vector<lexer::token>::const_iterator end, reaver::assembler::nasm_preprocessor_state & state, std::shared_ptr<
-    reaver::assembler::utils::include_chain> inc) const
+reaver::assembler::define_chain reaver::assembler::nasm_preprocessor::_apply_defines(std::vector<lexer::token> & tokens,
+    reaver::assembler::nasm_preprocessor_state & state, std::shared_ptr<reaver::assembler::utils::include_chain>) const
 {
-    std::string ret;
+    uint64_t i = 0;
+    uint64_t cur_len = 0;
+    bool macro = false;
 
-    while (begin != end)
+    reaver::assembler::define_chain ret;
+
+    while (i < tokens.size())
     {
+        auto begin = tokens.cbegin() + i;
+
         if (state.defines.find(begin->as<std::string>()) != state.defines.end())
         {
+            macro = true;
+
             if (std::find(state.define_stack.begin(), state.define_stack.end(), begin->as<std::string>())
                 != state.define_stack.end())
             {
@@ -405,62 +424,87 @@ std::string reaver::assembler::nasm_preprocessor::_apply_defines(std::vector<lex
             auto & define = state.defines.at(begin->as<std::string>());
             state.define_stack.push_back(begin->as<std::string>());
 
-            if (define.parameters().size())
+            if (define->parameters().size())
             {
                 auto t = begin;
-                auto match = reaver::parser::parse(_parser.define_call, t, end, _parser.skip);
+                auto match = reaver::parser::parse(_parser.define_call, t, tokens.end(), _parser.skip);
 
                 if (match)
                 {
                     begin = t - 1;
 
-                    if (match->args.size() != define.parameters().size())
+                    if (match->args.size() != define->parameters().size())
                     {
                         throw exception(error) << "wrong number of parameters for define `" << style::style(colors::white,
-                            colors::def, styles::bold) << define.name() << style::style() << "`; expected " << define.parameters()
+                            colors::def, styles::bold) << define->name() << style::style() << "`; expected " << define->parameters()
                             .size() << ", got " << match->args.size() << ".";
                     }
 
                     std::map<std::string, std::string> params;
-                    for (uint64_t i = 0; i < define.parameters().size(); ++i)
+                    for (uint64_t i = 0; i < define->parameters().size(); ++i)
                     {
-                        params[define.parameters()[i]] = match->args[i];
+                        params[define->parameters()[i]] = match->args[i];
                     }
 
-                    for (auto & x : lexer::tokenize(define.definition(), _lexer.desc))
+                    uint64_t call_size = 0;
+                    for (auto b = begin; b != t; ++b)
+                    {
+                        call_size += b->as<std::string>().size();
+                    }
+
+                    uint64_t j = i;
+                    uint64_t len = 0;
+
+                    for (const auto & x : define->tokens(_lexer))
                     {
                         if (params.find(x.as<std::string>()) != params.end())
                         {
-                            ret.append(_apply_defines(params[x.as<std::string>()], state, inc));
+                            for (const auto & x : lexer::tokenize(params[x.as<std::string>()], _lexer.desc))
+                            {
+                                tokens.insert(tokens.begin() + j++, x);
+                                len += x.as<std::string>().length();
+                            }
                         }
 
                         else
                         {
-                            ret.append(_apply_defines(x.as<std::string>(), state, inc));
+                            tokens.insert(tokens.begin() + j++, x);
+                            len += x.as<std::string>().length();
                         }
                     }
+
+                    ret.push(cur_len, cur_len + call_size, len, define);
                 }
 
                 else
                 {
                     throw exception(error) << "no parameters supplied for macro `" << style::style(colors::white,
-                        colors::def, styles::bold) << define.name() << style::style() << "` taking " << define.parameters()
+                        colors::def, styles::bold) << define->name() << style::style() << "` taking " << define->parameters()
                         .size() << " arguments.";
                 }
             }
 
             else
             {
-                ret.append(_apply_defines(define.definition(), state, inc));
+                uint64_t j = i;
+                uint64_t len = 0;
+
+                for (const auto & x : define->tokens(_lexer))
+                {
+                    tokens.insert(tokens.begin() + j++, x);
+                    len += x.as<std::string>().length();
+                }
+
+                ret.push(cur_len, cur_len + begin->as<std::string>().length(), len, define);
             }
         }
 
-        else
+        if (!macro)
         {
-            ret.append(begin->as<std::string>());
+            cur_len += (tokens.begin() + i++)->as<std::string>().length();
         }
 
-        ++begin;
+        macro = false;
     }
 
     return ret;

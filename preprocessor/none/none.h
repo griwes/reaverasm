@@ -42,7 +42,11 @@ namespace reaver
 
             virtual std::vector<line> operator()() const
             {
-                return { { { std::istreambuf_iterator<char>{ _front.input().rdbuf() }, std::istreambuf_iterator<char>{} }, {}, 0, {} } };
+                // the following return is slowly turning into brace abomination... God bless C++11 uniform initialization
+                // - if it wasn't available, it would be an even worse monstrocity that would have to mention every type
+                // name used in this invocation, which would be even more horrible. brr.
+                return { { { { std::istreambuf_iterator<char>{ _front.input().rdbuf() }, std::istreambuf_iterator<char>{} },
+                    {} }, {}, 0, {} } };
             }
 
         private:

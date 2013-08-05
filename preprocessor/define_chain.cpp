@@ -23,32 +23,35 @@
  *
  **/
 
-#pragma once
-
-#include <string>
-#include <vector>
-
-#include <utils/include_chain.h>
 #include <preprocessor/define_chain.h>
 
-namespace reaver
+void reaver::assembler::define_chain::print(logger::logger &) const
 {
-    namespace assembler
+    throw exception{ crash } << "not implemented yet: " << __PRETTY_FUNCTION__;
+}
+
+void reaver::assembler::define_chain::push(uint64_t start, uint64_t end, uint64_t length, std::shared_ptr<define> def)
+{
+    for (auto & expansion : _define_expansions)
     {
-        struct line
+        int64_t diff = length - (end - start);
+
+        // expansion:   [==================]
+        // new:             [=========]
+        if (expansion.start <= start && expansion.end >= end)
         {
-            line(std::pair<std::string, class define_chain> pp, std::vector<std::string> orig, uint64_t number, std::shared_ptr<
-                utils::include_chain> inc) : preprocessed{ std::move(pp.first) }, original{ std::move(orig) }, number{ number },
-                include_chain{ std::move(inc) }, define_chain{ std::move(pp.second) }
-            {
-            }
+            expansion.end += diff;
+        }
 
-            std::string preprocessed;
-            std::vector<std::string> original;
-            uint64_t number;
-
-            std::shared_ptr<utils::include_chain> include_chain;
-            class define_chain define_chain;
-        };
+        // expansion:   [==========]
+        // new:             [==========]
+        else if (expansion.start <= start && expansion.end < end)
+        {
+            dlog(info) << "this is probably a (very?) broken way of handling this; investigate the problem further ("
+                << __PRETTY_FUNCTION__ << ", line " << __LINE__ + 1 << ")";
+            expansion.end = start;
+        }
     }
+
+    _define_expansions.emplace_back(start, start + length, def);
 }

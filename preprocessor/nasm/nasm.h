@@ -36,6 +36,7 @@ namespace reaver
     namespace assembler
     {
         struct nasm_preprocessor_state;
+        class define_chain;
 
         class nasm_preprocessor : public preprocessor
         {
@@ -51,9 +52,10 @@ namespace reaver
         private:
             void _include_stream(std::istream &, nasm_preprocessor_state &, std::shared_ptr<utils::include_chain>) const;
 
-            std::string _apply_defines(std::string, nasm_preprocessor_state &, std::shared_ptr<utils::include_chain>) const;
-            std::string _apply_defines(std::vector<lexer::token>::const_iterator, std::vector<lexer::token>::const_iterator,
-                nasm_preprocessor_state &, std::shared_ptr<utils::include_chain>) const;
+            std::pair<std::string, define_chain> _apply_defines(std::string, nasm_preprocessor_state &, std::shared_ptr<
+                utils::include_chain>) const;
+            define_chain _apply_defines(std::vector<lexer::token> &, nasm_preprocessor_state &, std::shared_ptr<
+                utils::include_chain>) const;
 
             const frontend & _front;
 

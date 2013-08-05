@@ -197,8 +197,8 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
     {
         if (value.first[0] == 'D')
         {
-            _defines.emplace(std::make_pair(value.first.substr(1), define{ value.first.substr(1), value.second.as<std::string>(),
-                chain }));
+            _defines.emplace(std::make_pair(value.first.substr(1), std::make_shared<define>(value.first.substr(1), value.second.as<std::string>(),
+                chain)));
         }
     }
 

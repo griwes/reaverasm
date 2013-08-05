@@ -94,7 +94,7 @@ namespace reaver
 
             virtual file open_file(std::string) const;
 
-            virtual const std::map<std::string, define> & defines() const
+            virtual const std::map<std::string, std::shared_ptr<define>> & defines() const
             {
                 return _defines;
             }
@@ -115,7 +115,7 @@ namespace reaver
             mutable std::vector<file> _default_includes;
             std::vector<std::string> _include_paths;
 
-            std::map<std::string, define> _defines;
+            std::map<std::string, std::shared_ptr<define>> _defines;
 
             ::reaver::target::triple _target;
         };
