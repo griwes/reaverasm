@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include <reaver/error.h>
+
 #include <preprocessor/preprocessor.h>
 #include <preprocessor/nasm/lexer.h>
 #include <preprocessor/nasm/parser.h>
@@ -41,7 +43,7 @@ namespace reaver
         class nasm_preprocessor : public preprocessor
         {
         public:
-            nasm_preprocessor(const frontend & front) : _front{ front }, _parser{ _lexer }
+            nasm_preprocessor(const frontend & front, error_engine & engine) : _front{ front }, _parser{ _lexer }, _engine{ engine }
             {
             }
 
@@ -61,6 +63,8 @@ namespace reaver
 
             nasm_preprocessor_lexer _lexer;
             nasm_preprocessor_parser _parser;
+
+            error_engine & _engine;
         };
     }
 }

@@ -25,6 +25,7 @@
 
 #include <reaver/logger.h>
 #include <reaver/exception.h>
+#include <reaver/error.h>
 
 #include <frontend/console.h>
 #include <preprocessor/preprocessor.h>
@@ -46,11 +47,13 @@ int main(int argc, char ** argv)
 {
     try
     {
-        reaver::assembler::console_frontend frontend{ argc, argv };
-        std::unique_ptr<reaver::assembler::preprocessor> preprocessor = reaver::assembler::create_preprocessor(frontend);
-        std::unique_ptr<reaver::assembler::parser> parser = reaver::assembler::create_parser(frontend, *preprocessor);
-        std::unique_ptr<reaver::assembler::generator> generator = reaver::assembler::create_generator(frontend, *parser);
-        std::unique_ptr<reaver::assembler::output> output = reaver::assembler::create_output(frontend, *generator);
+        reaver::error_engine engine;
+
+        reaver::assembler::console_frontend frontend{ argc, argv, engine };
+        std::unique_ptr<reaver::assembler::preprocessor> preprocessor = reaver::assembler::create_preprocessor(frontend, engine);
+        std::unique_ptr<reaver::assembler::parser> parser = reaver::assembler::create_parser(frontend, *preprocessor, engine);
+        std::unique_ptr<reaver::assembler::generator> generator = reaver::assembler::create_generator(frontend, *parser, engine);
+        std::unique_ptr<reaver::assembler::output> output = reaver::assembler::create_output(frontend, *generator, engine);
 
         (*output)();
     }

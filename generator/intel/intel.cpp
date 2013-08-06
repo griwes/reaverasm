@@ -29,5 +29,6 @@
 
 std::map<std::string, reaver::assembler::section> reaver::assembler::intel_generator::operator()() const
 {
-    throw exception(crash) << "not implemented yet: " << __PRETTY_FUNCTION__;
+    _engine.push(exception(crash) << "not implemented yet: " << __PRETTY_FUNCTION__);
+    throw std::move(_engine);
 }

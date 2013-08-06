@@ -23,7 +23,7 @@
  *
  **/
 
-#include <reaver/exception.h>
+#include <reaver/error.h>
 
 #include <preprocessor/preprocessor.h>
 #include <preprocessor/nasm/nasm.h>
@@ -32,7 +32,8 @@
 using reaver::style::colors;
 using reaver::style::styles;
 
-std::unique_ptr<reaver::assembler::preprocessor> reaver::assembler::create_preprocessor(const reaver::assembler::frontend & front)
+std::unique_ptr<reaver::assembler::preprocessor> reaver::assembler::create_preprocessor(const reaver::assembler::frontend & front,
+    error_engine & engine)
 {
     if (front.preprocessor() == "none")
     {
@@ -41,9 +42,10 @@ std::unique_ptr<reaver::assembler::preprocessor> reaver::assembler::create_prepr
 
     if (front.preprocessor() == "nasm")
     {
-        return std::unique_ptr<preprocessor>{ new nasm_preprocessor{ front } };
+        return std::unique_ptr<preprocessor>{ new nasm_preprocessor{ front, engine } };
     }
 
-    throw exception(error) << "not supported preprocessor selected: " << style::style(colors::bgray, colors::def, styles::bold)
-        << front.preprocessor() << style::style() << ".";
+    engine.push(exception(error) << "not supported preprocessor selected: " << style::style(colors::bgray, colors::def,
+        styles::bold) << front.preprocessor() << style::style() << ".");
+    throw std::move(engine);
 }

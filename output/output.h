@@ -54,6 +54,6 @@ namespace reaver
             const class generator & _generator;
         };
 
-        std::unique_ptr<output> create_output(const frontend &, const generator &);
+        std::unique_ptr<output> create_output(const frontend &, const generator &, error_engine &);
     }
 }

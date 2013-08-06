@@ -57,6 +57,6 @@ namespace reaver
             const class parser & _parser;
         };
 
-        std::unique_ptr<generator> create_generator(const frontend &, const parser &);
+        std::unique_ptr<generator> create_generator(const frontend &, const parser &, error_engine &);
     }
 }

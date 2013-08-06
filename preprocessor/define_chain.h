@@ -63,7 +63,12 @@ namespace reaver
 
             void push(uint64_t, uint64_t, uint64_t, std::shared_ptr<define>);
 
-            void print(logger::logger &) const;
+            void print(logger::logger & l) const
+            {
+                create_exception().print(l);
+            }
+
+            exception create_exception() const;
 
         private:
             std::vector<define_info> _define_expansions;

@@ -1,6 +1,6 @@
 CC=clang++
 LD=clang++
-CFLAGS=-c -Os -Wall -Wextra -pedantic -Werror -std=c++11 -stdlib=libc++ -I . -g -MD -pthread
+CFLAGS=-c -Os -Wall -Wextra -pedantic -Werror -std=c++11 -stdlib=libc++ -I . -g -MD -pthread -Wno-unused-private-field
 LDFLAGS=-stdlib=libc++ -lc++abi -lc++ -lboost_system -lboost_program_options -lboost_filesystem -pthread
 SOURCES=$(shell find . -type f -name "*.cpp" ! -path "*old*")
 OBJECTS=$(SOURCES:.cpp=.o)

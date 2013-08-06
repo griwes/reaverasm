@@ -23,7 +23,7 @@
  *
  **/
 
-#include <reaver/exception.h>
+#include <reaver/error.h>
 
 #include <output/output.h>
 #include <output/elf32/elf32.h>
@@ -31,7 +31,7 @@
 #include <output/text/text.h>
 
 std::unique_ptr<reaver::assembler::output> reaver::assembler::create_output(const reaver::assembler::frontend & front,
-    const reaver::assembler::generator & gen)
+    const reaver::assembler::generator & gen, reaver::error_engine & engine)
 {
     if (front.preprocess_only())
     {
@@ -42,17 +42,16 @@ std::unique_ptr<reaver::assembler::output> reaver::assembler::create_output(cons
     {
         if (front.format() == "elf32")
         {
-            return std::unique_ptr<output>{ new elf32_output{ front, gen } };
+            return std::unique_ptr<output>{ new elf32_output{ front, gen, engine } };
         }
 
         if (front.format() == "elf64")
         {
-            return std::unique_ptr<output>{ new elf64_output{ front, gen } };
+            return std::unique_ptr<output>{ new elf64_output{ front, gen, engine } };
         }
     }
 
     throw exception(error) << "linker plugin not implemented yet, use -s to disable it.";
-//    std::unique_ptr<linker::frontend> linker_front{ new linker::assembler_frontend{ front } };
-//    return std::unique_ptr<output>{ new linker_output{ linker_front, gen } };
+//    std::unique_ptr<linker::frontend> linker_front{ new linker::assembler_frontend{ front, engine } };
+//    return std::unique_ptr<output>{ new linker_output{ linker_front, gen, engine } };
 }
-

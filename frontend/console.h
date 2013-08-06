@@ -34,12 +34,14 @@
 
 namespace reaver
 {
+    class error_engine;
+
     namespace assembler
     {
         class console_frontend : public frontend
         {
         public:
-            console_frontend(int, char **);
+            console_frontend(int, char **, error_engine &);
             virtual ~console_frontend() {}
 
             virtual bool preprocess_only() const
@@ -97,6 +99,11 @@ namespace reaver
             virtual const std::map<std::string, std::shared_ptr<define>> & defines() const
             {
                 return _defines;
+            }
+
+            virtual logger::level warning_level() const
+            {
+                return _werror ? level::error : level::warning;
             }
 
         private:

@@ -29,5 +29,6 @@
 
 void reaver::assembler::elf64_output::operator()() const
 {
-    throw exception(crash) << "not implemented yet: " << __PRETTY_FUNCTION__;
+    _engine.push(exception(crash) << "not implemented yet: " << __PRETTY_FUNCTION__);
+    throw std::move(_engine);
 }

@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include <reaver/error.h>
+
 #include <generator/generator.h>
 
 namespace reaver
@@ -34,13 +36,17 @@ namespace reaver
         class intel_generator : public generator
         {
         public:
-            intel_generator(const frontend &, const class parser & par) : generator{ par }
+            intel_generator(const frontend &, const class parser & par, error_engine & engine) : generator{ par }, _engine{
+                engine }
             {
             }
 
             virtual ~intel_generator() {}
 
             virtual std::map<std::string, section> operator()() const;
+
+        private:
+            error_engine & _engine;
         };
     }
 }

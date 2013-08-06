@@ -28,7 +28,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include <reaver/exception.h>
+#include <reaver/error.h>
 
 #include <frontend/console.h>
 
@@ -46,7 +46,7 @@ using reaver::style::styles;
 
 using namespace reaver::target;
 
-reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
+reaver::assembler::console_frontend::console_frontend(int argc, char ** argv, error_engine & engine)
 {
     boost::program_options::options_description general("General options");
     general.add_options()
@@ -135,14 +135,16 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
 
     if (_input_name == "")
     {
-        throw exception(error) << "you must specify input file.";
+        engine.push(exception(error) << "you must specify input file.");
+        throw std::move(engine);
     }
 
     _input.open(_input_name, std::ios::in);
     if (!_input)
     {
-        throw exception(error) << "failed to open input file " << style::style(colors::bgray, colors::def, styles::bold)
-            << _input_name << style::style() << ".";
+        engine.push(exception(error) << "failed to open input file " << style::style(colors::bgray, colors::def,
+            styles::bold) << _input_name << style::style() << ".");
+        throw std::move(engine);
     }
 
     if (_variables["output"].as<std::string>() == "")
@@ -153,8 +155,9 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
     _output.open(_variables["output"].as<std::string>(), std::ios::out | std::ios::binary);
     if (!_output)
     {
-        throw exception(error) << "failed to open output file " << style::style(colors::bgray, colors::def, styles::bold)
-            << _variables["output"].as<std::string>() << style::style() << ".";
+        engine.push(exception(error) << "failed to open output file " << style::style(colors::bgray, colors::def, styles::bold)
+            << _variables["output"].as<std::string>() << style::style() << ".");
+        throw std::move(engine);
     }
 
     if (_variables.count("preprocess-only"))
@@ -169,7 +172,8 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
 
     if (_asm_only && _prep_only)
     {
-        throw exception(error) << "-s (--assemble-only) and -E (--preprocess-only) are not allowed together.";
+        engine.push(exception(error) << "-s (--assemble-only) and -E (--preprocess-only) are not allowed together.");
+        throw std::move(engine);
     }
 
     _target = _variables["target"].as<std::string>();
@@ -189,7 +193,8 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv)
 
     if (_opt > 2)
     {
-        throw exception(error) << "not supported optimization level requested.";
+        engine.push(exception(warning) << "not supported optimization level requested; changing to 2.");
+        _opt = 2;
     }
 
     auto chain = std::make_shared<utils::include_chain>("<command line>");

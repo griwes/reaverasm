@@ -24,6 +24,9 @@
  **/
 
 #pragma once
+
+#include <reaver/error.h>
+
 #include <output/output.h>
 
 namespace reaver
@@ -33,13 +36,16 @@ namespace reaver
         class elf64_output : public output
         {
         public:
-            elf64_output(const frontend &, const class generator & gen) : output{ gen }
+            elf64_output(const frontend &, const class generator & gen, error_engine & engine) : output{ gen }, _engine{ engine }
             {
             }
 
             virtual ~elf64_output() {}
 
             virtual void operator()() const;
+
+        private:
+            error_engine & _engine;
         };
     }
 }

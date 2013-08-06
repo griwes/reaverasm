@@ -30,6 +30,8 @@
 #include <map>
 #include <memory>
 
+#include <reaver/logger.h>
+
 namespace reaver
 {
     namespace target
@@ -75,6 +77,8 @@ namespace reaver
             virtual file open_file(std::string) const = 0;
 
             virtual const std::map<std::string, std::shared_ptr<define>> & defines() const = 0;
+
+            virtual logger::level warning_level() const = 0;
         };
     }
 }

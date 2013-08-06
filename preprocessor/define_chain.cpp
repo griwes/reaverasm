@@ -25,9 +25,9 @@
 
 #include <preprocessor/define_chain.h>
 
-void reaver::assembler::define_chain::print(logger::logger &) const
+reaver::exception reaver::assembler::define_chain::create_exception() const
 {
-    throw exception{ crash } << "not implemented yet: " << __PRETTY_FUNCTION__;
+    throw exception(crash) << "not implemented yet: " << __PRETTY_FUNCTION__;
 }
 
 void reaver::assembler::define_chain::push(uint64_t start, uint64_t end, uint64_t length, std::shared_ptr<define> def)

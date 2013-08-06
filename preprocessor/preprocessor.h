@@ -33,6 +33,8 @@
 
 namespace reaver
 {
+    class error_engine;
+
     namespace assembler
     {
         class preprocessor
@@ -43,6 +45,6 @@ namespace reaver
             virtual std::vector<line> operator()() const = 0;
         };
 
-        std::unique_ptr<preprocessor> create_preprocessor(const frontend &);
+        std::unique_ptr<preprocessor> create_preprocessor(const frontend &, error_engine &);
     }
 }

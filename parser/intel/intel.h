@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include <reaver/error.h>
+
 #include <parser/parser.h>
 
 namespace reaver
@@ -34,11 +36,14 @@ namespace reaver
         class intel_parser : public parser
         {
         public:
-            intel_parser(const frontend &, class preprocessor & ppc) : parser{ ppc }
+            intel_parser(const frontend &, class preprocessor & ppc, error_engine & engine) : parser{ ppc }, _engine{ engine }
             {
             }
 
             virtual ~intel_parser() {}
+
+        private:
+            error_engine & _engine;
         };
     }
 }

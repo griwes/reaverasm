@@ -23,7 +23,7 @@
  *
  **/
 
-#include <reaver/exception.h>
+#include <reaver/error.h>
 #include <reaver/target.h>
 
 #include <parser/parser.h>
@@ -37,18 +37,19 @@ using namespace reaver::target;
 
 namespace
 {
-    void _mismatch(const reaver::assembler::frontend & front)
+    void _mismatch(const reaver::assembler::frontend & front, reaver::error_engine & engine)
     {
         using reaver::exception;
 
-        throw exception(error) << "Syntax " << reaver::style::style(colors::bgray, colors::def, styles::bold)
+        engine.push(exception(error) << "Syntax " << reaver::style::style(colors::bgray, colors::def, styles::bold)
             << front.syntax() << reaver::style::style() << " is not allowed for target " << reaver::style::style(
-            colors::bgray, colors::def, styles::bold) << front.target() << reaver::style::style() <<".";
+            colors::bgray, colors::def, styles::bold) << front.target() << reaver::style::style() <<".");
+        throw std::move(engine);
     }
 }
 
 std::unique_ptr<reaver::assembler::parser> reaver::assembler::create_parser(const reaver::assembler::frontend & front,
-    reaver::assembler::preprocessor & ppc)
+    reaver::assembler::preprocessor & ppc, error_engine & engine)
 {
     if (front.preprocess_only())
     {
@@ -59,12 +60,13 @@ std::unique_ptr<reaver::assembler::parser> reaver::assembler::create_parser(cons
     {
         if (front.target().arch() < arch::i386 || front.target().arch() > arch::x86_64)
         {
-            _mismatch(front);
+            _mismatch(front, engine);
         }
 
-        return std::unique_ptr<parser>{ new intel_parser{ front, ppc } };
+        return std::unique_ptr<parser>{ new intel_parser{ front, ppc, engine } };
     }
 
-    throw exception(error) << "not supported syntax selected: " << style::style(colors::bgray, colors::def, styles::bold)
-        << front.syntax() << style::style() << ".";
+    engine.push(exception(error) << "not supported syntax selected: " << style::style(colors::bgray, colors::def, styles::bold)
+        << front.syntax() << style::style() << ".");
+    throw std::move(engine);
 }

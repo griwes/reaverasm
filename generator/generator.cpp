@@ -24,6 +24,7 @@
  **/
 
 #include <reaver/target.h>
+#include <reaver/error.h>
 
 #include <generator/generator.h>
 #include <generator/none/none.h>
@@ -35,7 +36,7 @@ using reaver::style::styles;
 using namespace reaver::target;
 
 std::unique_ptr<reaver::assembler::generator> reaver::assembler::create_generator(const reaver::assembler::frontend & front,
-    const reaver::assembler::parser & parser)
+    const reaver::assembler::parser & parser, reaver::error_engine & engine)
 {
     if (front.preprocess_only())
     {
@@ -44,9 +45,10 @@ std::unique_ptr<reaver::assembler::generator> reaver::assembler::create_generato
 
     if (front.target().arch() >= arch::i386 && front.target().arch() <= arch::x86_64)
     {
-        return std::unique_ptr<generator>{ new intel_generator{ front, parser } };
+        return std::unique_ptr<generator>{ new intel_generator{ front, parser, engine } };
     }
 
-    throw exception(error) << "unsupported architecture requested: " << style::style(colors::bgray, colors::def, styles::bold)
-        << front.target().arch_string() << style::style() << ".";
+    engine.push(exception(error) << "unsupported architecture requested: " << style::style(colors::bgray, colors::def, styles::bold)
+        << front.target().arch_string() << style::style() << ".");
+    throw std::move(engine);
 }
