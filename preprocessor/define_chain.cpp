@@ -47,9 +47,8 @@ void reaver::assembler::define_chain::push(uint64_t start, uint64_t end, uint64_
         // new:             [==========]
         else if (expansion.start <= start && expansion.end < end)
         {
-            dlog(info) << "this is probably a (very?) broken way of handling this; investigate the problem further ("
-                << __PRETTY_FUNCTION__ << ", line " << __LINE__ + 1 << ")";
-            expansion.end = start;
+            // this is possibly a tiny bit less broken than the previous version
+            expansion.end = end;
         }
     }
 
