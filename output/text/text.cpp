@@ -31,8 +31,6 @@ void reaver::assembler::text_output::operator()() const
 {
     for (auto & x : _generator.parser().preprocessor()())
     {
-        _front.output() << x.preprocessed;
+        _front.output() << x.preprocessed << std::endl;
     }
-
-    _front.output() << std::flush;
 }

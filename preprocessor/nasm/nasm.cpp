@@ -421,6 +421,11 @@ reaver::assembler::define_chain reaver::assembler::nasm_preprocessor::_apply_def
     {
         auto begin = tokens.cbegin() + i;
 
+        if (begin->type() == pp_comment)
+        {
+            break;
+        }
+
         if (state.defines.find(begin->as<std::string>()) != state.defines.end())
         {
             macro = true;
@@ -463,6 +468,8 @@ reaver::assembler::define_chain reaver::assembler::nasm_preprocessor::_apply_def
                         call_size += b->as<std::string>().size();
                     }
 
+                    tokens.erase(begin, t);
+
                     uint64_t j = i;
                     uint64_t len = 0;
 
@@ -500,13 +507,16 @@ reaver::assembler::define_chain reaver::assembler::nasm_preprocessor::_apply_def
                 uint64_t j = i;
                 uint64_t len = 0;
 
+                auto token = *begin;
+                tokens.erase(begin);
+
                 for (const auto & x : define->tokens(_lexer))
                 {
                     tokens.insert(tokens.begin() + j++, x);
                     len += x.as<std::string>().length();
                 }
 
-                ret.push(cur_len, cur_len + begin->as<std::string>().length(), len, define);
+                ret.push(cur_len, cur_len + token.as<std::string>().length(), len, define);
             }
         }
 
