@@ -1,26 +1,35 @@
 CC=clang++
 LD=clang++
-CFLAGS=-c -Os -Wall -Wextra -pedantic -Werror -std=c++11 -stdlib=libc++ -I . -g -MD -pthread -Wno-unused-private-field
+CFLAGS=-c -Os -Wall -Wextra -pedantic -Werror -std=c++11 -stdlib=libc++ -I . -g -MD -pthread -Wno-unused-private-field -fPIC
 LDFLAGS=-stdlib=libc++ -lc++abi -lc++ -lboost_system -lboost_program_options -lboost_filesystem -pthread
-SOURCES=$(shell find . -type f -name "*.cpp" ! -path "*old*")
+SOFLAGS=-stdlib=libc++ -shared -pthread
+SOURCES=$(shell find . -type f -name "*.cpp" ! -path "*old*" ! -path "./main.cpp")
 OBJECTS=$(SOURCES:.cpp=.o)
 TESTS=$(shell find . -name "*.asm" ! -name "*.elf.asm")
 ELFTESTS=$(shell find . -name "*.elf.asm")
 TESTRESULTS=$(TESTS:.asm=.bin) $(ELFTESTS:.elf.asm=)
+LIBRARY=libreaverasm.so
 EXECUTABLE=rasm
 
-all: $(SOURCES) $(EXECUTABLE)
+all: $(SOURCES) $(LIBRARY) $(EXECUTABLE)
 
-install:
+library: $(LIBRARY)
+
+install: $(LIBRARY)
 	@sudo mkdir -p /usr/local/include/reaver/assembler
 	@sudo cp frontend/frontend.h /usr/local/include/reaver/assembler
 	@sudo cp generator/generator.h /usr/local/include/reaver/assembler
 	@sudo cp output/output.h /usr/local/include/reaver/assembler
 	@sudo cp parser/parser.h /usr/local/include/reaver/assembler
 	@sudo cp preprocessor/preprocessor.h /usr/local/include/reaver/assembler
+	@sudo cp libreaverasm.so /usr/local/lib/libreaverasm.so.1
+	@sudo ln -sfn /usr/local/lib/libreaverasm.so.1 /usr/local/lib/libreaverasm.so
 
-$(EXECUTABLE): $(OBJECTS)
-	$(LD) $(LDFLAGS) -o $@ $(OBJECTS) -lreaver -pthread
+$(EXECUTABLE): main.o
+	$(LD) $(LDFLAGS) -o $@ main.o -lreaver -pthread -lreaverasm
+
+$(LIBRARY): $(OBJECTS)
+	$(LD) $(SOFLAGS) -o $@ $(OBJECTS) -lreaver
 
 %.o: %.cpp
 	$(CC) $(CFLAGS) $< -o $@
@@ -28,6 +37,8 @@ $(EXECUTABLE): $(OBJECTS)
 clean: clean-test
 	@find . -name "*.o" -delete
 	@find . -name "*.d" -delete
+	@find . -name "*.so" -delete
+	@rm -rf rasm
 
 test: $(EXECUTABLE) $(TESTS) $(ELFTESTS) $(TESTRESULTS)
 

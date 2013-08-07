@@ -26,6 +26,7 @@
 #include <reaver/exception.h>
 
 #include <generator/intel/intel.h>
+#include <generator/section.h>
 
 std::map<std::string, reaver::assembler::section> reaver::assembler::intel_generator::operator()() const
 {

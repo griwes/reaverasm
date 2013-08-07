@@ -45,7 +45,6 @@ std::unique_ptr<reaver::assembler::preprocessor> reaver::assembler::create_prepr
         return std::unique_ptr<preprocessor>{ new nasm_preprocessor{ front, engine } };
     }
 
-    engine.push(exception(error) << "not supported preprocessor selected: " << style::style(colors::bgray, colors::def,
-        styles::bold) << front.preprocessor() << style::style() << ".");
+    engine.push(exception(error) << "not supported preprocessor selected: " << front.preprocessor() << ".");
     throw std::move(engine);
 }

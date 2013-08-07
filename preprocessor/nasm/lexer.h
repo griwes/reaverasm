@@ -39,7 +39,8 @@ namespace reaver
             pp_character,
             pp_string,
             pp_symbol,
-            pp_whitespace
+            pp_whitespace,
+            pp_comment
         };
 
         struct nasm_preprocessor_lexer
@@ -50,7 +51,8 @@ namespace reaver
                 character{ reaver::assembler::pp_character, "'\\\\?.'" },
                 string{ reaver::assembler::pp_string, "\"([^\"\\\\]*(\\.[^\"\\\\]*)*)\"" },
                 symbol{ reaver::assembler::pp_symbol, "[[:punct:]]" },
-                whitespace{ reaver::assembler::pp_whitespace, "[ \t\r\n\v\f]+" }
+                whitespace{ reaver::assembler::pp_whitespace, "[ \t\r\n\v\f]+" },
+                comment{ reaver::assembler::pp_comment, ";.*", [](std::string) { return ""; } }
             {
                 desc.add(directive)(identifier)(number)(character)(string)(symbol)(whitespace);
             }
@@ -62,6 +64,7 @@ namespace reaver
             lexer::token_definition<std::string> string;
             lexer::token_definition<std::string> symbol;
             lexer::token_definition<std::string> whitespace;
+            lexer::token_definition<std::string> comment;
 
             lexer::basic_tokens_description<char> desc;
         };

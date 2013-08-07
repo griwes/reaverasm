@@ -41,9 +41,7 @@ namespace
     {
         using reaver::exception;
 
-        engine.push(exception(error) << "Syntax " << reaver::style::style(colors::bgray, colors::def, styles::bold)
-            << front.syntax() << reaver::style::style() << " is not allowed for target " << reaver::style::style(
-            colors::bgray, colors::def, styles::bold) << front.target() << reaver::style::style() <<".");
+        engine.push(exception(error) << "syntax `" << front.syntax() << " is not allowed for target " << front.target() << "`.");
         throw std::move(engine);
     }
 }
@@ -66,7 +64,6 @@ std::unique_ptr<reaver::assembler::parser> reaver::assembler::create_parser(cons
         return std::unique_ptr<parser>{ new intel_parser{ front, ppc, engine } };
     }
 
-    engine.push(exception(error) << "not supported syntax selected: " << style::style(colors::bgray, colors::def, styles::bold)
-        << front.syntax() << style::style() << ".");
+    engine.push(exception(error) << "not supported syntax selected: `" << front.syntax() << "`.");
     throw std::move(engine);
 }

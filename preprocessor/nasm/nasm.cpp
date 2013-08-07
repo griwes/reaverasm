@@ -86,7 +86,8 @@ void reaver::assembler::nasm_preprocessor::_include_stream(std::istream & input,
 {
     if (inc->size > 1024)
     {
-        throw exception(error) << "maximum include (or macro) depth reached.";
+        _engine.push(inc->exception());
+        _engine.push(exception(error) << "maximum include (or macro) depth reached.");
     }
 
     std::string buffer;
@@ -112,7 +113,8 @@ void reaver::assembler::nasm_preprocessor::_include_stream(std::istream & input,
 
             if (!std::getline(input, next))
             {
-                throw exception(error) << "invalid `\\` at the end of file.";
+                _engine.push(chain()->exception());
+                _engine.push(exception(error) << "invalid `\\` at the end of file.");
             }
 
             buffer.append(next);
@@ -136,7 +138,8 @@ void reaver::assembler::nasm_preprocessor::_include_stream(std::istream & input,
 
             if (begin->type() == pp_directive && begin->as<std::string>() == "%if")
             {
-                throw exception(crash) << "%if directive is not implemented yet.";
+                _engine.push(chain()->exception());
+                _engine.push(exception(crash) << "%if directive is not implemented yet.");
             }
         }
 
@@ -169,10 +172,12 @@ void reaver::assembler::nasm_preprocessor::_include_stream(std::istream & input,
                 if (state.if_state_stack.empty() || state.if_state_stack.back() == else_true || state.if_state_stack.back()
                     == else_false)
                 {
-                    throw exception(error) << "invalid %elif directive.";
+                    _engine.push(chain()->exception());
+                    _engine.push(exception(error) << "invalid %elif directive.");
                 }
 
-                throw exception(crash) << "%elif directive is not implemented yet.";
+                _engine.push(chain()->exception());
+                _engine.push(exception(crash) << "%elif directive is not implemented yet.");
             }
         }
 
@@ -185,7 +190,8 @@ void reaver::assembler::nasm_preprocessor::_include_stream(std::istream & input,
                 if (state.if_state_stack.empty() || state.if_state_stack.back() == else_true || state.if_state_stack.back()
                     == else_false)
                 {
-                    throw exception(error) << "invalid %else directive.";
+                    _engine.push(chain()->exception());
+                    _engine.push(exception(error) << "invalid %else directive.");
                 }
 
                 if (state.if_state_stack.back() == if_true || state.if_state_stack.back() == elif_true)
@@ -217,7 +223,8 @@ void reaver::assembler::nasm_preprocessor::_include_stream(std::istream & input,
 
                 else
                 {
-                    throw exception(error) << "invalid %endif directive.";
+                    _engine.push(chain()->exception());
+                    _engine.push(exception(error) << "invalid %endif directive.");
                 }
             }
         }
@@ -241,8 +248,8 @@ void reaver::assembler::nasm_preprocessor::_include_stream(std::istream & input,
             {
                 if (state.defines.count(define->name))
                 {
-                    throw exception(error) << "define name `" << style::style(colors::bgray, colors::def, styles::bold)
-                        << define->name << style::style() << "` redefined.";
+                    _engine.push(chain()->exception());
+                    _engine.push(exception(error) << "define name `" << define->name << "` redefined.");
                 }
 
                 if (define->directive == "%define" && !define->args)
@@ -300,7 +307,8 @@ void reaver::assembler::nasm_preprocessor::_include_stream(std::istream & input,
 
                 if (begin != tokens.cend())
                 {
-                    throw exception(error) << "junk after %include directive.";
+                    _engine.push(chain()->exception());
+                    _engine.push(exception(error) << "junk after %include directive.");
                 }
 
                 auto i = std::make_shared<utils::include_chain>(file.name, chain(), 0, false);
@@ -318,13 +326,14 @@ void reaver::assembler::nasm_preprocessor::_include_stream(std::istream & input,
             {
                 if (begin != tokens.cend())
                 {
-                    throw exception(error) << "junk after %undef directive.";
+                    _engine.push(chain()->exception());
+                    _engine.push(exception(error) << "junk after %undef directive.");
                 }
 
                 if (state.defines.find(*undef) == state.defines.end())
                 {
-                    throw exception(error) << "unknown define: `" << style::style(colors::white, colors::def,
-                        styles::bold) << *undef << style::style() << "`.";
+                    _engine.push(chain()->exception());
+                    _engine.push(exception(error) << "unknown define: `" << *undef << "`.");
                 }
 
                 state.defines.erase(state.defines.find(*undef));
@@ -347,7 +356,8 @@ void reaver::assembler::nasm_preprocessor::_include_stream(std::istream & input,
                     error.append((begin++)->as<std::string>());
                 }
 
-                throw exception(logger::error) << error;
+                _engine.push(chain()->exception());
+                _engine.push(exception(logger::error) << error);
             }
         }
 
@@ -360,8 +370,8 @@ void reaver::assembler::nasm_preprocessor::_include_stream(std::istream & input,
 
             if (begin->type() == pp_directive)
             {
-                throw exception(error) << "unknown preprocessor directive `" << style::style(colors::bgray, colors::def,
-                    styles::bold) << begin->as<std::string>() << style::style() << "`.";
+                _engine.push(chain()->exception());
+                _engine.push(exception(error) << "unknown preprocessor directive `" << begin->as<std::string>() << "`.");
             }
 
             begin = tokens.cbegin();
@@ -369,8 +379,9 @@ void reaver::assembler::nasm_preprocessor::_include_stream(std::istream & input,
             {
                 if (begin->type() == pp_directive)
                 {
-                    throw exception(error) << "invalid place for a preprocessor directive `" << style::style(colors::bgray,
-                        colors::def, styles::bold) << begin->as<std::string>() << style::style() << "`.";
+                    _engine.push(chain()->exception());
+                    _engine.push(exception(error) << "invalid place for a preprocessor directive `" << begin->as<std::string>()
+                        << "`.");
                 }
 
                 ++begin;
@@ -398,7 +409,7 @@ std::pair<std::string, reaver::assembler::define_chain> reaver::assembler::nasm_
 }
 
 reaver::assembler::define_chain reaver::assembler::nasm_preprocessor::_apply_defines(std::vector<lexer::token> & tokens,
-    reaver::assembler::nasm_preprocessor_state & state, std::shared_ptr<reaver::assembler::utils::include_chain>) const
+    reaver::assembler::nasm_preprocessor_state & state, std::shared_ptr<reaver::assembler::utils::include_chain> chain) const
 {
     uint64_t i = 0;
     uint64_t cur_len = 0;
@@ -417,8 +428,8 @@ reaver::assembler::define_chain reaver::assembler::nasm_preprocessor::_apply_def
             if (std::find(state.define_stack.begin(), state.define_stack.end(), begin->as<std::string>())
                 != state.define_stack.end())
             {
-                throw exception(error) << "define `" << style::style(colors::white, colors::def, styles::bold) <<
-                    begin->as<std::string>() << style::style() << "` defined recursively.";
+                _engine.push(chain->exception());
+                _engine.push(exception(error) << "define `" << begin->as<std::string>() << "` defined recursively.");
             }
 
             auto & define = state.defines.at(begin->as<std::string>());
@@ -435,9 +446,9 @@ reaver::assembler::define_chain reaver::assembler::nasm_preprocessor::_apply_def
 
                     if (match->args.size() != define->parameters().size())
                     {
-                        throw exception(error) << "wrong number of parameters for define `" << style::style(colors::white,
-                            colors::def, styles::bold) << define->name() << style::style() << "`; expected " << define->parameters()
-                            .size() << ", got " << match->args.size() << ".";
+                        _engine.push(chain->exception());
+                        _engine.push(exception(error) << "wrong number of parameters for define `" << define->name()
+                            << "`; expected " << define->parameters().size() << ", got " << match->args.size() << ".");
                     }
 
                     std::map<std::string, std::string> params;
@@ -478,9 +489,9 @@ reaver::assembler::define_chain reaver::assembler::nasm_preprocessor::_apply_def
 
                 else
                 {
-                    throw exception(error) << "no parameters supplied for macro `" << style::style(colors::white,
-                        colors::def, styles::bold) << define->name() << style::style() << "` taking " << define->parameters()
-                        .size() << " arguments.";
+                    _engine.push(chain->exception());
+                    _engine.push(exception(error) << "no parameters supplied for macro `" << define->name() << "` taking "
+                        << define->parameters().size() << " arguments.");
                 }
             }
 

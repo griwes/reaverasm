@@ -8,3 +8,5 @@ rasm
 *.ref
 *.elf
 *.d
+*.so
+

@@ -27,6 +27,8 @@
 
 #include <memory>
 
+#include <reaver/exception.h>
+
 namespace reaver
 {
     namespace assembler
@@ -45,6 +47,17 @@ namespace reaver
                     {
                         size = up->size + 1;
                     }
+                }
+
+                class exception exception() const
+                {
+                    class exception exc(always);
+                    return exc;
+                }
+
+                class exception exception(class exception & exc) const
+                {
+                    return exc;
                 }
 
                 std::string file;

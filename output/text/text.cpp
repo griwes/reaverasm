@@ -34,5 +34,5 @@ void reaver::assembler::text_output::operator()() const
         _front.output() << x.preprocessed;
     }
 
-    _front.output() << std::endl;
+    _front.output() << std::flush;
 }

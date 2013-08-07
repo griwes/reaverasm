@@ -48,7 +48,6 @@ std::unique_ptr<reaver::assembler::generator> reaver::assembler::create_generato
         return std::unique_ptr<generator>{ new intel_generator{ front, parser, engine } };
     }
 
-    engine.push(exception(error) << "unsupported architecture requested: " << style::style(colors::bgray, colors::def, styles::bold)
-        << front.target().arch_string() << style::style() << ".");
+    engine.push(exception(error) << "unsupported architecture requested: `" << front.target().arch_string() << "`.");
     throw std::move(engine);
 }
