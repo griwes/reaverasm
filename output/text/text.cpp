@@ -29,7 +29,14 @@
 
 void reaver::assembler::text_output::operator()() const
 {
-    for (auto & x : _generator.parser().preprocessor()())
+    auto preprocessed = _generator.parser().preprocessor()();
+
+    if (!_engine)
+    {
+        throw std::move(_engine);
+    }
+
+    for (auto & x : preprocessed)
     {
         _front.output() << x.preprocessed << std::endl;
     }

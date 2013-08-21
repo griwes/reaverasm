@@ -35,7 +35,7 @@ std::unique_ptr<reaver::assembler::output> reaver::assembler::create_output(cons
 {
     if (front.preprocess_only())
     {
-        return std::unique_ptr<output>{ new text_output{ front, gen } };
+        return std::unique_ptr<output>{ new text_output{ front, gen, engine } };
     }
 
     if (front.assemble_only())

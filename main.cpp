@@ -35,14 +35,6 @@
 
 using namespace reaver::logger;
 
-namespace reaver
-{
-    namespace assembler
-    {
-        const char * version_string = "Reaver Project Assembler v0.0.1 dev\nCopyright (C) 2013 Reaver Project Team\n";
-    }
-}
-
 int main(int argc, char ** argv)
 {
     try
@@ -56,6 +48,11 @@ int main(int argc, char ** argv)
         std::unique_ptr<reaver::assembler::output> output = reaver::assembler::create_output(frontend, *generator, engine);
 
         (*output)();
+
+        if (engine.size())
+        {
+            engine.print(dlog);
+        }
     }
 
     catch (reaver::exception & e)
@@ -64,15 +61,15 @@ int main(int argc, char ** argv)
 
         if (e.level() == crash)
         {
-            return -2;
+            return 2;
         }
 
-        return -1;
+        return 1;
     }
 
     catch (std::exception & e)
     {
-        dlog(error) << e.what();
-        return -1;
+        dlog(crash) << e.what();
+        return 1;
     }
 }

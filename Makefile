@@ -55,3 +55,4 @@ clean-test:
 	./$@
 
 -include $(SOURCES:.cpp=.d)
+-include main.d

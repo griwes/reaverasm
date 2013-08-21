@@ -49,15 +49,16 @@ namespace reaver
                     }
                 }
 
-                class exception exception() const
+                class exception exception(bool b = false) const
                 {
-                    class exception exc(always);
-                    return exc;
-                }
+                    if (up)
+                    {
+                        return up->exception(true) << "\nIn file " << (b ? "included from " : "") << file << " at line "
+                            << line << ":";
+                    }
 
-                class exception exception(class exception & exc) const
-                {
-                    return exc;
+                    return reaver::exception(always) << "In file " << (b ? "included from " : "") << file << " at line "
+                        << line << ":";
                 }
 
                 std::string file;

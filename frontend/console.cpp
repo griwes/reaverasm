@@ -36,7 +36,7 @@ namespace reaver
 {
     namespace assembler
     {
-        extern const char * version_string;
+        const char * version_string = "Reaver Project Assembler v0.0.1 dev\nCopyright (C) 2013 Reaver Project Team\n";
     }
 }
 

@@ -23,6 +23,8 @@
  *
  **/
 
+#include <boost/algorithm/string.hpp>
+
 #include <reaver/exception.h>
 #include <reaver/lexer.h>
 
@@ -87,7 +89,7 @@ void reaver::assembler::nasm_preprocessor::_include_stream(std::istream & input,
     if (inc->size > 1024)
     {
         _engine.push(inc->exception());
-        _engine.push(exception(error) << "maximum include (or macro) depth reached.");
+        _engine.push(exception(fatal) << "maximum include (or macro) depth reached.");
     }
 
     std::string buffer;
@@ -114,7 +116,8 @@ void reaver::assembler::nasm_preprocessor::_include_stream(std::istream & input,
             if (!std::getline(input, next))
             {
                 _engine.push(chain()->exception());
-                _engine.push(exception(error) << "invalid `\\` at the end of file.");
+                _engine.push(exception(error) << "invalid `\\` at the end of file.\n" << v.back() << "\n" << style::style()
+                    << spaces(v.back(), v.back().length() - 1) << style::style(colors::bgreen) << "^" << style::style());
             }
 
             buffer.append(next);
@@ -139,7 +142,9 @@ void reaver::assembler::nasm_preprocessor::_include_stream(std::istream & input,
             if (begin->type() == pp_directive && begin->as<std::string>() == "%if")
             {
                 _engine.push(chain()->exception());
-                _engine.push(exception(crash) << "%if directive is not implemented yet.");
+                _engine.push(exception(crash) << "%if directive is not implemented yet.\n" << style::style() <<
+                    buffer << "\n" << spaces(buffer, begin->position()) << style::style(colors::bgreen) << "^" <<
+                    style::style());
             }
         }
 

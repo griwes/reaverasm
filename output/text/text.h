@@ -24,6 +24,9 @@
  **/
 
 #pragma once
+
+#include <reaver/error.h>
+
 #include <output/output.h>
 
 namespace reaver
@@ -33,7 +36,8 @@ namespace reaver
         class text_output : public output
         {
         public:
-            text_output(const frontend & front, const class generator & gen) : output{ gen }, _front{ front }
+            text_output(const frontend & front, const class generator & gen, error_engine & engine) : output{ gen },
+                _front{ front }, _engine{ engine }
             {
             }
 
@@ -43,6 +47,7 @@ namespace reaver
 
         private:
             const frontend & _front;
+            error_engine & _engine;
         };
     }
 }
