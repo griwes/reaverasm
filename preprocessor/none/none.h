@@ -1,8 +1,7 @@
 /**
  * Reaver Project Assembler License
  *
- * Copyright (C) 2013 Reaver Project Team:
- * 1. Michał "Griwes" Dominiak
+ * Copyright © 2013-2014 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -19,13 +18,11 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * Michał "Griwes" Dominiak
- *
  **/
 
 #pragma once
 
-#include <preprocessor/preprocessor.h>
+#include "../preprocessor.h"
 
 namespace reaver
 {
@@ -40,7 +37,7 @@ namespace reaver
 
             virtual ~none_preprocessor() {}
 
-            virtual std::vector<line> operator()() const
+            virtual std::vector<line> operator()() const override
             {
                 // the following return is slowly turning into brace abomination... God bless C++11 uniform initialization
                 // - if it wasn't available, it would be an even worse monstrocity that would have to mention every type

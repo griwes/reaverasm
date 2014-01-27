@@ -27,24 +27,43 @@
 
 #include <reaver/error.h>
 
-#include <output/output.h>
+#include <preprocessor/preprocessor.h>
+#include <preprocessor/nasm/lexer.h>
+#include <preprocessor/nasm/parser.h>
+#include <preprocessor/macro.h>
+#include <preprocessor/define.h>
 
 namespace reaver
 {
     namespace assembler
     {
-        class elf32_output : public output
+        struct nasm_preprocessor_state;
+        class define_chain;
+
+        class nasm_preprocessor : public preprocessor
         {
         public:
-            elf32_output(const frontend &, const class generator & gen, error_engine & engine) : output{ gen }, _engine{ engine }
+            nasm_preprocessor(const frontend & front, error_engine & engine) : _front{ front }, _parser{ _lexer }, _engine{ engine }
             {
             }
 
-            virtual ~elf32_output() {}
+            virtual ~nasm_preprocessor() {}
 
-            virtual void operator()() const;
+            virtual std::vector<line> operator()() const;
 
         private:
+            void _include_stream(std::istream &, nasm_preprocessor_state &, std::shared_ptr<utils::include_chain>) const;
+
+            std::pair<std::string, define_chain> _apply_defines(std::string, nasm_preprocessor_state &, std::shared_ptr<
+                utils::include_chain>) const;
+            define_chain _apply_defines(std::vector<lexer::token> &, nasm_preprocessor_state &, std::shared_ptr<
+                utils::include_chain>) const;
+
+            const frontend & _front;
+
+            nasm_preprocessor_lexer _lexer;
+            nasm_preprocessor_parser _parser;
+
             error_engine & _engine;
         };
     }

@@ -1,8 +1,7 @@
 /**
  * Reaver Project Assembler License
  *
- * Copyright (C) 2013 Reaver Project Team:
- * 1. Michał "Griwes" Dominiak
+ * Copyright © 2013-2014 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -19,57 +18,54 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * Michał "Griwes" Dominiak
- *
  **/
 
 #include <reaver/logger.h>
-#include <reaver/exception.h>
-#include <reaver/error.h>
 
-#include <frontend/console.h>
-#include <preprocessor/preprocessor.h>
-#include <parser/parser.h>
-#include <generator/generator.h>
-#include <output/output.h>
+#include "frontend/console.h"
+#include "preprocessor/preprocessor.h"
+#include "parser/parser.h"
+#include "generator/generator.h"
+#include "output/output.h"
 
 using namespace reaver::logger;
 
-int main(int argc, char ** argv)
+int main(int argc, char ** argv) try
 {
-    try
+    reaver::error_engine engine;
+
+    reaver::assembler::console_frontend frontend{ argc, argv, engine };
+    auto preprocessor = reaver::assembler::create_preprocessor(frontend, engine);
+    auto parser = reaver::assembler::create_parser(frontend, engine);
+    auto generator = reaver::assembler::create_generator(frontend, engine);
+    auto output = reaver::assembler::create_output(frontend, engine);
+
+    auto preprocessed = (*preprocessor)();
+    auto parsed = (*parser)(preprocessed);
+    auto generated = (*generator)(parsed);
+    (*output)(generated);
+
+    if (engine.size())
     {
-        reaver::error_engine engine;
+        engine.print(dlog);
+    }
+}
 
-        reaver::assembler::console_frontend frontend{ argc, argv, engine };
-        std::unique_ptr<reaver::assembler::preprocessor> preprocessor = reaver::assembler::create_preprocessor(frontend, engine);
-        std::unique_ptr<reaver::assembler::parser> parser = reaver::assembler::create_parser(frontend, *preprocessor, engine);
-        std::unique_ptr<reaver::assembler::generator> generator = reaver::assembler::create_generator(frontend, *parser, engine);
-        std::unique_ptr<reaver::assembler::output> output = reaver::assembler::create_output(frontend, *generator, engine);
+catch (reaver::exception & e)
+{
+    e.print(dlog);
 
-        (*output)();
-
-        if (engine.size())
-        {
-            engine.print(dlog);
-        }
+    if (e.level() == crash)
+    {
+        return 2;
     }
 
-    catch (reaver::exception & e)
-    {
-        e.print(dlog);
+    return 1;
+}
 
-        if (e.level() == crash)
-        {
-            return 2;
-        }
+catch (std::exception & e)
+{
+    dlog(crash) << e.what();
 
-        return 1;
-    }
-
-    catch (std::exception & e)
-    {
-        dlog(crash) << e.what();
-        return 1;
-    }
+    return 2;
 }

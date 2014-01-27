@@ -1,8 +1,7 @@
 /**
  * Reaver Project Assembler License
  *
- * Copyright (C) 2013 Reaver Project Team:
- * 1. Michał "Griwes" Dominiak
+ * Copyright © 2013-2014 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -19,15 +18,13 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * Michał "Griwes" Dominiak
- *
  **/
 
 #pragma once
 
 #include <reaver/error.h>
 
-#include <output/output.h>
+#include "../output.h"
 
 namespace reaver
 {
@@ -36,14 +33,13 @@ namespace reaver
         class text_output : public output
         {
         public:
-            text_output(const frontend & front, const class generator & gen, error_engine & engine) : output{ gen },
-                _front{ front }, _engine{ engine }
+            text_output(const frontend & front, error_engine & engine) : _front{ front }, _engine{ engine }
             {
             }
 
             virtual ~text_output() {}
 
-            virtual void operator()() const;
+            virtual void operator()(const std::unique_ptr<format::executable::executable> &) const override;
 
         private:
             const frontend & _front;

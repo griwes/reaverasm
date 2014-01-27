@@ -1,8 +1,7 @@
 /**
  * Reaver Project Assembler License
  *
- * Copyright (C) 2013 Reaver Project Team:
- * 1. Michał "Griwes" Dominiak
+ * Copyright © 2013-2014 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -19,15 +18,13 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * Michał "Griwes" Dominiak
- *
  **/
 
 #pragma once
 
 #include <reaver/error.h>
 
-#include <parser/parser.h>
+#include "../parser.h"
 
 namespace reaver
 {
@@ -36,11 +33,13 @@ namespace reaver
         class intel_parser : public parser
         {
         public:
-            intel_parser(const frontend &, class preprocessor & ppc, error_engine & engine) : parser{ ppc }, _engine{ engine }
+            intel_parser(const frontend &, error_engine & engine) : _engine{ engine }
             {
             }
 
             virtual ~intel_parser() {}
+
+            virtual ast operator()(const std::vector<line> &) const override;
 
         private:
             error_engine & _engine;

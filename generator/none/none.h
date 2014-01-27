@@ -1,8 +1,7 @@
 /**
  * Reaver Project Assembler License
  *
- * Copyright (C) 2013 Reaver Project Team:
- * 1. Michał "Griwes" Dominiak
+ * Copyright © 2014 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -19,14 +18,11 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * Michał "Griwes" Dominiak
- *
  **/
 
 #pragma once
 
-#include <generator/generator.h>
-#include <generator/section.h>
+#include "../generator.h"
 
 namespace reaver
 {
@@ -35,16 +31,13 @@ namespace reaver
         class none_generator : public generator
         {
         public:
-            none_generator(const class parser & par) : generator{ par }
+            none_generator()
             {
             }
 
             virtual ~none_generator() {}
 
-            virtual std::map<std::string, section> operator()() const
-            {
-                return std::map<std::string, section>{};
-            }
+            virtual std::unique_ptr<format::executable::executable> operator()(const ast &) const override;
         };
     }
 }

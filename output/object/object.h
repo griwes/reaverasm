@@ -1,8 +1,7 @@
 /**
  * Reaver Project Assembler License
  *
- * Copyright (C) 2013 Reaver Project Team:
- * 1. Michał "Griwes" Dominiak
+ * Copyright © 2014 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -19,16 +18,33 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * Michał "Griwes" Dominiak
- *
  **/
 
-#include <reaver/exception.h>
+#pragma once
 
-#include <output/elf32/elf32.h>
+#include "../output.h"
 
-void reaver::assembler::elf32_output::operator()() const
+namespace reaver
 {
-    _engine.push(exception(crash) << "not implemented yet: " << __PRETTY_FUNCTION__);
-    throw std::move(_engine);
+    namespace assembler
+    {
+        class object_output : public output
+        {
+        public:
+            object_output(const frontend & front, error_engine & engine) : _front{ front }, _engine{ engine }, _triple{
+                front.target() }, _format{ format::executable::make_format(front.format()) }
+            {
+            }
+
+            virtual ~object_output() {}
+
+            virtual void operator()(const std::unique_ptr<format::executable::executable> &) const override;
+
+        private:
+            const frontend & _front;
+            error_engine & _engine;
+            target::triple _triple;
+            format::executable::format _format;
+        };
+    }
 }

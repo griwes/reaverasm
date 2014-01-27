@@ -1,8 +1,7 @@
 /**
  * Reaver Project Assembler License
  *
- * Copyright (C) 2013 Reaver Project Team:
- * 1. Michał "Griwes" Dominiak
+ * Copyright © 2013-2014 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -19,16 +18,15 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * Michał "Griwes" Dominiak
- *
  **/
 
 #pragma once
 
 #include <memory>
 
-#include <frontend/frontend.h>
-#include <preprocessor/preprocessor.h>
+#include "../frontend/frontend.h"
+#include "../preprocessor/line.h"
+#include "ast.h"
 
 namespace reaver
 {
@@ -37,21 +35,15 @@ namespace reaver
         class parser
         {
         public:
-            parser(const class preprocessor & ppc) : _preprocessor{ ppc }
+            parser()
             {
             }
 
             virtual ~parser() {}
 
-            virtual const class preprocessor & preprocessor() const
-            {
-                return _preprocessor;
-            }
-
-        protected:
-            const class preprocessor & _preprocessor;
+            virtual ast operator()(const std::vector<line> &) const = 0;
         };
 
-        std::unique_ptr<parser> create_parser(const frontend &, preprocessor &, error_engine &);
+        std::unique_ptr<parser> create_parser(const frontend &, error_engine &);
     }
 }

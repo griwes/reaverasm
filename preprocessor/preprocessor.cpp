@@ -1,8 +1,7 @@
 /**
  * Reaver Project Assembler License
  *
- * Copyright (C) 2013 Reaver Project Team:
- * 1. Michał "Griwes" Dominiak
+ * Copyright © 2013-2014 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -19,15 +18,13 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * Michał "Griwes" Dominiak
- *
  **/
 
 #include <reaver/error.h>
 
-#include <preprocessor/preprocessor.h>
-#include <preprocessor/nasm/nasm.h>
-#include <preprocessor/none/none.h>
+#include "preprocessor.h"
+#include "nasm/nasm.h"
+#include "none/none.h"
 
 using reaver::style::colors;
 using reaver::style::styles;
@@ -37,14 +34,14 @@ std::unique_ptr<reaver::assembler::preprocessor> reaver::assembler::create_prepr
 {
     if (front.preprocessor() == "none")
     {
-        return std::unique_ptr<preprocessor>{ new none_preprocessor{ front } };
+        return std::make_unique<none_preprocessor>(front);
     }
 
     if (front.preprocessor() == "nasm")
     {
-        return std::unique_ptr<preprocessor>{ new nasm_preprocessor{ front, engine } };
+        return std::make_unique<nasm_preprocessor>(front, engine);
     }
 
-    engine.push(exception(error) << "not supported preprocessor selected: " << front.preprocessor() << ".");
+    engine.push(exception(logger::error) << "not supported preprocessor selected: " << front.preprocessor() << ".");
     throw std::move(engine);
 }

@@ -1,8 +1,7 @@
 /**
  * Reaver Project Assembler License
  *
- * Copyright (C) 2013 Reaver Project Team:
- * 1. Michał "Griwes" Dominiak
+ * Copyright © 2013-2014 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -19,39 +18,28 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * Michał "Griwes" Dominiak
- *
  **/
 
 #include <reaver/error.h>
 
-#include <output/output.h>
-#include <output/elf32/elf32.h>
-#include <output/elf64/elf64.h>
-#include <output/text/text.h>
+#include "output.h"
+#include "text/text.h"
+#include "object/object.h"
 
 std::unique_ptr<reaver::assembler::output> reaver::assembler::create_output(const reaver::assembler::frontend & front,
-    const reaver::assembler::generator & gen, reaver::error_engine & engine)
+    reaver::error_engine & engine)
 {
     if (front.preprocess_only())
     {
-        return std::unique_ptr<output>{ new text_output{ front, gen, engine } };
+        return std::make_unique<text_output>(front, engine);
     }
 
     if (front.assemble_only())
     {
-        if (front.format() == "elf32")
-        {
-            return std::unique_ptr<output>{ new elf32_output{ front, gen, engine } };
-        }
-
-        if (front.format() == "elf64")
-        {
-            return std::unique_ptr<output>{ new elf64_output{ front, gen, engine } };
-        }
+        return std::make_unique<object_output>(front, engine);
     }
 
-    engine.push(exception(crash) << "linker plugin not implemented yet, use -s to disable it.");
+    engine.push(exception(logger::crash) << "linker plugin not implemented yet, use -s to disable it.");
     throw std::move(engine);
 //    std::unique_ptr<linker::frontend> linker_front{ new linker::assembler_frontend{ front, engine } };
 //    return std::unique_ptr<output>{ new linker_output{ linker_front, gen, engine } };

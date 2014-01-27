@@ -1,8 +1,7 @@
 /**
  * Reaver Project Assembler License
  *
- * Copyright (C) 2013 Reaver Project Team:
- * 1. Michał "Griwes" Dominiak
+ * Copyright © 2013-2014 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -23,12 +22,9 @@
  *
  **/
 
-#include <reaver/target.h>
-#include <reaver/error.h>
-
-#include <generator/generator.h>
-#include <generator/none/none.h>
-#include <generator/intel/intel.h>
+#include "generator.h"
+#include "none/none.h"
+#include "intel/intel.h"
 
 using reaver::style::colors;
 using reaver::style::styles;
@@ -36,18 +32,18 @@ using reaver::style::styles;
 using namespace reaver::target;
 
 std::unique_ptr<reaver::assembler::generator> reaver::assembler::create_generator(const reaver::assembler::frontend & front,
-    const reaver::assembler::parser & parser, reaver::error_engine & engine)
+    reaver::error_engine & engine)
 {
     if (front.preprocess_only())
     {
-        return std::unique_ptr<generator>{ new none_generator{ parser } };
+        return std::make_unique<none_generator>();
     }
 
     if (front.target().arch() >= arch::i386 && front.target().arch() <= arch::x86_64)
     {
-        return std::unique_ptr<generator>{ new intel_generator{ front, parser, engine } };
+        return std::make_unique<intel_generator>(front, engine);
     }
 
-    engine.push(exception(error) << "unsupported architecture requested: `" << front.target().arch_string() << "`.");
+    engine.push(exception(logger::error) << "unsupported architecture requested: `" << front.target().arch_string() << "`.");
     throw std::move(engine);
 }

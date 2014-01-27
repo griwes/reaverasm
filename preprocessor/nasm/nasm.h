@@ -1,8 +1,7 @@
 /**
  * Reaver Project Assembler License
  *
- * Copyright (C) 2013 Reaver Project Team:
- * 1. Michał "Griwes" Dominiak
+ * Copyright © 2013-2014 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -19,19 +18,15 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * Michał "Griwes" Dominiak
- *
  **/
 
 #pragma once
 
 #include <reaver/error.h>
 
-#include <preprocessor/preprocessor.h>
-#include <preprocessor/nasm/lexer.h>
-#include <preprocessor/nasm/parser.h>
-#include <preprocessor/macro.h>
-#include <preprocessor/define.h>
+#include "../preprocessor.h"
+#include "../macro.h"
+#include "../define.h"
 
 namespace reaver
 {
@@ -43,13 +38,13 @@ namespace reaver
         class nasm_preprocessor : public preprocessor
         {
         public:
-            nasm_preprocessor(const frontend & front, error_engine & engine) : _front{ front }, _parser{ _lexer }, _engine{ engine }
+            nasm_preprocessor(const frontend & front, error_engine & engine) : _front{ front }, _engine{ engine }
             {
             }
 
             virtual ~nasm_preprocessor() {}
 
-            virtual std::vector<line> operator()() const;
+            virtual std::vector<line> operator()() const override;
 
         private:
             void _include_stream(std::istream &, nasm_preprocessor_state &, std::shared_ptr<utils::include_chain>) const;
@@ -61,8 +56,7 @@ namespace reaver
 
             const frontend & _front;
 
-            nasm_preprocessor_lexer _lexer;
-            nasm_preprocessor_parser _parser;
+//            nasm_preprocessor_parser _parser;
 
             error_engine & _engine;
         };

@@ -1,8 +1,7 @@
 /**
  * Reaver Project Assembler License
  *
- * Copyright (C) 2013 Reaver Project Team:
- * 1. Michał "Griwes" Dominiak
+ * Copyright © 2014 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -19,16 +18,16 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * Michał "Griwes" Dominiak
- *
  **/
 
-#include <reaver/exception.h>
+#pragma once
 
-#include <output/elf64/elf64.h>
-
-void reaver::assembler::elf64_output::operator()() const
+namespace reaver
 {
-    _engine.push(exception(crash) << "not implemented yet: " << __PRETTY_FUNCTION__);
-    throw std::move(_engine);
+    namespace assembler
+    {
+        class ast
+        {
+        };
+    }
 }

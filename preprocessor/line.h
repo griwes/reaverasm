@@ -1,8 +1,7 @@
 /**
  * Reaver Project Assembler License
  *
- * Copyright (C) 2013 Reaver Project Team:
- * 1. Michał "Griwes" Dominiak
+ * Copyright © 2013 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -19,8 +18,6 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * Michał "Griwes" Dominiak
- *
  **/
 
 #pragma once
@@ -28,8 +25,8 @@
 #include <string>
 #include <vector>
 
-#include <utils/include_chain.h>
-#include <preprocessor/define_chain.h>
+#include "../utils/include_chain.h"
+#include "define_chain.h"
 
 namespace reaver
 {

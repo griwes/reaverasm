@@ -1,8 +1,7 @@
 /**
  * Reaver Project Assembler License
  *
- * Copyright (C) 2013 Reaver Project Team:
- * 1. Michał "Griwes" Dominiak
+ * Copyright © 2013-2014 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -19,8 +18,6 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * Michał "Griwes" Dominiak
- *
  **/
 
 #include <iostream>
@@ -30,7 +27,7 @@
 
 #include <reaver/error.h>
 
-#include <frontend/console.h>
+#include "console.h"
 
 namespace reaver
 {
@@ -135,14 +132,14 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv, er
 
     if (_input_name == "")
     {
-        engine.push(exception(error) << "you must specify input file.");
+        engine.push(exception(logger::error) << "you must specify input file.");
         throw std::move(engine);
     }
 
     _input.open(_input_name, std::ios::in);
     if (!_input)
     {
-        engine.push(exception(error) << "failed to open input file `"  << _input_name << ".");
+        engine.push(exception(logger::error) << "failed to open input file `"  << _input_name << ".");
         throw std::move(engine);
     }
 
@@ -154,7 +151,7 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv, er
     _output.open(_variables["output"].as<std::string>(), std::ios::out | std::ios::binary);
     if (!_output)
     {
-        engine.push(exception(error) << "failed to open output file `" << _variables["output"].as<std::string>() << ".");
+        engine.push(exception(logger::error) << "failed to open output file `" << _variables["output"].as<std::string>() << ".");
         throw std::move(engine);
     }
 
@@ -170,7 +167,7 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv, er
 
     if (_asm_only && _prep_only)
     {
-        engine.push(exception(error) << "-s (--assemble-only) and -E (--preprocess-only) are not allowed together.");
+        engine.push(exception(logger::error) << "-s (--assemble-only) and -E (--preprocess-only) are not allowed together.");
         throw std::move(engine);
     }
 
@@ -191,7 +188,7 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv, er
 
     if (_opt > 2)
     {
-        engine.push(exception(warning) << "not supported optimization level requested; changing to 2.");
+        engine.push(exception(logger::warning) << "not supported optimization level requested; changing to 2.");
         _opt = 2;
     }
 

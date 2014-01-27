@@ -1,8 +1,7 @@
 /**
  * Reaver Project Assembler License
  *
- * Copyright (C) 2013 Reaver Project Team:
- * 1. Michał "Griwes" Dominiak
+ * Copyright © 2013-2014 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -19,8 +18,6 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * Michał "Griwes" Dominiak
- *
  **/
 
 #pragma once
@@ -28,35 +25,28 @@
 #include <memory>
 #include <map>
 
-#include <frontend/frontend.h>
-#include <parser/parser.h>
+#include <reaver/error.h>
+#include <reaver/format/executable.h>
+
+#include "../frontend/frontend.h"
+#include "../parser/ast.h"
 
 namespace reaver
 {
     namespace assembler
     {
-        class section;
-
         class generator
         {
         public:
-            generator(const class parser & par) : _parser{ par }
+            generator()
             {
             }
 
             virtual ~generator() {}
 
-            virtual const class parser & parser() const
-            {
-                return _parser;
-            }
-
-            virtual std::map<std::string, section> operator()() const = 0;
-
-        protected:
-            const class parser & _parser;
+            virtual std::unique_ptr<format::executable::executable> operator()(const ast &) const = 0;
         };
 
-        std::unique_ptr<generator> create_generator(const frontend &, const parser &, error_engine &);
+        std::unique_ptr<generator> create_generator(const frontend &, error_engine &);
     }
 }

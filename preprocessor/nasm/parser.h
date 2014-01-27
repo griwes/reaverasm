@@ -1,8 +1,7 @@
 /**
  * Reaver Project Assembler License
  *
- * Copyright (C) 2013 Reaver Project Team:
- * 1. Michał "Griwes" Dominiak
+ * Copyright © 2013-2014 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -19,90 +18,42 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * Michał "Griwes" Dominiak
- *
  **/
 
 #pragma once
 
-#include <reaver/parser.h>
+#include <boost/spirit/home/x3.hpp>
+#include <boost/multiprecision/cpp_int.hpp>
 
-#include <preprocessor/nasm/lexer.h>
+#include <iostream>
 
 namespace reaver
 {
     namespace assembler
     {
-        struct define_match
+        namespace nasm_pp_grammar
         {
-            std::string directive;
-            std::string name;
-            boost::optional<std::vector<std::string>> args;
-        };
+            using namespace boost::spirit::x3;
 
-        struct assign_match
-        {
-            std::string name;
-            std::string value;
-        };
+            const rule<class identifier, std::string> identifier("identifier");
+            const rule<class integer, boost::multiprecision::cpp_int> integer("integer");
 
-        struct rep_match
-        {
-            std::string dummy;
-        };
+//            const auto identifier_def = char_("a-zA-Z_@$") >> *char_("a-zA_Z_@$0-9");
+            const auto integer_def = int_;
 
-        struct macro_call_match
-        {
-            std::string name;
-            std::vector<std::string> args;
-        };
-
-        struct nasm_preprocessor_parser
-        {
-            nasm_preprocessor_parser(const nasm_preprocessor_lexer & lex)
+            void foo()
             {
-                define = parser::token(lex.directive)({ "%define", "%xdefine" }) > parser::token(lex.identifier) >>
-                    -(~parser::token(lex.symbol)({ "(" }) > parser::token(lex.identifier) % parser::token(lex.symbol)({ "," })
-                    >> ~parser::token(lex.symbol)({ ")" }));
-                include = ~parser::token(lex.directive)({ "%include" }) >> parser::token(lex.string);
-                undef = ~parser::token(lex.directive)({ "%undef" }) >> parser::token(lex.identifier);
-                assign = ~parser::token(lex.directive)({ "%assign" }) >> parser::token(lex.identifier) >> parser::token(lex.number);
-                macro = ~parser::token(lex.directive)({ "%macro" }) >> parser::token(lex.identifier);
-                endmacro = parser::token(lex.directive)({ "%endmacro" });
-//                if_directive = parser::token(lex.directive)({ "%if" }) >> *expression;
-                ifdef = ~parser::token(lex.directive)({ "%ifdef" }) >> parser::token(lex.identifier);
-                elseif = parser::token(lex.directive)({ "%elseif", "%elif" }); // >> *expression
-                else_directive = parser::token(lex.directive)({ "%else" });
-                endif = parser::token(lex.directive)({ "%endif" });
-                rep = parser::token(lex.directive)({ "%rep" });                     // TODO
-
-                anything_but_comma_and_parens = +((parser::token(lex.identifier) | parser::token(lex.character)
-                    | parser::token(lex.number) | parser::token(lex.string) | parser::token(lex.symbol))
-                    - parser::token(lex.symbol)({ ",", "(", ")" }));
-
-                define_call = parser::token(lex.identifier) >> ~parser::token(lex.symbol)({ "(" }) >> anything_but_comma_and_parens
-                    % parser::token(lex.symbol)({ "," }) >> ~parser::token(lex.symbol)({ ")" });
-
-                skip = parser::token(lex.whitespace);
+                boost::multiprecision::cpp_int i;
+                char foo[] = "basd";
+                auto b = std::begin(foo);
+                integer_def.parse(b, std::end(foo), unused, i);
+                std::cout << i << std::endl;
             }
-
-            parser::rule<reaver::assembler::define_match> define;
-            parser::rule<std::string> include;
-            parser::rule<std::string> undef;
-            parser::rule<reaver::assembler::assign_match> assign;
-            parser::rule<std::string> macro;
-            parser::rule<> endmacro;
-            parser::rule<std::string> ifdef;
-            parser::rule<std::string> elseif;
-            parser::rule<> else_directive;
-            parser::rule<> endif;
-            parser::rule<reaver::assembler::rep_match> rep;
-
-            parser::rule<reaver::assembler::macro_call_match> define_call;
-
-            parser::rule<std::string> anything_but_comma_and_parens;
-
-            parser::rule<std::string> skip;
-        };
+        }
     }
+}
+
+int main()
+{
+    reaver::assembler::nasm_pp_grammar::foo();
 }

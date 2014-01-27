@@ -1,8 +1,7 @@
 /**
  * Reaver Project Assembler License
  *
- * Copyright (C) 2013 Reaver Project Team:
- * 1. Michał "Griwes" Dominiak
+ * Copyright © 2013-2014 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -19,16 +18,14 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * Michał "Griwes" Dominiak
- *
  **/
 
 #include <reaver/error.h>
 #include <reaver/target.h>
 
-#include <parser/parser.h>
-#include <parser/intel/intel.h>
-#include <parser/none/none.h>
+#include "parser.h"
+#include "intel/intel.h"
+#include "none/none.h"
 
 using reaver::style::colors;
 using reaver::style::styles;
@@ -41,17 +38,18 @@ namespace
     {
         using reaver::exception;
 
-        engine.push(exception(error) << "syntax `" << front.syntax() << " is not allowed for target " << front.target() << "`.");
+        engine.push(exception(reaver::logger::error) << "syntax `" << front.syntax() << " is not allowed for target "
+            << front.target() << "`.");
         throw std::move(engine);
     }
 }
 
 std::unique_ptr<reaver::assembler::parser> reaver::assembler::create_parser(const reaver::assembler::frontend & front,
-    reaver::assembler::preprocessor & ppc, error_engine & engine)
+    error_engine & engine)
 {
     if (front.preprocess_only())
     {
-        return std::unique_ptr<parser>{ new none_parser{ ppc } };
+        return std::make_unique<none_parser>();
     }
 
     if (front.syntax() == "intel")
@@ -61,9 +59,9 @@ std::unique_ptr<reaver::assembler::parser> reaver::assembler::create_parser(cons
             _mismatch(front, engine);
         }
 
-        return std::unique_ptr<parser>{ new intel_parser{ front, ppc, engine } };
+        return std::make_unique<intel_parser>(front, engine);
     }
 
-    engine.push(exception(error) << "not supported syntax selected: `" << front.syntax() << "`.");
+    engine.push(exception(logger::error) << "not supported syntax selected: `" << front.syntax() << "`.");
     throw std::move(engine);
 }

@@ -1,8 +1,7 @@
 /**
  * Reaver Project Assembler License
  *
- * Copyright (C) 2013 Reaver Project Team:
- * 1. Michał "Griwes" Dominiak
+ * Copyright © 2013 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -19,15 +18,13 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * Michał "Griwes" Dominiak
- *
  **/
 
-#include <preprocessor/define_chain.h>
+#include "define_chain.h"
 
 reaver::exception reaver::assembler::define_chain::create_exception() const
 {
-    throw exception(crash) << "not implemented yet: " << __PRETTY_FUNCTION__;
+    throw exception(logger::crash) << "not implemented yet: " << __PRETTY_FUNCTION__;
 }
 
 void reaver::assembler::define_chain::push(uint64_t start, uint64_t end, uint64_t length, std::shared_ptr<define> def)

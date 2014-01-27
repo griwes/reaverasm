@@ -1,8 +1,7 @@
 /**
  * Reaver Project Assembler License
  *
- * Copyright (C) 2013 Reaver Project Team:
- * 1. Michał "Griwes" Dominiak
+ * Copyright © 2013-2014 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -19,25 +18,19 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * Michał "Griwes" Dominiak
- *
  **/
 
 #include <iostream>
 
-#include <output/text/text.h>
+#include "text.h"
 
-void reaver::assembler::text_output::operator()() const
+void reaver::assembler::text_output::operator()(const std::unique_ptr<format::executable::executable> & exec) const
 {
-    auto preprocessed = _generator.parser().preprocessor()();
-
     if (!_engine)
     {
         throw std::move(_engine);
     }
 
-    for (auto & x : preprocessed)
-    {
-        _front.output() << x.preprocessed << std::endl;
-    }
+    auto section = exec->sections().begin()->second;
+    _front.output().write(reinterpret_cast<const char *>(section.blob().data()), section.size());
 }

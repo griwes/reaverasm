@@ -1,8 +1,7 @@
 /**
  * Reaver Project Assembler License
  *
- * Copyright (C) 2013 Reaver Project Team:
- * 1. Michał "Griwes" Dominiak
+ * Copyright © 2013-2014 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -19,8 +18,6 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * Michał "Griwes" Dominiak
- *
  **/
 
 #pragma once
@@ -28,14 +25,13 @@
 #include <boost/program_options.hpp>
 
 #include <reaver/target.h>
+#include <reaver/error.h>
 
-#include <frontend/frontend.h>
-#include <preprocessor/define.h>
+#include "frontend.h"
+#include "../preprocessor/define.h"
 
 namespace reaver
 {
-    class error_engine;
-
     namespace assembler
     {
         class console_frontend : public frontend
@@ -44,66 +40,66 @@ namespace reaver
             console_frontend(int, char **, error_engine &);
             virtual ~console_frontend() {}
 
-            virtual bool preprocess_only() const
+            virtual bool preprocess_only() const override
             {
                 return _prep_only;
             }
 
-            virtual bool assemble_only() const
+            virtual bool assemble_only() const override
             {
                 return _asm_only;
             }
 
-            virtual std::string preprocessor() const
+            virtual std::string preprocessor() const override
             {
                 return _variables["preprocessor"].as<std::string>();
             }
 
-            virtual std::string syntax() const
+            virtual std::string syntax() const override
             {
                 return _variables["syntax"].as<std::string>();
             }
 
-            virtual ::reaver::target::triple target() const
+            virtual ::reaver::target::triple target() const override
             {
                 return _target;
             }
 
-            virtual std::string format() const
+            virtual std::string format() const override
             {
                 return _variables["format"].as<std::string>();
             }
 
-            virtual std::istream & input() const
+            virtual std::istream & input() const override
             {
                 return _input;
             }
 
-            virtual std::ostream & output() const
+            virtual std::ostream & output() const override
             {
                 return _output;
             }
 
-            virtual std::string input_name() const
+            virtual std::string input_name() const override
             {
                 return _input_name;
             }
 
-            virtual std::vector<file> & default_includes() const
+            virtual std::vector<file> & default_includes() const override
             {
                 return _default_includes;
             }
 
-            virtual file open_file(std::string) const;
+            virtual file open_file(std::string) const override;
 
-            virtual const std::map<std::string, std::shared_ptr<define>> & defines() const
+            virtual const std::map<std::string, std::shared_ptr<define>> & defines() const override
             {
                 return _defines;
             }
 
-            virtual logger::level warning_level() const
+            virtual logger::level warning_level() const override
             {
-                return _werror ? level::error : level::warning;
+                return _werror ? logger::error : logger::warning;
             }
 
         private:

@@ -1,9 +1,9 @@
 CC=clang++
 LD=clang++
-CFLAGS=-c -Os -Wall -Wextra -pedantic -Werror -std=c++11 -stdlib=libc++ -I . -g -MD -pthread -Wno-unused-private-field -fPIC
+CFLAGS=-c -Os -Wall -Wextra -pedantic -Werror -std=c++1y -stdlib=libc++ -g -MD -pthread -Wno-unused-private-field -fPIC
 LDFLAGS=-stdlib=libc++ -lc++abi -lc++ -lboost_system -lboost_program_options -lboost_filesystem -pthread
 SOFLAGS=-stdlib=libc++ -shared -pthread
-SOURCES=$(shell find . -type f -name "*.cpp" ! -path "*old*" ! -path "./main.cpp")
+SOURCES=$(shell find . -type f -name "*.cpp" ! -path "*-old*" ! -path "./main.cpp")
 OBJECTS=$(SOURCES:.cpp=.o)
 TESTS=$(shell find . -name "*.asm" ! -name "*.elf.asm")
 ELFTESTS=$(shell find . -name "*.elf.asm")
@@ -15,17 +15,12 @@ all: $(SOURCES) $(LIBRARY) $(EXECUTABLE)
 
 library: $(LIBRARY)
 
-install: $(LIBRARY)
+library-install: $(LIBRARY)
 	@sudo mkdir -p /usr/local/include/reaver/assembler
-	@sudo cp frontend/frontend.h /usr/local/include/reaver/assembler
-	@sudo cp generator/generator.h /usr/local/include/reaver/assembler
-	@sudo cp output/output.h /usr/local/include/reaver/assembler
-	@sudo cp parser/parser.h /usr/local/include/reaver/assembler
-	@sudo cp preprocessor/preprocessor.h /usr/local/include/reaver/assembler
 	@sudo cp libreaverasm.so /usr/local/lib/libreaverasm.so.1
 	@sudo ln -sfn /usr/local/lib/libreaverasm.so.1 /usr/local/lib/libreaverasm.so
 
-$(EXECUTABLE): main.o
+$(EXECUTABLE): library-install main.o
 	$(LD) $(LDFLAGS) -o $@ main.o -lreaver -pthread -lreaverasm
 
 $(LIBRARY): $(OBJECTS)
