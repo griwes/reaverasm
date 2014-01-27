@@ -73,7 +73,7 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv, er
         ("Werror", boost::program_options::value<bool>(&_werror)->implicit_value(true), " throw errors instead of warnings")
         ("Wno-long-mode-ss-write", boost::program_options::value<bool>(&_no_ss_warning)->implicit_value(true), " disable warning"
             " about write to segment register being ignored in 64 bit mode, if the segment register is SS (i(X)86 and x86_64 only)")
-        (",O", boost::program_options::value<uint8_t>(&_opt), "set optimization level; supported levels:\n"
+        ("optimizations,O", boost::program_options::value<int>(&_opt), "set optimization level; supported levels:\n"
             "- O0 - disable all optimizations\n- O1 - enable space optimizations (default)\n- O2 - enable additional optimizations");
 
     boost::program_options::options_description preprocessor("Preprocessor options");
@@ -184,6 +184,11 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv, er
         {
             _default_includes.emplace_back(open_file(x));
         }
+    }
+
+    if (_variables.count("optimizations"))
+    {
+        _opt = _variables.at("optimizations").as<int>();
     }
 
     if (_opt > 2)

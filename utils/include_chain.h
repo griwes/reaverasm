@@ -48,14 +48,36 @@ namespace reaver
 
                 class exception exception(bool b = false) const
                 {
+                    using style::colors;
+                    using style::styles;
+
                     if (up)
                     {
-                        return up->exception(true) << "\nIn file " << (b ? "included from " : "") << file << " at line "
+                        return up->exception(true) << "\nIn file " << (b ? "included from " : "") << style::style(
+                            colors::bgray, colors::def, styles::bold) << file << style::style() << " at "
                             << line << ":";
                     }
 
-                    return reaver::exception(logger::always) << "In file " << (b ? "included from " : "") << file << " at line "
-                        << line << ":";
+                    return reaver::exception(logger::always) << "In file " << (b ? "included from " : "") << style::style(
+                        colors::bgray, colors::def, styles::bold) << file << style::style() << " at "
+                        << style::style(colors::bgray, colors::def, styles::bold) << line << ":";
+                }
+
+                class exception exception(std::size_t column) const
+                {
+                    using style::colors;
+                    using style::styles;
+
+                    if (up)
+                    {
+                        return up->exception(true) << "\nIn file " << style::style(colors::bgray, colors::def,
+                            styles::bold) << file << style::style() << " at " << style::style(colors::bgray, colors::def,
+                            styles::bold) << line << ":" << column << style::style();
+                    }
+
+                    return reaver::exception(logger::always) << "In file " << style::style(colors::bgray, colors::def,
+                        styles::bold) << file << style::style() << " at " << style::style(colors::bgray, colors::def,
+                        styles::bold) << line << ":" << column << style::style() << ":";
                 }
 
                 std::string file;

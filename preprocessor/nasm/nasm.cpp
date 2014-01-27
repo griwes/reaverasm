@@ -1,7 +1,7 @@
 /**
  * Reaver Project Assembler License
  *
- * Copyright (C) 2013 Michał "Griwes" Dominiak
+ * Copyright © 2013-2014 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -21,3 +21,41 @@
  **/
 
 #include "nasm.h"
+
+std::vector<reaver::assembler::line> reaver::assembler::nasm_preprocessor::operator()() const
+{
+    _include_stream(_front.input(), std::make_shared<utils::include_chain>(_front.input_name()));
+    return {};
+}
+
+void reaver::assembler::nasm_preprocessor::_include_stream(std::istream & is, std::shared_ptr<reaver::assembler::utils::include_chain> ic) const
+{
+    std::string buffer;
+    std::size_t current_line = 1;
+
+    auto chain = [&](){
+        auto i = std::make_shared<utils::include_chain>(*ic);
+        i->line = current_line;
+        return i;
+    };
+
+    while (std::getline(is, buffer))
+    {
+        while (buffer.back() == '\\')
+        {
+            std::string b;
+
+            if (!std::getline(is,  b))
+            {
+                _engine.push({
+                    chain()->exception(buffer.size()),
+                    exception(logger::error) << "invalid `\\` at the end of file."
+                });
+                buffer.pop_back();
+            }
+
+            buffer.append(b);
+            ++current_line;
+        }
+    }
+}

@@ -27,14 +27,12 @@
 #include "../preprocessor.h"
 #include "../macro.h"
 #include "../define.h"
+#include "../define_chain.h"
 
 namespace reaver
 {
     namespace assembler
     {
-        struct nasm_preprocessor_state;
-        class define_chain;
-
         class nasm_preprocessor : public preprocessor
         {
         public:
@@ -47,16 +45,12 @@ namespace reaver
             virtual std::vector<line> operator()() const override;
 
         private:
-            void _include_stream(std::istream &, nasm_preprocessor_state &, std::shared_ptr<utils::include_chain>) const;
+            void _include_stream(std::istream &, std::shared_ptr<utils::include_chain>) const;
 
-            std::pair<std::string, define_chain> _apply_defines(std::string, nasm_preprocessor_state &, std::shared_ptr<
-                utils::include_chain>) const;
-            define_chain _apply_defines(std::vector<lexer::token> &, nasm_preprocessor_state &, std::shared_ptr<
-                utils::include_chain>) const;
+            std::pair<std::string, define_chain> _apply_defines(std::string, std::shared_ptr<utils::include_chain>) const;
+            define_chain _apply_defines(std::vector<lexer::token> &, std::shared_ptr<utils::include_chain>) const;
 
             const frontend & _front;
-
-//            nasm_preprocessor_parser _parser;
 
             error_engine & _engine;
         };

@@ -1,6 +1,6 @@
 CC=clang++
 LD=clang++
-CFLAGS=-c -Os -Wall -Wextra -pedantic -Werror -std=c++1y -stdlib=libc++ -g -MD -pthread -Wno-unused-private-field -fPIC
+CFLAGS=-c -Os -Wall -Wextra -pedantic -Werror -std=c++1y -stdlib=libc++ -g -MD -pthread -fPIC
 LDFLAGS=-stdlib=libc++ -lc++abi -lc++ -lboost_system -lboost_program_options -lboost_filesystem -pthread
 SOFLAGS=-stdlib=libc++ -shared -pthread
 SOURCES=$(shell find . -type f -name "*.cpp" ! -path "*-old*" ! -path "./main.cpp")
@@ -17,6 +17,8 @@ library: $(LIBRARY)
 
 library-install: $(LIBRARY)
 	@sudo mkdir -p /usr/local/include/reaver/assembler
+	@find . -name "*.h" ! -path "*-old" ! -name "assembler.h" | sudo cpio -pdm /usr/local/include/reaver/assembler 2> /dev/null
+	@sudo cp assembler.h /usr/local/include/reaver
 	@sudo cp libreaverasm.so /usr/local/lib/libreaverasm.so.1
 	@sudo ln -sfn /usr/local/lib/libreaverasm.so.1 /usr/local/lib/libreaverasm.so
 

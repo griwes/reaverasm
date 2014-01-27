@@ -109,7 +109,7 @@ namespace reaver
             bool _wextra = false;
             bool _werror = false;
             bool _no_ss_warning = false;
-            uint8_t _opt = 1;
+            int _opt = 1;
 
             mutable std::ifstream _input;
             mutable std::ofstream _output;
