@@ -23,25 +23,23 @@
 #include <reaver/logger.h>
 
 #include "frontend/console.h"
-#include "preprocessor/preprocessor.h"
 #include "parser/parser.h"
 #include "generator/generator.h"
 #include "output/output.h"
 
-using namespace reaver::logger;
+using reaver::logger::dlog;
+using reaver::logger::crash;
 
 int main(int argc, char ** argv) try
 {
     reaver::error_engine engine;
 
     reaver::assembler::console_frontend frontend{ argc, argv, engine };
-    auto preprocessor = reaver::assembler::create_preprocessor(frontend, engine);
     auto parser = reaver::assembler::create_parser(frontend, engine);
     auto generator = reaver::assembler::create_generator(frontend, engine);
     auto output = reaver::assembler::create_output(frontend, engine);
 
-    auto preprocessed = (*preprocessor)();
-    auto parsed = (*parser)(preprocessed);
+    auto parsed = (*parser)();
     auto generated = (*generator)(parsed);
     (*output)(generated);
 

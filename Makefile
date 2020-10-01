@@ -1,6 +1,6 @@
 CC=clang++
 LD=clang++
-CFLAGS=-c -Os -Wall -Wextra -pedantic -Werror -std=c++1y -stdlib=libc++ -g -MD -pthread -fPIC
+CFLAGS=-c -Os -Wall -Wextra -pedantic -Werror -std=c++17 -stdlib=libc++ -g -MD -pthread -fPIC -Wno-unused-private-field
 LDFLAGS=-stdlib=libc++ -lc++abi -lc++ -lboost_system -lboost_program_options -lboost_filesystem -pthread
 SOFLAGS=-stdlib=libc++ -shared -pthread
 SOURCES=$(shell find . -type f -name "*.cpp" ! -path "*-old*" ! -path "./main.cpp")
@@ -19,8 +19,8 @@ library-install: $(LIBRARY)
 	@sudo mkdir -p /usr/local/include/reaver/assembler
 	@find . -name "*.h" ! -path "*-old" ! -name "assembler.h" | sudo cpio -pdm /usr/local/include/reaver/assembler 2> /dev/null
 	@sudo cp assembler.h /usr/local/include/reaver
-	@sudo cp libreaverasm.so /usr/local/lib/libreaverasm.so.1
-	@sudo ln -sfn /usr/local/lib/libreaverasm.so.1 /usr/local/lib/libreaverasm.so
+	@sudo cp $(LIBRARY) /usr/local/lib/$(LIBRARY).1
+	@sudo ln -sfn /usr/local/lib/$(LIBRARY).1 /usr/local/lib/$(LIBRARY)
 
 $(EXECUTABLE): library-install main.o
 	$(LD) $(LDFLAGS) -o $@ main.o -lreaver -pthread -lreaverasm
@@ -35,7 +35,7 @@ clean: clean-test
 	@find . -name "*.o" -delete
 	@find . -name "*.d" -delete
 	@find . -name "*.so" -delete
-	@rm -rf rasm
+	@rm -rf $(EXECUTABLE)
 
 test: $(EXECUTABLE) $(TESTS) $(ELFTESTS) $(TESTRESULTS)
 

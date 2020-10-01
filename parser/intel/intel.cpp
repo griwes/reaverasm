@@ -20,10 +20,75 @@
  *
  **/
 
-#include "intel.h"
+#include <boost/spirit/include/lex_lexertl.hpp>
 
-reaver::assembler::ast reaver::assembler::intel_parser::operator()(const std::vector<reaver::assembler::line> &) const
+#include "intel.h"
+#include "../../utils/include_chain.h"
+#include "grammar.h"
+#include "tokens.h"
+
+reaver::assembler::ast reaver::assembler::intel_parser::operator()() const
 {
-    _engine.push(exception(logger::crash) << "not implemented yet: " << __PRETTY_FUNCTION__);
-    throw std::move(_engine);
+    return _parse_stream(_front.input(), std::make_shared<utils::include_chain>(_front.input_name()));
+}
+
+reaver::assembler::ast reaver::assembler::intel_parser::_parse_stream(std::istream & is, std::shared_ptr<
+    reaver::assembler::utils::include_chain> ic) const
+{
+    std::string buffer;
+    std::size_t current_line = 0;
+    std::size_t more_lines = 0;
+
+    auto chain = [&](){
+        auto i = std::make_shared<utils::include_chain>(*ic);
+        i->line = current_line;
+        return i;
+    };
+
+    ast ret;
+
+    using iterator = std::string::const_iterator;
+    using token_type = lex::lexertl::token<iterator, boost::mpl::vector<lex::omit, std::string>>;
+    using lexer_type = lex::lexertl::lexer<token_type>;
+    using skipper_type = qi::in_state_skipper<intel_tokens<lexer_type>::lexer_def>;
+
+    intel_tokens<lexer_type> lexer;
+    intel_grammar<intel_tokens<lexer_type>::iterator_type, skipper_type> grammar{ lexer, ret, chain, current_line };
+
+    while (std::getline(is, buffer))
+    {
+        current_line += more_lines + 1;
+        more_lines = 0;
+
+        while (buffer.back() == '\\')
+        {
+            std::string b;
+
+            buffer.pop_back();
+
+            if (!is.eof())
+            {
+                is.unget();
+            }
+
+            if (is.eof() || !std::getline(is,  b))
+            {
+                _engine.push({
+                    chain()->exception(buffer.size() + 1),
+                    exception(logger::error) << "invalid `\\` at the end of file."
+                  });
+            }
+
+            else
+            {
+                buffer.append(b);
+                ++more_lines;
+            }
+        }
+
+        auto begin = buffer.cbegin();
+        lex::tokenize_and_phrase_parse(begin, buffer.cend(), lexer, grammar, qi::in_state("skip")[lexer.self]);
+    }
+
+    return ret;
 }

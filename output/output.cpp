@@ -23,17 +23,11 @@
 #include <reaver/error.h>
 
 #include "output.h"
-#include "text/text.h"
 #include "object/object.h"
 
 std::unique_ptr<reaver::assembler::output> reaver::assembler::create_output(const reaver::assembler::frontend & front,
     reaver::error_engine & engine)
 {
-    if (front.preprocess_only())
-    {
-        return std::make_unique<text_output>(front, engine);
-    }
-
     if (front.assemble_only())
     {
         return std::make_unique<object_output>(front, engine);

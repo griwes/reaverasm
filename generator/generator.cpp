@@ -23,7 +23,6 @@
  **/
 
 #include "generator.h"
-#include "none/none.h"
 #include "intel/intel.h"
 
 using reaver::style::colors;
@@ -34,11 +33,6 @@ using namespace reaver::target;
 std::unique_ptr<reaver::assembler::generator> reaver::assembler::create_generator(const reaver::assembler::frontend & front,
     reaver::error_engine & engine)
 {
-    if (front.preprocess_only())
-    {
-        return std::make_unique<none_generator>();
-    }
-
     if (front.target().arch() >= arch::i386 && front.target().arch() <= arch::x86_64)
     {
         return std::make_unique<intel_generator>(front, engine);

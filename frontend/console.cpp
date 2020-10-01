@@ -33,7 +33,7 @@ namespace reaver
 {
     namespace assembler
     {
-        const char * version_string = "Reaver Project Assembler v0.0.1 dev\nCopyright (C) 2013 Reaver Project Team\n";
+        const char * version_string = "Reaver Project Assembler v0.0.1 dev\nCopyright © 2013 Reaver Project Team\n";
     }
 }
 
@@ -53,13 +53,10 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv, er
     boost::program_options::options_description config("Configuration");
     config.add_options()
         ("output,o", boost::program_options::value<std::string>()->default_value(""), "specify output file")
-        ("preprocess-only,E", "preprocess only")
         ("assemble-only,s", "assemble only, do not link")
         ("include-dir,I", boost::program_options::value<std::vector<std::string>>(&_include_paths)->composing(), "specify additional"
             " include directories")
         ("include,i", boost::program_options::value<std::vector<std::string>>()->composing(), "specify automatically included file")
-        ("preprocessor,p", boost::program_options::value<std::string>()->default_value("nasm"), "specify preprocessor "
-            "to use; currently supported:\n- none \n- nasm")
         ("syntax", boost::program_options::value<std::string>()->default_value(""), "specify assembly syntax "
             "(x86 and x86_64 only); currently supported:\n- intel (default for x86 and x86_64 targets)")
         ("format,f", boost::program_options::value<std::string>()->default_value("elf64"), "specify format; currently "
@@ -76,10 +73,6 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv, er
         ("optimizations,O", boost::program_options::value<int>(&_opt), "set optimization level; supported levels:\n"
             "- O0 - disable all optimizations\n- O1 - enable space optimizations (default)\n- O2 - enable additional optimizations");
 
-    boost::program_options::options_description preprocessor("Preprocessor options");
-    preprocessor.add_options()
-        ("D*", boost::program_options::value<std::string>()->implicit_value(""), " define names for preprocessor");
-
     boost::program_options::options_description hidden("Hidden");
     hidden.add_options()
         ("input", boost::program_options::value<std::string>(), "specify input file");
@@ -88,7 +81,7 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv, er
     pod.add("input", 1);
 
     boost::program_options::options_description options;
-    options.add(config).add(hidden).add(general).add(errors).add(preprocessor);
+    options.add(config).add(hidden).add(general).add(errors);
     boost::program_options::store(boost::program_options::command_line_parser(argc, argv).options(options).positional(pod)
         .style(boost::program_options::command_line_style::allow_short
             | boost::program_options::command_line_style::allow_long
@@ -106,7 +99,7 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv, er
         std::cout << "  rasm [options] <input file> [options]\n\n";
 
         std::stringstream ss;
-        ss << general << std::endl << config << std::endl << errors << std::endl << preprocessor;
+        ss << general << std::endl << config << std::endl << errors;
         std::string str = ss.str();
         boost::algorithm::replace_all(str, "--W", "-W");
         boost::algorithm::replace_all(str, "--D", "-D");
@@ -121,7 +114,7 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv, er
         std::cout << version_string;
         std::cout << "Distributed under modified zlib license.\n\n";
 
-        std::cout << "RAsm, or Reaver Assembler, is part of Reaver Project - http://reaver-project.org/.\n";
+        std::cout << "RAsm, or Reaver Assembler, is part of the Reaver Project - http://reaver-project.org/.\n";
         std::cout << "Development of this part of Reaver Project started as second semester programming\n";
         std::cout << "project of Michal \"Griwes\" Dominiak.\n";
 
@@ -155,20 +148,9 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv, er
         throw std::move(engine);
     }
 
-    if (_variables.count("preprocess-only"))
-    {
-        _prep_only = true;
-    }
-
     if (_variables.count("assemble-only") || boost::filesystem::path(_variables["output"].as<std::string>()).extension() == ".o")
     {
         _asm_only = true;
-    }
-
-    if (_asm_only && _prep_only)
-    {
-        engine.push(exception(logger::error) << "-s (--assemble-only) and -E (--preprocess-only) are not allowed together.");
-        throw std::move(engine);
     }
 
     _target = _variables["target"].as<std::string>();
@@ -195,16 +177,6 @@ reaver::assembler::console_frontend::console_frontend(int argc, char ** argv, er
     {
         engine.push(exception(logger::warning) << "not supported optimization level requested; changing to 2.");
         _opt = 2;
-    }
-
-    auto chain = std::make_shared<utils::include_chain>("<command line>");
-    for (const auto & value : _variables)
-    {
-        if (value.first[0] == 'D')
-        {
-            _defines.emplace(std::make_pair(value.first.substr(1), std::make_shared<define>(value.first.substr(1), value.second.as<std::string>(),
-                chain)));
-        }
     }
 
     _include_paths.insert(_include_paths.begin(), boost::filesystem::current_path().string());

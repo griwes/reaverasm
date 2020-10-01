@@ -25,7 +25,6 @@
 
 #include "parser.h"
 #include "intel/intel.h"
-#include "none/none.h"
 
 using reaver::style::colors;
 using reaver::style::styles;
@@ -47,11 +46,6 @@ namespace
 std::unique_ptr<reaver::assembler::parser> reaver::assembler::create_parser(const reaver::assembler::frontend & front,
     error_engine & engine)
 {
-    if (front.preprocess_only())
-    {
-        return std::make_unique<none_parser>();
-    }
-
     if (front.syntax() == "intel")
     {
         if (front.target().arch() < arch::i386 || front.target().arch() > arch::x86_64)

@@ -25,6 +25,7 @@
 #include <reaver/error.h>
 
 #include "../parser.h"
+#include "../../utils/include_chain.h"
 
 namespace reaver
 {
@@ -33,16 +34,19 @@ namespace reaver
         class intel_parser : public parser
         {
         public:
-            intel_parser(const frontend &, error_engine & engine) : _engine{ engine }
+            intel_parser(const frontend & front, error_engine & engine) : _front{ front }, _engine{ engine }
             {
             }
 
             virtual ~intel_parser() {}
 
-            virtual ast operator()(const std::vector<line> &) const override;
+            virtual ast operator()() const override;
 
         private:
+            const frontend & _front;
             error_engine & _engine;
+
+            ast _parse_stream(std::istream &, std::shared_ptr<utils::include_chain>) const;
         };
     }
 }

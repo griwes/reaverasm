@@ -27,7 +27,6 @@
 #include <reaver/error.h>
 
 #include "../frontend/frontend.h"
-#include "../preprocessor/line.h"
 #include "ast.h"
 
 namespace reaver
@@ -43,7 +42,7 @@ namespace reaver
 
             virtual ~parser() {}
 
-            virtual ast operator()(const std::vector<line> &) const = 0;
+            virtual ast operator()() const = 0;
         };
 
         std::unique_ptr<parser> create_parser(const frontend &, error_engine &);

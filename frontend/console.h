@@ -28,7 +28,6 @@
 #include <reaver/error.h>
 
 #include "frontend.h"
-#include "../preprocessor/define.h"
 
 namespace reaver
 {
@@ -40,19 +39,9 @@ namespace reaver
             console_frontend(int, char **, error_engine &);
             virtual ~console_frontend() {}
 
-            virtual bool preprocess_only() const override
-            {
-                return _prep_only;
-            }
-
             virtual bool assemble_only() const override
             {
                 return _asm_only;
-            }
-
-            virtual std::string preprocessor() const override
-            {
-                return _variables["preprocessor"].as<std::string>();
             }
 
             virtual std::string syntax() const override
@@ -104,7 +93,6 @@ namespace reaver
 
         private:
             boost::program_options::variables_map _variables;
-            bool _prep_only = false;
             bool _asm_only = false;
             bool _wextra = false;
             bool _werror = false;
